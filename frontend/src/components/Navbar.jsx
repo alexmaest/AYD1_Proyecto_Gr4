@@ -12,7 +12,7 @@ export default function Navbar () {
       </div>
       <ul className='flex space-x-4 p-1 h-auto justify-center items-center'>
         <li className='bg-al-yellow font-semibold p-1 rounded-md text-center'>
-          <Link href='/register'>
+          <Link href='/register-delivery'>
             Únete a nuestro equipo
           </Link>
         </li>
