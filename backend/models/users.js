@@ -1,4 +1,4 @@
-const db = require('../database');
+/*const db = require('../database');
 
 // User model
 class User {
@@ -35,3 +35,4 @@ class User {
 }
 
 module.exports = User;
+*/
