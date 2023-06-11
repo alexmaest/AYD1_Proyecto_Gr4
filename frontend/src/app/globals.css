@@ -25,3 +25,27 @@ body {
     )
     rgb(var(--background-start-rgb));
 }
+
+.form_label {
+  @apply block uppercase tracking-wide text-al-black text-xs font-bold mb-2;
+}
+
+.form_input {
+  @apply w-full flex rounded-lg mt-2 p-3 text-sm text-al-black outline-0;
+}
+
+.form_checkbox {
+  @apply w-5 h-5 text-al-black bg-gray-100 border-gray-300 rounded focus:ring-al-black my-3;
+}
+
+.form_select {
+  @apply bg-gray-50 border border-gray-300 text-al-black text-sm rounded-lg focus:ring-al-orange focus:border-al-orange block w-full p-2;
+}
+
+.form_file {
+  @apply block w-full text-lg text-al-black border-none rounded-lg cursor-pointer bg-al-gray focus:outline-none;
+}
+
+.orange_gradient {
+  @apply bg-gradient-to-r from-al-orange to-al-yellow;
+}
