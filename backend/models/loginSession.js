@@ -1,4 +1,4 @@
-const db = require('../database');
+/*const db = require('../database');
 
 // Login session model
 class LoginSession {
@@ -19,3 +19,4 @@ class LoginSession {
 }
 
 module.exports = LoginSession;
+*/

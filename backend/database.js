@@ -1,4 +1,4 @@
-const mysql = require('mysql');
+/*const mysql = require('mysql');
 
 // DB configuration
 const connection = mysql.createConnection({
@@ -13,4 +13,4 @@ connection.connect((err) => {
   console.log('Information: Database conection succeed');
 });
 
-module.exports = connection;
+module.exports = connection;*/
