@@ -31,7 +31,7 @@ export default function Navbar () {
           </Link>
         </li>
         <li>
-          <Link href='/register'>
+          <Link href='/user-register'>
             Regístrate
           </Link>
         </li>
