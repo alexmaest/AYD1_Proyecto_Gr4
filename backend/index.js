@@ -9,6 +9,7 @@ const userRegisterRoutes = require('./routes/register/userRegisterRoutes');
 const companyRegisterRoutes = require('./routes/register/companyRegisterRoutes');
 const deliveryRegisterRoutes = require('./routes/register/deliveryRegisterRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const departmentRoutes = require('./routes/departmentRoutes');
 
 app.use(express.json());
 app.use(cors());
@@ -19,6 +20,7 @@ app.use('/userRegister', userRegisterRoutes);
 app.use('/companyRegister', companyRegisterRoutes);
 app.use('/deliveryRegister', deliveryRegisterRoutes);
 app.use('/admin', adminRoutes);
+app.use('/departments', departmentRoutes);
 
 app.listen(port, () => {
   console.log(`Information: Server running on http://localhost:${port}`);

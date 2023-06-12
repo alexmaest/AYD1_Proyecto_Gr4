@@ -35,17 +35,29 @@ body {
 }
 
 .form_checkbox {
-  @apply w-5 h-5 text-al-black bg-gray-100 border-gray-300 rounded focus:ring-al-black my-3;
+  @apply w-5 h-5 text-al-black bg-gray-100 border-gray-300 rounded focus:ring-al-black my-4;
 }
 
 .form_select {
-  @apply bg-gray-50 border border-gray-300 text-al-black text-sm rounded-lg focus:ring-al-orange focus:border-al-orange block w-full p-2;
+  @apply bg-gray-50 border border-gray-300 text-al-black text-sm rounded-lg focus:ring-al-orange focus:border-al-orange block w-full p-3;
 }
 
 .form_file {
-  @apply block w-full text-lg text-al-black border-none rounded-lg cursor-pointer bg-al-gray focus:outline-none;
+  @apply block w-full text-sm text-al-black border-none rounded-lg cursor-pointer bg-transparent font-medium focus:outline-none p-3;
+}
+
+.form_textarea {
+  @apply w-full flex rounded-lg h-[100px] mt-2 p-3 text-sm text-gray-500 outline-0;
+}
+
+.form_radio {
+  @apply w-5 h-5 text-blue-600 bg-al-gray border-al-black focus:ring-blue-500;
 }
 
 .orange_gradient {
   @apply bg-gradient-to-r from-al-orange to-al-yellow;
+}
+
+.black_btn {
+  @apply rounded-full border-2 border-al-black bg-al-black py-1.5 px-5 text-al-yellow transition-all hover:bg-al-gray  hover:text-al-black text-center text-lg font-medium flex items-center justify-center;
 }

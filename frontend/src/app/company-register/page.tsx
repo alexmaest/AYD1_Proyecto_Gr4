@@ -5,8 +5,13 @@ import { useEffect, useState, useRef } from 'react'
 import baseUrl from '@/constants/baseUrl'
 import Navbar from '@/components/Navbar'
 
-const phoneRegex = /^[+]?([(]?502[)]?)?[-\s]?[0-9]{8}$/
-const licenseTypes = ['A', 'B', 'C', 'M']
+const zones = [
+  'Zona 1',
+  'Zona 2',
+  'Zona 3',
+  'Zona 4',
+  'Zona 5'
+]
 
 function Page () {
   const nameRef = useRef<HTMLInputElement>(null)
@@ -15,22 +20,20 @@ function Page () {
   const [departments, setDepartments] = useState<any[]>([])
   const [towns, setTowns] = useState<any[]>([])
   const [name, setName] = useState('')
-  const [lastName, setLastName] = useState('')
   const [email, setEmail] = useState('')
-  const [phone, setPhone] = useState('')
+  const [description, setDescription] = useState('')
+  const [type, setType] = useState('')
   const [town, setTown] = useState('')
   const [department, setDepartment] = useState('')
-  const [hasLicense, setHasLicense] = useState(false)
-  const [licenseType, setLicenseType] = useState('')
-  const [hasVehicle, setHasVehicle] = useState(false)
-  const [cv, setCv] = useState<File | null>(null)
+  const [zone, setZone] = useState('')
+  const [files, setFiles] = useState<FileList | null>(null)
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
 
   const changeHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.currentTarget.files?.item(0)
-    if (file == null) return
-    setCv(file)
+    const _file = e.currentTarget.files
+    if (_file == null) return
+    setFiles(_file)
   }
 
   const handleDepartmentChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -49,9 +52,9 @@ function Page () {
       return
     }
 
-    // validate phone number
-    if (!phoneRegex.test(phone)) {
-      setError('El número de teléfono no es válido!')
+    // validate type
+    if (type === '') {
+      setError('Debe seleccionar un tipo de empresa!')
       errorRef.current?.focus()
       return
     }
@@ -59,20 +62,18 @@ function Page () {
     // form data
     const formData = new FormData()
     formData.append('name', name)
-    formData.append('lastName', lastName)
     formData.append('email', email)
-    formData.append('phone', phone)
+    formData.append('description', description)
+    formData.append('type', type)
     formData.append('town', town)
     formData.append('department', department)
-    formData.append('hasLicense', hasLicense.toString())
-    if (hasLicense) { formData.append('licenseType', licenseType) } else { formData.append('licenseType', '') }
-    formData.append('hasVehicle', hasVehicle.toString())
-    formData.append('cv', cv as File)
+    formData.append('zone', zone)
+    formData.append('file', files?.item(0) as File)
     formData.append('password', password)
 
     // send form data
     try {
-      const res = await fetch(`${baseUrl}/deliveryRegister`, {
+      const res = await fetch(`${baseUrl}/companyRegister`, {
         method: 'POST',
         body: formData
       })
@@ -107,18 +108,14 @@ function Page () {
   }, [])
 
   useEffect(() => {
-    setLicenseType('A')
-  }, [hasLicense])
-
-  useEffect(() => {
     setError('')
-  }, [email, phone, town, department, hasLicense, licenseType, hasVehicle, cv, password])
+  }, [email, town, department, password])
 
   return (
     <>
       <Navbar />
       <section className='max-w-2xl rounded px-10 py-16 orange_gradient text-al-black mx-auto my-24'>
-        <h1 className='text-center font-black text-3xl mb-10'>Solicitud para Repartidor</h1>
+        <h1 className='text-center font-black text-3xl mb-10'>Solicitud para Empresa</h1>
         {(error !== '') && (
           <p className='bg-red-200 border-none rounded text-red-500 text-lg text-center italic p-2 mb-8'>{error}</p>
         )}
@@ -142,55 +139,89 @@ function Page () {
               />
             </div>
             <div className='w-1/2 px-3'>
-              <label className='form_label' htmlFor='lastName'>
-                Apellido:
+              <label className='form_label' htmlFor='email'>
+                Correo:
               </label>
               <input
                 className='form_input'
-                type='text'
-                name='lastName'
-                id='lastName'
-                placeholder='Apellido'
-                autoComplete='off'
-                onChange={(e) => setLastName(e.target.value)}
-                value={lastName}
+                type='email'
+                name='email'
+                id='email'
+                placeholder='Correo'
+                onChange={(e) => setEmail(e.target.value)}
+                value={email}
                 required
               />
             </div>
           </div>
           <div className='w-full px-3'>
-            <label className='form_label' htmlFor='email'>
-              Correo:
+            <label className='form_label' htmlFor='description'>
+              Descripción:
             </label>
-            <input
-              className='form_input'
-              type='email'
-              name='email'
-              id='email'
-              placeholder='Correo'
-              onChange={(e) => setEmail(e.target.value)}
-              value={email}
+            <textarea
+              className='form_textarea resize-none'
+              name='description'
+              id='description'
+              placeholder='Descripción'
+              onChange={(e) => setDescription(e.target.value)}
+              value={description}
               required
             />
           </div>
           <div className='w-full px-3'>
-            <label className='form_label' htmlFor='phone'>
-              Teléfono:
+            <label className='form_label' htmlFor='type'>
+              Tipo:
             </label>
-            <input
-              className='form_input'
-              type='text'
-              name='phone'
-              id='phone'
-              placeholder='Teléfono'
-              autoComplete='off'
-              onChange={(e) => setPhone(e.target.value)}
-              value={phone}
-              required
-            />
+            <ul className='flex items-center w-full text-sm font-medium text-al-black p-3'>
+              <li className='w-1/3'>
+                <div className='flex items-center pl-3'>
+                  <input
+                    id='restaurant'
+                    type='radio'
+                    value='Restaurante'
+                    name='list-radio'
+                    className='form_radio'
+                    onChange={(e) => setType(e.target.value)}
+                  />
+                  <label htmlFor='restaurant' className='w-full py-3 ml-2 font-medium'>
+                    Restaurante
+                  </label>
+                </div>
+              </li>
+              <li className='w-1/3'>
+                <div className='flex items-center pl-3'>
+                  <input
+                    id='store'
+                    type='radio'
+                    value='Tienda'
+                    name='list-radio'
+                    className='form_radio'
+                    onChange={(e) => setType(e.target.value)}
+                  />
+                  <label htmlFor='store' className='w-full py-3 ml-2 font-medium'>
+                    Tienda de Conveniencia
+                  </label>
+                </div>
+              </li>
+              <li className='w-1/3'>
+                <div className='flex items-center pl-3'>
+                  <input
+                    id='supermarket'
+                    type='radio'
+                    value='Supermercado'
+                    name='list-radio'
+                    className='form_radio'
+                    onChange={(e) => setType(e.target.value)}
+                  />
+                  <label htmlFor='supermarket' className='w-full py-3 ml-2 font-medium'>
+                    Supermercado
+                  </label>
+                </div>
+              </li>
+            </ul>
           </div>
           <div className='flex flex-row w-full'>
-            <div className='w-1/2 px-3'>
+            <div className='w-2/5 px-3'>
               <label className='form_label' htmlFor='department'>
                 Departamento:
               </label>
@@ -206,7 +237,7 @@ function Page () {
                 ))}
               </select>
             </div>
-            <div className='w-1/2 px-3'>
+            <div className='w-2/5 px-3'>
               <label className='form_label' htmlFor='town'>
                 Municipio:
               </label>
@@ -218,7 +249,23 @@ function Page () {
                 value={town}
               >
                 {towns.map((town) => (
-                  <option key={town.id} value={town.id}>{town.descripcion}</option>
+                  <option key={town.id} value={town.descripcion}>{town.descripcion}</option>
+                ))}
+              </select>
+            </div>
+            <div className='w-1/5 px-3'>
+              <label className='form_label' htmlFor='zones'>
+                Zonas:
+              </label>
+              <select
+                className='form_select'
+                name='zones'
+                id='zones'
+                onChange={(e) => setZone(e.target.value)}
+                value={zone}
+              >
+                {zones.map((zone, index) => (
+                  <option key={index} value={zone}>{zone}</option>
                 ))}
               </select>
             </div>
@@ -237,59 +284,15 @@ function Page () {
               required
             />
           </div>
-          <div className='flex flex-row w-full items-center'>
-            <div className='w-1/3 px-3'>
-              <label className='form_label' htmlFor='hasLicense'>
-                Tiene Licencia:
-              </label>
-              <input
-                className='form_checkbox'
-                type='checkbox'
-                name='hasLicense'
-                id='hasLicense'
-                onChange={() => setHasLicense((prev) => !prev)}
-              />
-            </div>
-            {hasLicense && (
-              <div className='w-1/3 px-3'>
-                <label className='form_label' htmlFor='licenseType'>
-                  Tipo de Licencia:
-                </label>
-                <select
-                  className='form_select'
-                  name='licenseType'
-                  id='licenseType'
-                  onChange={(e) => setLicenseType(e.target.value)}
-                  value={licenseType}
-                >
-                  {licenseTypes.map((type) => (
-                    <option value={type} key={type}>{type}</option>
-                  ))}
-                </select>
-              </div>
-            )}
-            <div className='w-1/3 px-3'>
-              <label className='form_label' htmlFor='hasVehicle'>
-                Tiene Vehículo Propio:
-              </label>
-              <input
-                className='form_checkbox'
-                type='checkbox'
-                name='hasVehicle'
-                id='hasVehicle'
-                onChange={() => setHasVehicle((prev) => !prev)}
-              />
-            </div>
-          </div>
           <div className='w-full px-3'>
-            <label className='form_label' htmlFor='cv'>
+            <label className='form_label' htmlFor='files'>
               Hoja de Vida:
             </label>
             <input
               className='form_file'
               type='file'
-              name='cv'
-              id='cv'
+              name='files'
+              id='files'
               accept='.pdf'
               multiple={false}
               onChange={changeHandler}
