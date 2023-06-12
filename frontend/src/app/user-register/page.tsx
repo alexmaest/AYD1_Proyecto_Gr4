@@ -1,12 +1,14 @@
 'use client'
 import Navbar from '@/components/Navbar'
 import baseUrl from '@/constants/baseUrl'
+import useDepartment from '@/hooks/useDepartment'
 import { useState } from 'react'
 
 export default function Register () {
   const [error, setError] = useState('')
   const [selectedDepartment, setSelectedDepartment] = useState('')
   const [selectedMunicipality, setSelectedMunicipality] = useState('')
+  const { departments } = useDepartment()
   const phoneRegex = /^[+]?([(]?502[)]?)?[-\s]?[0-9]{8}$/
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -77,8 +79,7 @@ export default function Register () {
     setSelectedMunicipality(event.target.value)
   }
 
-  const filteredMunicipalities = departments.find(
-    department => department.descripcion === selectedDepartment
+  const filteredMunicipalities = departments?.find((department: { id: number, descripcion: string }) => department.descripcion === selectedDepartment
   )?.municipios ?? []
 
   return (
@@ -138,7 +139,7 @@ export default function Register () {
             >
               <option value=''>Selecciona un departamento</option>
               {
-              departments.map(({ id, descripcion }) => (
+              departments?.map(({ id, descripcion }: { id: number, descripcion: string }) => (
                 <option key={id} value={descripcion}>{descripcion}</option>
               ))
             }
@@ -156,7 +157,7 @@ export default function Register () {
             >
               <option value=''>Selecciona un municipio</option>
               {
-                filteredMunicipalities.map(({ id, descripcion }) => (
+                filteredMunicipalities.map(({ id, descripcion }: { id: number, descripcion: string }) => (
                   <option key={id} value={descripcion}>{descripcion}</option>
                 ))
                }
