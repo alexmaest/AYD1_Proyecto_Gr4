@@ -6,28 +6,14 @@ import baseUrl from '@/constants/baseUrl'
 import Navbar from '@/components/Navbar'
 
 const phoneRegex = /^[+]?([(]?502[)]?)?[-\s]?[0-9]{8}$/
-const departments = [
-  'Alta Verapaz',
-  'Baja Verapaz',
-  'Chimaltenango',
-  'Chiquimula',
-  'El Progreso'
-]
-
-const towns = [
-  'Cobán',
-  'San Pedro Carchá',
-  'San Juan Chamelco',
-  'San Cristóbal Verapaz',
-  'Tactic'
-]
+const licenseTypes = ['A', 'B', 'C', 'M']
 
 function Page () {
-  const licenseTypes = ['A', 'B', 'C', 'M', 'E']
-
   const nameRef = useRef<HTMLInputElement>(null)
   const errorRef = useRef<HTMLParagraphElement>(null)
 
+  const [departments, setDepartments] = useState<any[]>([])
+  const [towns, setTowns] = useState<any[]>([])
   const [name, setName] = useState('')
   const [lastName, setLastName] = useState('')
   const [email, setEmail] = useState('')
@@ -45,6 +31,13 @@ function Page () {
     const file = e.currentTarget.files?.item(0)
     if (file == null) return
     setCv(file)
+  }
+
+  const handleDepartmentChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const department = e.currentTarget.value
+    setDepartment(department)
+    const _towns = departments.find(d => d.descripcion === department)?.municipios
+    if (_towns != null) setTowns(_towns)
   }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -96,6 +89,18 @@ function Page () {
       errorRef.current?.focus()
     }
   }
+
+  useEffect(() => {
+    const getDepartments = async () => {
+      const res = await fetch(`${baseUrl}/departments`)
+      const { departments } = await res.json()
+      setDepartments(departments)
+    }
+    void getDepartments()
+    setDepartment(departments[0]?.descripcion)
+    setTowns(departments[0]?.municipios)
+    setTown(departments[0]?.municipios[0]?.descripcion)
+  }, [departments])
 
   useEffect(() => {
     nameRef.current?.focus()
@@ -186,6 +191,22 @@ function Page () {
           </div>
           <div className='flex flex-row w-full'>
             <div className='w-1/2 px-3'>
+              <label className='form_label' htmlFor='department'>
+                Departamento:
+              </label>
+              <select
+                className='form_select'
+                name='departments'
+                id='departments'
+                onChange={(e) => handleDepartmentChange(e)}
+                value={department}
+              >
+                {departments.map((department) => (
+                  <option key={department.id} value={department.descripcion}>{department.descripcion}</option>
+                ))}
+              </select>
+            </div>
+            <div className='w-1/2 px-3'>
               <label className='form_label' htmlFor='town'>
                 Municipio:
               </label>
@@ -197,23 +218,7 @@ function Page () {
                 value={town}
               >
                 {towns.map((town) => (
-                  <option key={town} value={town}>{town}</option>
-                ))}
-              </select>
-            </div>
-            <div className='w-1/2 px-3'>
-              <label className='form_label' htmlFor='department'>
-                Departamento:
-              </label>
-              <select
-                className='form_select'
-                name='departments'
-                id='departments'
-                onChange={(e) => setDepartment(e.target.value)}
-                value={department}
-              >
-                {departments.map((department) => (
-                  <option key={department} value={department}>{department}</option>
+                  <option key={town.id} value={town.id}>{town.descripcion}</option>
                 ))}
               </select>
             </div>

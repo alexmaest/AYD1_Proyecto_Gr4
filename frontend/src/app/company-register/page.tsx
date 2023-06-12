@@ -5,22 +5,6 @@ import { useEffect, useState, useRef } from 'react'
 import baseUrl from '@/constants/baseUrl'
 import Navbar from '@/components/Navbar'
 
-const departments = [
-  'Alta Verapaz',
-  'Baja Verapaz',
-  'Chimaltenango',
-  'Chiquimula',
-  'El Progreso'
-]
-
-const towns = [
-  'Cobán',
-  'San Pedro Carchá',
-  'San Juan Chamelco',
-  'San Cristóbal Verapaz',
-  'Tactic'
-]
-
 const zones = [
   'Zona 1',
   'Zona 2',
@@ -33,6 +17,8 @@ function Page () {
   const nameRef = useRef<HTMLInputElement>(null)
   const errorRef = useRef<HTMLParagraphElement>(null)
 
+  const [departments, setDepartments] = useState<any[]>([])
+  const [towns, setTowns] = useState<any[]>([])
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [description, setDescription] = useState('')
@@ -48,6 +34,13 @@ function Page () {
     const _file = e.currentTarget.files
     if (_file == null) return
     setFiles(_file)
+  }
+
+  const handleDepartmentChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const department = e.currentTarget.value
+    setDepartment(department)
+    const _towns = departments.find(d => d.descripcion === department)?.municipios
+    if (_towns != null) setTowns(_towns)
   }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -97,6 +90,18 @@ function Page () {
       errorRef.current?.focus()
     }
   }
+
+  useEffect(() => {
+    const getDepartments = async () => {
+      const res = await fetch(`${baseUrl}/departments`)
+      const { departments } = await res.json()
+      setDepartments(departments)
+    }
+    void getDepartments()
+    setDepartment(departments[0]?.descripcion)
+    setTowns(departments[0]?.municipios)
+    setTown(departments[0]?.municipios[0]?.descripcion)
+  }, [departments])
 
   useEffect(() => {
     nameRef.current?.focus()
@@ -173,7 +178,7 @@ function Page () {
                   <input
                     id='restaurant'
                     type='radio'
-                    value='Restaurant'
+                    value='Restaurante'
                     name='list-radio'
                     className='form_radio'
                     onChange={(e) => setType(e.target.value)}
@@ -217,6 +222,22 @@ function Page () {
           </div>
           <div className='flex flex-row w-full'>
             <div className='w-2/5 px-3'>
+              <label className='form_label' htmlFor='department'>
+                Departamento:
+              </label>
+              <select
+                className='form_select'
+                name='departments'
+                id='departments'
+                onChange={(e) => handleDepartmentChange(e)}
+                value={department}
+              >
+                {departments.map((department) => (
+                  <option key={department.id} value={department.descripcion}>{department.descripcion}</option>
+                ))}
+              </select>
+            </div>
+            <div className='w-2/5 px-3'>
               <label className='form_label' htmlFor='town'>
                 Municipio:
               </label>
@@ -228,23 +249,7 @@ function Page () {
                 value={town}
               >
                 {towns.map((town) => (
-                  <option key={town} value={town}>{town}</option>
-                ))}
-              </select>
-            </div>
-            <div className='w-2/5 px-3'>
-              <label className='form_label' htmlFor='department'>
-                Departamento:
-              </label>
-              <select
-                className='form_select'
-                name='departments'
-                id='departments'
-                onChange={(e) => setDepartment(e.target.value)}
-                value={department}
-              >
-                {departments.map((department) => (
-                  <option key={department} value={department}>{department}</option>
+                  <option key={town.id} value={town.descripcion}>{town.descripcion}</option>
                 ))}
               </select>
             </div>
@@ -259,8 +264,8 @@ function Page () {
                 onChange={(e) => setZone(e.target.value)}
                 value={zone}
               >
-                {zones.map((zone) => (
-                  <option key={zone} value={zone}>{zone}</option>
+                {zones.map((zone, index) => (
+                  <option key={index} value={zone}>{zone}</option>
                 ))}
               </select>
             </div>
