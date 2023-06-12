@@ -16,13 +16,13 @@ router.get('/', (req, res) => {
           const { departamento_id, departamento, municipio_id, municipio } = row;
           if (!departamentos[departamento_id]) {
             departamentos[departamento_id] = {
-              id: departamento_id,
+              departamento_id,
               descripcion: departamento,
               municipios: []
             };
           }
           departamentos[departamento_id].municipios.push({
-            id: municipio_id,
+            municipio_id,
             descripcion: municipio
           });
         });
