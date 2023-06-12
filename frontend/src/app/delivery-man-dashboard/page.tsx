@@ -9,18 +9,18 @@ export default function DeliveryManDashboard () {
       image: './listado-entrega.jpg'
     },
     {
-      title: 'Card 2',
-      description: 'This is the description for Card 2.',
+      title: 'Pedidos asignados',
+      description: 'Mira los pedidos que tienes asignados para entrega.',
       image: './listado-entrega.jpg'
     },
     {
-      title: 'Card 3',
-      description: 'This is the description for Card 3.',
+      title: 'Mi perfil',
+      description: 'Actualiza tus datos personales y de contacto.',
       image: './listado-entrega.jpg'
     },
     {
-      title: 'Card 4',
-      description: 'This is the description for Card 4.',
+      title: 'HIstorial de pedidos',
+      description: 'Mira los pedidos que has entregado.',
       image: './listado-entrega.jpg'
     }
   ]
@@ -29,7 +29,7 @@ export default function DeliveryManDashboard () {
     <>
       <DeliveryNavbar />
       <div className='h-screen '>
-        <div className='container mx-auto py-28'>
+        <div className='container mx-auto py-28 px-4'>
           <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4'>
             {cards.map((card, index) => (
               <Card key={index} title={card.title} description={card.description} image={card.image} />
