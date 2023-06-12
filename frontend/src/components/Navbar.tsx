@@ -9,7 +9,7 @@ export default function Navbar () {
       text: 'Repartidor'
     },
     {
-      linkTo: '/restaurantRegister',
+      linkTo: '/company-register',
       text: 'Restaurante'
     }
   ]
