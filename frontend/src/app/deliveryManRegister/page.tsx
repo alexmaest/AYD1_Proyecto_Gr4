@@ -92,15 +92,15 @@ function Page () {
 
   useEffect(() => {
     const getDepartments = async () => {
-      const res = await fetch(`${baseUrl}/departments`)
-      const { departments } = await res.json()
-      setDepartments(departments)
+      const res = await fetch(`${baseUrl}/departments`, { method: 'GET' })
+      const _departments = await res.json()
+      setDepartments(_departments)
+      setDepartment(_departments[0]?.descripcion)
+      setTowns(_departments[0]?.municipios)
+      setTown(_departments[0]?.municipios[0]?.descripcion)
     }
     void getDepartments()
-    setDepartment(departments[0]?.descripcion)
-    setTowns(departments[0]?.municipios)
-    setTown(departments[0]?.municipios[0]?.descripcion)
-  }, [departments])
+  }, [])
 
   useEffect(() => {
     nameRef.current?.focus()
