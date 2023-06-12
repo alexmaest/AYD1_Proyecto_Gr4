@@ -7,7 +7,7 @@ const fetcher = async (url: string) => {
 }
 
 const useDepartment = () => {
-  const { data, error, isLoading } = useSWR(`${baseUrl}/department`, fetcher)
+  const { data, error, isLoading } = useSWR(`${baseUrl}/departments`, fetcher)
 
   return {
     departments: data,

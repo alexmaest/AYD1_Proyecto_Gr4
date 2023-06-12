@@ -1,10 +1,14 @@
 'use client'
 import Navbar from '@/components/Navbar'
 import baseUrl from '@/constants/baseUrl'
+import useDepartment from '@/hooks/useDepartment'
 import { useState } from 'react'
 
 export default function Register () {
   const [error, setError] = useState('')
+  const [selectedDepartment, setSelectedDepartment] = useState('')
+  const [selectedMunicipality, setSelectedMunicipality] = useState('')
+  const { departments } = useDepartment()
   const phoneRegex = /^[+]?([(]?502[)]?)?[-\s]?[0-9]{8}$/
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -23,7 +27,26 @@ export default function Register () {
       return
     }
 
+    if (data.department === '') {
+      setError('Debes seleccionar un departamento')
+      return
+    }
+
+    if (data.municipality === '') {
+      setError('Debes seleccionar un municipio')
+      return
+    }
+
     try {
+      console.log({
+        firstName: data.firstName,
+        lastName: data.lastName,
+        email: data.email,
+        password: data.password,
+        phoneNumber: data.phoneNumber,
+        municipality: data.municipality,
+        department: data.department
+      })
       const res = await fetch(baseUrl + '/userRegister', {
         method: 'POST',
         headers: {
@@ -46,6 +69,18 @@ export default function Register () {
       setError('Ha ocurrido un error, intenta de nuevo')
     }
   }
+
+  const handleDepartmentChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedDepartment(event.target.value)
+    setSelectedMunicipality('')
+  }
+
+  const handleMunicipalityChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedMunicipality(event.target.value)
+  }
+
+  const filteredMunicipalities = departments?.find((department: { id: number, descripcion: string }) => department.descripcion === selectedDepartment
+  )?.municipios ?? []
 
   return (
     <div>
@@ -88,19 +123,46 @@ export default function Register () {
           type='text'
           placeholder='Número de teléfono'
         />
-        <div className='flex flex-row'>
-          <input
-            name='municipality'
-            className='w-full mr-2 px-4 py-2 mb-4 text-base text-gray-700 placeholder-gray-600 border rounded-lg focus:outline-none focus:border-green-500'
-            type=''
-            placeholder='Municipio'
-          />
-          <input
-            name='department'
-            className='w-full ml-2 px-4 py-2 mb-4 text-base text-gray-700 placeholder-gray-600 border rounded-lg focus:outline-none focus:border-green-500'
-            type='text'
-            placeholder='Departamento'
-          />
+        <div className='flex flex-row justify-center items-center'>
+          <div className='flex-1 mr-2'>
+            <label
+              htmlFor='department'
+              className='text-sm text-al-yellow font-semibold'
+            >Departamento:
+            </label>
+            <select
+              id='department'
+              name='department'
+              value={selectedDepartment}
+              onChange={handleDepartmentChange}
+              className='px-4 py-2 mb-4 w-full text-base text-gray-700 placeholder-gray-600 border rounded-lg focus:outline-none focus:border-green-500'
+            >
+              <option value=''>Selecciona un departamento</option>
+              {
+              departments?.map(({ id, descripcion }: { id: number, descripcion: string }) => (
+                <option key={id} value={descripcion}>{descripcion}</option>
+              ))
+            }
+            </select>
+          </div>
+          <div className='flex-1 ml-2'>
+            <label htmlFor='municipality' className='text-sm text-al-yellow font-semibold'>Municipio</label>
+            <select
+              id='municipality'
+              name='municipality'
+              value={selectedMunicipality}
+              onChange={handleMunicipalityChange}
+              disabled={selectedDepartment === '' || filteredMunicipalities.length === 0}
+              className='px-4 py-2 mb-4 w-full text-base text-gray-700 placeholder-gray-600 border rounded-lg focus:outline-none focus:border-green-500'
+            >
+              <option value=''>Selecciona un municipio</option>
+              {
+                filteredMunicipalities.map(({ id, descripcion }: { id: number, descripcion: string }) => (
+                  <option key={id} value={descripcion}>{descripcion}</option>
+                ))
+               }
+            </select>
+          </div>
         </div>
         <input
           name='password'
