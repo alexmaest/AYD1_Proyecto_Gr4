@@ -3,22 +3,6 @@ const db = require('../database');
 // Login
 exports.login = (req, res) => {
   const { email, password, type } = req.body;
-  let tableName = '';
-
-  /*switch (type) {
-    case 'user':
-      tableName = 'users';
-      break;
-    case 'company':
-      tableName = 'companies';
-      break;
-    case 'delivery':
-      tableName = 'deliveries';
-      break;
-    default:
-      res.send('Error: Invalid user type');
-      return;
-  }*/
 
   const query ='SELECT usr.usuario_id, usr.nombre,  usr.apellido, usr.correo, usr.rol FROM alchilazodb.vw_usuario usr  where habilitado=1 and correo = ? and clave = ? and rol = ?;' 
   const values = [email, password, type ];
@@ -32,6 +16,4 @@ exports.login = (req, res) => {
       res.send('Error: Invalid credentials');
     }
   });
-
-  //res.send('Information: Login endpoint');
 };
