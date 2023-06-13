@@ -41,32 +41,6 @@ const liItems = [
   }
 ]
 
-const dropdown = {
-  title: 'Únete al mejor equipo',
-  styles: '',
-  items: [
-    {
-      text: 'Repartidor',
-      linkTo: '/deliveryManRegister'
-    },
-    {
-      text: 'Restaurante',
-      linkTo: '/company-register'
-    }
-  ]
-}
-
-const liItems = [
-  {
-    linkTo: '/login',
-    text: 'Login'
-  },
-  {
-    linkTo: '/user-register',
-    text: 'Registro'
-  }
-]
-
 function Page () {
   const nameRef = useRef<HTMLInputElement>(null)
   const errorRef = useRef<HTMLParagraphElement>(null)
