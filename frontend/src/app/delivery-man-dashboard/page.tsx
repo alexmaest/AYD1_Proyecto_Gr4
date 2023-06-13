@@ -6,22 +6,22 @@ export default function DeliveryManDashboard () {
     {
       title: 'Solicitudes de entrega',
       description: 'Listado de pedidos que se han solicitado para entrega.',
-      image: './listado-entrega.jpg'
+      image: './deliveries.webp'
     },
     {
       title: 'Pedidos asignados',
       description: 'Mira los pedidos que tienes asignados para entrega.',
-      image: './listado-entrega.jpg'
+      image: './order.webp'
     },
     {
       title: 'Mi perfil',
       description: 'Actualiza tus datos personales y de contacto.',
-      image: './listado-entrega.jpg'
+      image: './delivery.webp'
     },
     {
       title: 'HIstorial de pedidos',
       description: 'Mira los pedidos que has entregado.',
-      image: './listado-entrega.jpg'
+      image: './record.webp'
     }
   ]
 
