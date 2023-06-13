@@ -1,6 +1,32 @@
 import Navbar from '@/components/Navbar'
 import Image from 'next/image'
 
+const dropdown = {
+  title: 'Únete al mejor equipo',
+  styles: '',
+  items: [
+    {
+      text: 'Repartidor',
+      linkTo: '/deliveryManRegister'
+    },
+    {
+      text: 'Restaurante',
+      linkTo: '/company-register'
+    }
+  ]
+}
+
+const liItems = [
+  {
+    linkTo: '/login',
+    text: 'Login'
+  },
+  {
+    linkTo: '/user-register',
+    text: 'Registro'
+  }
+]
+
 export default function Team () {
   const teamMembers = [
     {
@@ -31,7 +57,7 @@ export default function Team () {
 
   return (
     <>
-      <Navbar />
+      <Navbar liElements={liItems} dropdown={dropdown} />
       <section className='pb-8 md:pt-20 pt-28'>
         <h1 className='text-3xl font-bold text-center mb-8 text-al-yellow'>Nuestro equipo</h1>
         <ul className='flex flex-wrap justify-center'>
