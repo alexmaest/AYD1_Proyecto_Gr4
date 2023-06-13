@@ -59,6 +59,9 @@ function Page () {
       return
     }
 
+    // file list to array
+    const _files = Array.from(files as FileList)
+
     // form data
     const formData = new FormData()
     formData.append('name', name)
@@ -68,14 +71,18 @@ function Page () {
     formData.append('town', town)
     formData.append('department', department)
     formData.append('zone', zone)
-    formData.append('file', files?.item(0) as File)
+    // formData.append('file', files?.item(0) as File)
+    _files.forEach((_file: File) => formData.append('pdfFiles', _file))
     formData.append('password', password)
 
     // send form data
     try {
       const res = await fetch(`${baseUrl}/companyRegister`, {
         method: 'POST',
-        body: formData
+        body: formData,
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
       })
       if (res.status === 200) {
         alert('Solicitud enviada con éxito')
@@ -99,6 +106,7 @@ function Page () {
       setDepartment(_departments[0]?.descripcion)
       setTowns(_departments[0]?.municipios)
       setTown(_departments[0]?.municipios[0]?.descripcion)
+      setZone(zones[0])
     }
     void getDepartments()
   }, [])
@@ -294,7 +302,7 @@ function Page () {
               name='files'
               id='files'
               accept='.pdf'
-              multiple={false}
+              multiple
               onChange={changeHandler}
               required
             />
