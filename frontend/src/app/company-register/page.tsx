@@ -13,6 +13,32 @@ const zones = [
   'Zona 5'
 ]
 
+const dropdown = {
+  title: 'Únete al mejor equipo',
+  styles: '',
+  items: [
+    {
+      text: 'Repartidor',
+      linkTo: '/deliveryManRegister'
+    },
+    {
+      text: 'Restaurante',
+      linkTo: '/company-register'
+    }
+  ]
+}
+
+const liItems = [
+  {
+    linkTo: '/login',
+    text: 'Login'
+  },
+  {
+    linkTo: '/user-register',
+    text: 'Registro'
+  }
+]
+
 function Page () {
   const nameRef = useRef<HTMLInputElement>(null)
   const errorRef = useRef<HTMLParagraphElement>(null)
@@ -121,7 +147,7 @@ function Page () {
 
   return (
     <>
-      <Navbar />
+      <Navbar liElements={liItems} dropdown={dropdown} />
       <section className='max-w-2xl rounded px-10 py-16 orange_gradient text-al-black mx-auto my-24'>
         <h1 className='text-center font-black text-3xl mb-10'>Solicitud para Empresa</h1>
         {(error !== '') && (

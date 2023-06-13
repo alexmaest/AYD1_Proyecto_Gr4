@@ -2,33 +2,59 @@ import Navbar from '@/components/Navbar'
 import Image from 'next/image'
 import Link from 'next/link'
 
-export default function Home () {
-  const itemsFooter = [
+const dropdown = {
+  title: 'Únete al mejor equipo',
+  styles: '',
+  items: [
     {
-      title: 'Quiénes somos',
-      url: '/'
+      text: 'Repartidor',
+      linkTo: '/deliveryManRegister'
     },
     {
-      title: 'Equipo',
-      url: '/team'
-    },
-    {
-      title: 'Preguntas Frecuentes',
-      url: '/'
-    },
-    {
-      title: 'Términos y condiciones',
-      url: '/'
-    },
-    {
-      title: 'Políticas de Privacidad',
-      url: '/'
+      text: 'Restaurante',
+      linkTo: '/company-register'
     }
   ]
+}
 
+const liItems = [
+  {
+    linkTo: '/login',
+    text: 'Login'
+  },
+  {
+    linkTo: '/user-register',
+    text: 'Registro'
+  }
+]
+
+const itemsFooter = [
+  {
+    title: 'Quiénes somos',
+    url: '/'
+  },
+  {
+    title: 'Equipo',
+    url: '/team'
+  },
+  {
+    title: 'Preguntas Frecuentes',
+    url: '/'
+  },
+  {
+    title: 'Términos y condiciones',
+    url: '/'
+  },
+  {
+    title: 'Políticas de Privacidad',
+    url: '/'
+  }
+]
+
+export default function Home () {
   return (
     <main>
-      <Navbar />
+      <Navbar liElements={liItems} dropdown={dropdown} />
       <section className='flex flex-col justify-center items-center h-screen sm:flex-row sm:justify-around'>
         <div className='h-auto'>
           <Image src='/principal.png' width={1000} height={1000} alt='principal' />

@@ -4,6 +4,32 @@ import baseUrl from '@/constants/baseUrl'
 import useDepartment from '@/hooks/useDepartment'
 import { useState } from 'react'
 
+const dropdown = {
+  title: 'Únete al mejor equipo',
+  styles: '',
+  items: [
+    {
+      text: 'Repartidor',
+      linkTo: '/deliveryManRegister'
+    },
+    {
+      text: 'Restaurante',
+      linkTo: '/company-register'
+    }
+  ]
+}
+
+const liItems = [
+  {
+    linkTo: '/login',
+    text: 'Login'
+  },
+  {
+    linkTo: '/user-register',
+    text: 'Registro'
+  }
+]
+
 export default function Register () {
   const [error, setError] = useState('')
   const [selectedDepartment, setSelectedDepartment] = useState('')
@@ -38,15 +64,6 @@ export default function Register () {
     }
 
     try {
-      console.log({
-        firstName: data.firstName,
-        lastName: data.lastName,
-        email: data.email,
-        password: data.password,
-        phoneNumber: data.phoneNumber,
-        municipality: data.municipality,
-        department: data.department
-      })
       const res = await fetch(baseUrl + '/userRegister', {
         method: 'POST',
         headers: {
@@ -84,7 +101,7 @@ export default function Register () {
 
   return (
     <div>
-      <Navbar />
+      <Navbar liElements={liItems} dropdown={dropdown} />
       <h1 className='py-20 text-2xl text-center text-al-yellow font-bold'>Registrate y pide cuando quieras</h1>
       <form
         className='flex flex-col items-center justify-center w-full max-w-md mx-auto'
