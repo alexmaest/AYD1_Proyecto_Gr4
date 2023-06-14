@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const multer = require('multer');
 const fs = require('fs');
@@ -14,10 +15,10 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // AWS S3 configuration
-const AWS_BUCKET_NAME = 'alchilazo-bucket';
-const AWS_BUCKET_REGION = 'us-east-2';
-const AWS_PUBLIC_KEY = 'AKIAQX6ZSICQ737CYEOE';
-const AWS_SECRET_KEY = '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';
+const AWS_BUCKET_NAME = process.env.AWS_BUCKET_NAME;
+const AWS_BUCKET_REGION = process.env.AWS_BUCKET_REGION;
+const AWS_PUBLIC_KEY = process.env.AWS_PUBLIC_KEY;
+const AWS_SECRET_KEY = process.env.AWS_SECRET_KEY;
 
 const s3 = new AWS.S3({
   accessKeyId: AWS_PUBLIC_KEY,

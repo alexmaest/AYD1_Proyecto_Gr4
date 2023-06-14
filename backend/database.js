@@ -1,21 +1,14 @@
+require('dotenv').config(); 
 const mysql = require('mysql');
 
 // DB configuration
 var connection = mysql.createConnection({
-  host     : 'ayd1g4db.cunwtkz7gu5j.us-east-2.rds.amazonaws.com',
-  user     : 'ayd1g4',
-  password : 'ayd1grp4',
-  ssh : "Amazon RDS",
-  database: 'alchilazodb'
+  host     : process.env.DB_HOST,
+  user     : process.env.DB_USER,
+  password : process.env.DB_PASSWORD,
+  ssh      : "Amazon RDS",
+  database : process.env.DB_NAME
 });
-
-/*const connection = mysql.createConnection({
-  host: '127.0.0.1',
-  port: '3306',
-  user: 'root',
-  password: '12345',
-  database: 'alchilazodb',
-});*/
 
 connection.connect((err) => {
   if (err) throw err;
