@@ -1,7 +1,26 @@
 import Card from '@/components/Card'
-import DeliveryNavbar from '@/components/DeliveryNavbar'
+import Navbar from '@/components/Navbar'
 
-export default function DeliveryManDashboard () {
+const liItems = [
+  {
+    linkTo: '/delivery/requests',
+    text: 'Solicitudes de entrega'
+  },
+  {
+    linkTo: '/delivery/assigned-orders',
+    text: 'Pedidos asignados'
+  },
+  {
+    linkTo: '/delivery/my-profile',
+    text: 'Mi perfil'
+  },
+  {
+    linkTo: '/delivery/order-history',
+    text: 'Historial de pedidos'
+  }
+]
+
+export default function Delivery () {
   const cards = [
     {
       title: 'Solicitudes de entrega',
@@ -31,7 +50,7 @@ export default function DeliveryManDashboard () {
 
   return (
     <>
-      <DeliveryNavbar />
+      <Navbar dropdown={undefined} liElements={liItems} />
       <div className='h-screen '>
         <div className='container mx-auto py-28 px-4'>
           <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4'>
