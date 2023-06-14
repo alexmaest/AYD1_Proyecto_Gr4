@@ -40,7 +40,7 @@ function Page () {
         email,
         password,
         redirect: true,
-        callbackUrl: '/delivery-man-dashboard'
+        callbackUrl: '/check-role'
       })
     } catch (error) {
       setError('Correo o contraseña incorrectos')

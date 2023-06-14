@@ -9,26 +9,38 @@ export const authOptions: NextAuthOptions = {
         email: { label: 'email', type: 'text', placeholder: 'email' },
         password: { label: 'Password', type: 'password' }
       },
-      async authorize (credentials, req) {
-        const { email, password } = credentials as any
+      async authorize (credentials: any, req: any) {
+        const { email, password } = credentials
         const res = await fetch('http://localhost:5000/login', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            email,
-            password
+            correo: email,
+            clave: password
           })
         })
         const user = await res.json()
-
         if (res.ok && (user !== null || user !== undefined)) {
           return user
         } else return null
       }
     })
   ],
+
+  callbacks: {
+    async jwt ({ token, user }) {
+      return ({ ...token, ...user })
+    },
+    async session ({ session, token, user }) {
+      session.user = token
+      return session
+    },
+    async redirect ({ url, baseUrl }) {
+      return baseUrl
+    }
+  },
 
   session: {
     strategy: 'jwt'
