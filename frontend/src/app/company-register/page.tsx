@@ -1,9 +1,10 @@
 'use client'
 
-import Link from 'next/link'
 import { useEffect, useState, useRef } from 'react'
 import baseUrl from '@/constants/baseUrl'
 import Navbar from '@/components/Navbar'
+import axios from 'axios'
+import { signIn } from 'next-auth/react'
 
 const zones = [
   'Zona 1',
@@ -30,10 +31,6 @@ const dropdown = {
 
 const liItems = [
   {
-    linkTo: '/login',
-    text: 'Login'
-  },
-  {
     linkTo: '/user-register',
     text: 'Registro'
   }
@@ -57,9 +54,9 @@ function Page () {
   const [error, setError] = useState('')
 
   const changeHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const _file = e.currentTarget.files
-    if (_file == null) return
-    setFiles(_file)
+    const _files = e.currentTarget.files
+    if (_files == null) return
+    setFiles(_files)
   }
 
   const handleDepartmentChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -97,27 +94,18 @@ function Page () {
     formData.append('town', town)
     formData.append('department', department)
     formData.append('zone', zone)
-    // formData.append('file', files?.item(0) as File)
     _files.forEach((_file: File) => formData.append('pdfFiles', _file))
     formData.append('password', password)
 
     // send form data
     try {
-      const res = await fetch(`${baseUrl}/companyRegister`, {
-        method: 'POST',
-        body: formData,
+      await axios.post(`${baseUrl}/companyRegister`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
       })
-      if (res.status === 200) {
-        alert('Solicitud enviada con éxito')
-        window.location.href = '/login'
-      } else {
-        const { error } = await res.json()
-        setError(error)
-        errorRef.current?.focus()
-      }
+      alert('Solicitud enviada con éxito')
+      window.location.href = '/login'
     } catch (error) {
       setError('Error al enviar la solicitud')
       errorRef.current?.focus()
@@ -150,10 +138,10 @@ function Page () {
       <Navbar liElements={liItems} dropdown={dropdown} />
       <section className='max-w-2xl rounded px-10 py-16 orange_gradient text-al-black mx-auto my-24'>
         <h1 className='text-center font-black text-3xl mb-10'>Solicitud para Empresa</h1>
-        {(error !== '') && (
+        {error !== '' && (
           <p className='bg-red-200 border-none rounded text-red-500 text-lg text-center italic p-2 mb-8'>{error}</p>
         )}
-        <form action='post' className='flex flex-col gap-4' onSubmit={(e) => { void handleSubmit(e) }}>
+        <form action='post' className='flex flex-col gap-4' onSubmit={e => { void handleSubmit(e) }}>
           <div className='flex flex-row w-full'>
             <div className='w-1/2 px-3'>
               <label className='form_label' htmlFor='name'>
@@ -167,7 +155,7 @@ function Page () {
                 placeholder='Nombre'
                 autoComplete='off'
                 ref={nameRef}
-                onChange={(e) => setName(e.target.value)}
+                onChange={e => setName(e.target.value)}
                 value={name}
                 required
               />
@@ -182,7 +170,7 @@ function Page () {
                 name='email'
                 id='email'
                 placeholder='Correo'
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={e => setEmail(e.target.value)}
                 value={email}
                 required
               />
@@ -197,7 +185,7 @@ function Page () {
               name='description'
               id='description'
               placeholder='Descripción'
-              onChange={(e) => setDescription(e.target.value)}
+              onChange={e => setDescription(e.target.value)}
               value={description}
               required
             />
@@ -215,7 +203,7 @@ function Page () {
                     value='Restaurante'
                     name='list-radio'
                     className='form_radio'
-                    onChange={(e) => setType(e.target.value)}
+                    onChange={e => setType(e.target.value)}
                   />
                   <label htmlFor='restaurant' className='w-full py-3 ml-2 font-medium'>
                     Restaurante
@@ -230,7 +218,7 @@ function Page () {
                     value='Tienda'
                     name='list-radio'
                     className='form_radio'
-                    onChange={(e) => setType(e.target.value)}
+                    onChange={e => setType(e.target.value)}
                   />
                   <label htmlFor='store' className='w-full py-3 ml-2 font-medium'>
                     Tienda de Conveniencia
@@ -245,7 +233,7 @@ function Page () {
                     value='Supermercado'
                     name='list-radio'
                     className='form_radio'
-                    onChange={(e) => setType(e.target.value)}
+                    onChange={e => setType(e.target.value)}
                   />
                   <label htmlFor='supermarket' className='w-full py-3 ml-2 font-medium'>
                     Supermercado
@@ -263,11 +251,13 @@ function Page () {
                 className='form_select'
                 name='departments'
                 id='departments'
-                onChange={(e) => handleDepartmentChange(e)}
+                onChange={e => handleDepartmentChange(e)}
                 value={department}
               >
-                {departments.map((department) => (
-                  <option key={department.id} value={department.descripcion}>{department.descripcion}</option>
+                {departments.map(department => (
+                  <option key={department.id} value={department.descripcion}>
+                    {department.descripcion}
+                  </option>
                 ))}
               </select>
             </div>
@@ -279,11 +269,13 @@ function Page () {
                 className='form_select'
                 name='towns'
                 id='towns'
-                onChange={(e) => setTown(e.target.value)}
+                onChange={e => setTown(e.target.value)}
                 value={town}
               >
-                {towns.map((town) => (
-                  <option key={town.id} value={town.descripcion}>{town.descripcion}</option>
+                {towns.map(town => (
+                  <option key={town.id} value={town.descripcion}>
+                    {town.descripcion}
+                  </option>
                 ))}
               </select>
             </div>
@@ -295,11 +287,13 @@ function Page () {
                 className='form_select'
                 name='zones'
                 id='zones'
-                onChange={(e) => setZone(e.target.value)}
+                onChange={e => setZone(e.target.value)}
                 value={zone}
               >
                 {zones.map((zone, index) => (
-                  <option key={index} value={zone}>{zone}</option>
+                  <option key={index} value={zone}>
+                    {zone}
+                  </option>
                 ))}
               </select>
             </div>
@@ -313,7 +307,7 @@ function Page () {
               id='password'
               type='password'
               placeholder='Ingrese su contraseña'
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={e => setPassword(e.target.value)}
               value={password}
               required
             />
@@ -334,17 +328,14 @@ function Page () {
             />
           </div>
           <div className='w-full px-3'>
-            <button
-              className='black_btn w-full'
-              type='submit'
-            >
+            <button className='black_btn w-full' type='submit'>
               Enviar
             </button>
           </div>
           <p className='text-center'>
             Ya tienes una cuenta?&nbsp;
-            <span className='text-blue-500 hover:underline font-semibold'>
-              <Link href='/login'>Iniciar Sesión</Link>
+            <span className='text-blue-500'>
+              <button className='hover:underline' onClick={async () => await signIn()}>Iniciar Sesión</button>
             </span>
           </p>
         </form>

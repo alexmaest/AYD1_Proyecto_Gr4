@@ -1,3 +1,5 @@
+'use client'
+import { signIn, signOut, useSession } from 'next-auth/react'
 import Dropdown from './Dropdown'
 import Logo from './Logo'
 import Link from 'next/link'
@@ -7,6 +9,7 @@ export default function Navbar (
   { liElements: Array<{ linkTo: string, text: string }>
     dropdown?: { title: string, styles: string, items: Array<{ text: string, linkTo: string }> }
   }) {
+  const { data: session } = useSession()
   return (
     <nav className='flex justify-between items-center px-2 fixed top-0 left-0 right-0 backdrop-blur-lg py-2'>
       <div className='flex items-center'>
@@ -30,6 +33,15 @@ export default function Navbar (
             </Link>
           </li>
         ))}
+        <li className='text-al-white font-semibold text-center'>
+          {session?.user != null
+            ? (
+              <button onClick={async () => await signOut()}>Cerrar Sesión</button>
+              )
+            : (
+              <button onClick={async () => await signIn()}>Iniciar Sesión</button>
+              )}
+        </li>
       </ul>
 
     </nav>

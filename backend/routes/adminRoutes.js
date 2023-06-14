@@ -5,7 +5,8 @@ const adminController = require('../controllers/adminController');
 
 // Admin
 router.get('/', adminController.main);
-router.get('/requests', adminController.requests);
+router.get('/companyRequests', adminController.companyRequests);
+router.get('/deliveryRequests', adminController.deliveryRequests);
 router.get('/reports', adminController.reports);
 
 module.exports = router;

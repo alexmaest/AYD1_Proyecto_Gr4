@@ -1,9 +1,9 @@
 'use client'
 
-import Link from 'next/link'
 import { useEffect, useState, useRef } from 'react'
 import baseUrl from '@/constants/baseUrl'
 import Navbar from '@/components/Navbar'
+import { signIn } from 'next-auth/react'
 
 const phoneRegex = /^[+]?([(]?502[)]?)?[-\s]?[0-9]{8}$/
 const licenseTypes = ['A', 'B', 'C', 'M']
@@ -24,10 +24,6 @@ const dropdown = {
 }
 
 const liItems = [
-  {
-    linkTo: '/login',
-    text: 'Login'
-  },
   {
     linkTo: '/user-register',
     text: 'Registro'
@@ -104,14 +100,15 @@ function Page () {
       })
       if (res.status === 200) {
         alert('Solicitud enviada con éxito')
-        window.location.href = '/login'
+        await signIn()
       } else {
         const { error } = await res.json()
         setError(error)
         errorRef.current?.focus()
       }
-    } catch (error) {
-      setError('Error al enviar la solicitud')
+    } catch (error: any) {
+      setError(error.message)
+      console.log(error.message)
       errorRef.current?.focus()
     }
   }
@@ -244,7 +241,7 @@ function Page () {
                 value={town}
               >
                 {towns.map((town) => (
-                  <option key={town.id} value={town.id}>{town.descripcion}</option>
+                  <option key={town.id} value={town.descripcion}>{town.descripcion}</option>
                 ))}
               </select>
             </div>
@@ -288,8 +285,8 @@ function Page () {
                   onChange={(e) => setLicenseType(e.target.value)}
                   value={licenseType}
                 >
-                  {licenseTypes.map((type) => (
-                    <option value={type} key={type}>{type}</option>
+                  {licenseTypes.map((type, index) => (
+                    <option key={index} value={type}>{type}</option>
                   ))}
                 </select>
               </div>
@@ -332,8 +329,8 @@ function Page () {
           </div>
           <p className='text-center'>
             Ya tienes una cuenta?&nbsp;
-            <span className='text-blue-500 hover:underline font-semibold'>
-              <Link href='/login'>Iniciar Sesión</Link>
+            <span className='text-blue-500'>
+              <button className='hover:underline' onClick={async () => await signIn()}>Iniciar Sesión</button>
             </span>
           </p>
         </form>
