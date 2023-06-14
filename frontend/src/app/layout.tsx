@@ -1,3 +1,5 @@
+'use client'
+import { SessionProvider } from 'next-auth/react'
 import './globals.css'
 import { Montserrat } from 'next/font/google'
 
@@ -15,7 +17,13 @@ export default function RootLayout ({
 }) {
   return (
     <html lang='es'>
-      <body className={inter.className}>{children}</body>
+      <head>
+        <title>{metadata.title}</title>
+        <meta name='description' content={metadata.description} />
+      </head>
+      <SessionProvider>
+        <body className={inter.className}>{children}</body>
+      </SessionProvider>
     </html>
   )
 }

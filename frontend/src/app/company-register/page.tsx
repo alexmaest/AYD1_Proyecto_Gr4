@@ -1,11 +1,10 @@
 'use client'
 
-import Link from 'next/link';
-
-import { useEffect, useState, useRef } from 'react';
-import baseUrl from '@/constants/baseUrl';
-import Navbar from '@/components/Navbar';
-import axios from 'axios';
+import { useEffect, useState, useRef } from 'react'
+import baseUrl from '@/constants/baseUrl'
+import Navbar from '@/components/Navbar'
+import axios from 'axios'
+import { signIn } from 'next-auth/react'
 
 const zones = [
   'Zona 1',
@@ -13,7 +12,7 @@ const zones = [
   'Zona 3',
   'Zona 4',
   'Zona 5'
-];
+]
 
 const dropdown = {
   title: 'Únete al mejor equipo',
@@ -32,10 +31,6 @@ const dropdown = {
 
 const liItems = [
   {
-    linkTo: '/login',
-    text: 'Login'
-  },
-  {
     linkTo: '/user-register',
     text: 'Registro'
   }
@@ -45,98 +40,98 @@ function Page () {
   const nameRef = useRef<HTMLInputElement>(null)
   const errorRef = useRef<HTMLParagraphElement>(null)
 
-  const [departments, setDepartments] = useState<any[]>([]);
-  const [towns, setTowns] = useState<any[]>([]);
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [description, setDescription] = useState('');
-  const [type, setType] = useState('');
-  const [town, setTown] = useState('');
-  const [department, setDepartment] = useState('');
-  const [zone, setZone] = useState('');
-  const [files, setFiles] = useState<FileList | null>(null);
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [departments, setDepartments] = useState<any[]>([])
+  const [towns, setTowns] = useState<any[]>([])
+  const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
+  const [description, setDescription] = useState('')
+  const [type, setType] = useState('')
+  const [town, setTown] = useState('')
+  const [department, setDepartment] = useState('')
+  const [zone, setZone] = useState('')
+  const [files, setFiles] = useState<FileList | null>(null)
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
 
   const changeHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const _files = e.currentTarget.files;
-    if (_files == null) return;
-    setFiles(_files);
-  };
+    const _files = e.currentTarget.files
+    if (_files == null) return
+    setFiles(_files)
+  }
 
   const handleDepartmentChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const department = e.currentTarget.value;
-    setDepartment(department);
-    const _towns = departments.find(d => d.descripcion === department)?.municipios;
-    if (_towns != null) setTowns(_towns);
-  };
+    const department = e.currentTarget.value
+    setDepartment(department)
+    const _towns = departments.find(d => d.descripcion === department)?.municipios
+    if (_towns != null) setTowns(_towns)
+  }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+    e.preventDefault()
     // validate password
     if (password.length < 8) {
-      setError('La contraseña debe tener al menos 8 caracteres!');
-      errorRef.current?.focus();
-      return;
+      setError('La contraseña debe tener al menos 8 caracteres!')
+      errorRef.current?.focus()
+      return
     }
 
     // validate type
     if (type === '') {
-      setError('Debe seleccionar un tipo de empresa!');
-      errorRef.current?.focus();
-      return;
+      setError('Debe seleccionar un tipo de empresa!')
+      errorRef.current?.focus()
+      return
     }
 
     // file list to array
-    const _files = Array.from(files as FileList);
+    const _files = Array.from(files as FileList)
 
     // form data
-    const formData = new FormData();
-    formData.append('name', name);
-    formData.append('email', email);
-    formData.append('description', description);
-    formData.append('type', type);
-    formData.append('town', town);
-    formData.append('department', department);
-    formData.append('zone', zone);
-    _files.forEach((_file: File) => formData.append('pdfFiles', _file));
-    formData.append('password', password);
+    const formData = new FormData()
+    formData.append('name', name)
+    formData.append('email', email)
+    formData.append('description', description)
+    formData.append('type', type)
+    formData.append('town', town)
+    formData.append('department', department)
+    formData.append('zone', zone)
+    _files.forEach((_file: File) => formData.append('pdfFiles', _file))
+    formData.append('password', password)
 
     // send form data
     try {
       await axios.post(`${baseUrl}/companyRegister`, formData, {
         headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-      alert('Solicitud enviada con éxito');
-      window.location.href = '/login';
+          'Content-Type': 'multipart/form-data'
+        }
+      })
+      alert('Solicitud enviada con éxito')
+      window.location.href = '/login'
     } catch (error) {
-      setError('Error al enviar la solicitud');
-      errorRef.current?.focus();
+      setError('Error al enviar la solicitud')
+      errorRef.current?.focus()
     }
-  };
+  }
 
   useEffect(() => {
     const getDepartments = async () => {
-      const res = await fetch(`${baseUrl}/departments`, { method: 'GET' });
-      const _departments = await res.json();
-      setDepartments(_departments);
-      setDepartment(_departments[0]?.descripcion);
-      setTowns(_departments[0]?.municipios);
-      setTown(_departments[0]?.municipios[0]?.descripcion);
-      setZone(zones[0]);
-    };
-    void getDepartments();
-  }, []);
+      const res = await fetch(`${baseUrl}/departments`, { method: 'GET' })
+      const _departments = await res.json()
+      setDepartments(_departments)
+      setDepartment(_departments[0]?.descripcion)
+      setTowns(_departments[0]?.municipios)
+      setTown(_departments[0]?.municipios[0]?.descripcion)
+      setZone(zones[0])
+    }
+    void getDepartments()
+  }, [])
 
   useEffect(() => {
-    nameRef.current?.focus();
-  }, []);
+    nameRef.current?.focus()
+  }, [])
 
   useEffect(() => {
-    setError('');
-  }, [email, town, department, password]);
+    setError('')
+  }, [email, town, department, password])
 
   return (
     <>
@@ -146,7 +141,7 @@ function Page () {
         {error !== '' && (
           <p className='bg-red-200 border-none rounded text-red-500 text-lg text-center italic p-2 mb-8'>{error}</p>
         )}
-        <form action='post' className='flex flex-col gap-4' onSubmit={e => void handleSubmit(e)}>
+        <form action='post' className='flex flex-col gap-4' onSubmit={e => { void handleSubmit(e) }}>
           <div className='flex flex-row w-full'>
             <div className='w-1/2 px-3'>
               <label className='form_label' htmlFor='name'>
@@ -339,14 +334,14 @@ function Page () {
           </div>
           <p className='text-center'>
             Ya tienes una cuenta?&nbsp;
-            <span className='text-blue-500 hover:underline font-semibold'>
-              <Link href='/login'>Iniciar Sesión</Link>
+            <span className='text-blue-500'>
+              <button className='hover:underline' onClick={async () => await signIn()}>Iniciar Sesión</button>
             </span>
           </p>
         </form>
       </section>
     </>
-  );
+  )
 }
 
-export default Page;
+export default Page

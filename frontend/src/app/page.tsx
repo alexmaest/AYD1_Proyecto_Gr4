@@ -19,10 +19,6 @@ const dropdown = {
 
 const liItems = [
   {
-    linkTo: '/login',
-    text: 'Login'
-  },
-  {
     linkTo: '/user-register',
     text: 'Registro'
   }
