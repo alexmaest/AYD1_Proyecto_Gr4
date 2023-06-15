@@ -7,7 +7,7 @@ const dropdown = {
   items: [
     {
       text: 'Repartidor',
-      linkTo: '/deliveryManRegister'
+      linkTo: '/delivery-man-register'
     },
     {
       text: 'Restaurante',
