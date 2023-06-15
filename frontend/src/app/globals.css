@@ -58,6 +58,14 @@ body {
   @apply bg-gradient-to-r from-al-orange to-al-yellow;
 }
 
+.orange_gradient_text {
+  @apply bg-gradient-to-r from-al-orange to-al-yellow bg-clip-text text-transparent;
+}
+
 .black_btn {
   @apply rounded-full border-2 border-al-black bg-al-black py-1.5 px-5 text-al-yellow transition-all hover:bg-al-gray  hover:text-al-black text-center text-lg font-medium flex items-center justify-center;
+}
+
+.navbar_item {
+  @apply text-al-white font-semibold text-center border-2 border-transparent rounded-full transition duration-0 ease-in-out p-2  hover:border-al-yellow  hover:duration-700 hover:scale-110;
 }
