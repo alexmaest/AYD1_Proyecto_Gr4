@@ -9,7 +9,6 @@ function Page () {
 
   const handleClick = () => {
     if (data != null) {
-      console.log(data)
       const { role } = data.user
       if (role === 'Administrador') {
         router.push('/admin')
