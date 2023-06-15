@@ -13,21 +13,23 @@ export default function Page () {
   const [acceptedSuccess, setAcceptedSuccess] = useState(false)
   const [rejectedSuccess, setRejectedSuccess] = useState(false)
 
-  const { deliveryManRequests, isLoading } = useDeliveryManRequest()
+  const { deliveryManRequests, isLoading, mutate } = useDeliveryManRequest()
 
   useEffect(() => {
     if (acceptedSuccess) {
       setTimeout(() => {
         setAcceptedSuccess(false)
+        void mutate()
       }, 2000)
     }
 
     if (rejectedSuccess) {
       setTimeout(() => {
         setRejectedSuccess(false)
+        void mutate()
       }, 2000)
     }
-  }, [acceptedSuccess, rejectedSuccess])
+  }, [acceptedSuccess, rejectedSuccess, mutate])
 
   const handleReject = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -121,7 +123,7 @@ export default function Page () {
         {
           isLoading
             ? (
-              <h1>Loading</h1>
+              <Spinner />
               )
             : (
               <div className='space-y-3 lg:grid lg:grid-cols-1 sm:gap-6 xl:gap-10 lg:space-y-0'>

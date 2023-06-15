@@ -22,12 +22,13 @@ const fetcher = async (url: string) => {
 }
 
 const useDeliveryManRequest = () => {
-  const { data, error, isLoading } = useSWR(`${baseUrl}/admin/deliveryRequests`, fetcher)
+  const { data, error, isLoading, mutate } = useSWR(`${baseUrl}/admin/deliveryRequests`, fetcher)
 
   return {
     deliveryManRequests: data as DeliveryManRequest[],
     isLoading,
-    error
+    error,
+    mutate
   }
 }
 
