@@ -86,7 +86,7 @@ exports.deliveryRequests = (req, res) => {
 };
 
 exports.deliveryRequestApprove = (req, res) => {
-  const { id, state } = req.body;
+  const { id, state, description } = req.body;
 
   if (state === 'Aprobado') {
     const approveQuery = `
@@ -104,7 +104,7 @@ exports.deliveryRequestApprove = (req, res) => {
         console.error(err);
         res.status(500).send('Error: Sending request');
       } else {
-        sendEmail(id, state, 0);
+        sendEmail(id, state, 0, description);
         res.status(200).send('Information: Reply sent');
       }
     });
@@ -124,7 +124,7 @@ exports.deliveryRequestApprove = (req, res) => {
         console.error(err);
         res.status(500).send('Error: Sending request');
       } else {
-        sendEmail(id, state, 0);
+        sendEmail(id, state, 0, description);
         res.status(200).send('Information: Reply sent');
       }
     });
@@ -134,7 +134,7 @@ exports.deliveryRequestApprove = (req, res) => {
 };
 
 exports.companyRequestApprove = (req, res) => {
-  const { id, state } = req.body;
+  const { id, state, description } = req.body;
 
   if (state === 'Aprobado') {
     const approveQuery = `
@@ -152,7 +152,7 @@ exports.companyRequestApprove = (req, res) => {
         console.error(err);
         res.status(500).send('Error: Sending request');
       } else {
-        sendEmail(id, state, 1);
+        sendEmail(id, state, 1, description);
         res.status(200).send('Information: Reply sent');
       }
     });
@@ -172,7 +172,7 @@ exports.companyRequestApprove = (req, res) => {
         console.error(err);
         res.status(500).send('Error: Sending request');
       } else {
-        sendEmail(id, state, 1);
+        sendEmail(id, state, 1, description);
         res.status(200).send('Information: Reply sent');
       }
     });
@@ -181,7 +181,7 @@ exports.companyRequestApprove = (req, res) => {
   }
 };
 
-function sendEmail(id, state, type) {
+function sendEmail(id, state, type, description) {
   var userQuery = ``;
   var deleteQuery = ``;
   if(type === 0){
@@ -227,12 +227,12 @@ function sendEmail(id, state, type) {
       correo = userData.correo;
       nombres = userData.nombres;
       apellidos = userData.apellidos;
-      text = `Estimado(a) ${nombres} ${apellidos},\n\n${message}`
+      text = `Estimado(a) ${nombres} ${apellidos},\n\n${message}\n${description}`
     } else if (type === 1) {
       const userData = result[0];
       correo = userData.correo;
       nombre = userData.nombre;
-      text = `Estimada empresa ${nombre},\n\n${message}`
+      text = `Estimada empresa ${nombre},\n\n${message}\n${description}`
     }
     const transporter = nodemailer.createTransport({
       host: process.env.EMAIL_HOST,

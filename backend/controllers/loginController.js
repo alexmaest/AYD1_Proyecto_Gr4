@@ -40,7 +40,7 @@ exports.login = (req, res) => {
           name = userInfoResults.length > 0 ? userInfoResults[0].name : '';
           role = 'Usuario';
           const token = jwt.sign({ correo, rol }, 'secret_key');
-          res.json({ name, role, email: correo, accessToken: token });
+          res.json({ name: name, role: role, email: correo, accessToken: token });
         });
         return;
       } else if (rol_usuario_id === 3) {
@@ -55,7 +55,7 @@ exports.login = (req, res) => {
           name = deliveryInfoResults.length > 0 ? deliveryInfoResults[0].name : '';
           role = 'Repartidor';
           const token = jwt.sign({ correo, rol }, 'secret_key');
-          res.json({ name, role, email: correo, accessToken: token });
+          res.json({ name: name, role: role, email: correo, accessToken: token });
         });
         return;
       } else if (rol_usuario_id === 4) {
@@ -70,7 +70,7 @@ exports.login = (req, res) => {
           name = companyInfoResults.length > 0 ? companyInfoResults[0].name : '';
           role = 'Empresa';
           const token = jwt.sign({ correo, rol }, 'secret_key');
-          res.json({ name, role, email: correo, accessToken: token });
+          res.json({ name: name, role: role, email: correo, accessToken: token });
         });
         return;
       }
