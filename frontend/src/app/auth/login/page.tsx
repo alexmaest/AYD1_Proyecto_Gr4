@@ -1,8 +1,9 @@
 'use client'
 
+import { useSession, signIn } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
 import Navbar from '@/components/Navbar'
 import { useEffect, useRef, useState } from 'react'
-import { signIn } from 'next-auth/react'
 
 const dropdown = {
   title: 'Únete al mejor equipo',
@@ -27,6 +28,9 @@ const liItems = [
 ]
 
 function Page () {
+  const { data: session } = useSession()
+  const router = useRouter()
+
   const emailRef = useRef<HTMLInputElement>(null)
 
   const [email, setEmail] = useState('')
@@ -39,8 +43,7 @@ function Page () {
       await signIn('credentials', {
         email,
         password,
-        redirect: true,
-        callbackUrl: '/check-role'
+        redirect: false
       })
     } catch (error) {
       setError('Correo o contraseña incorrectos')
@@ -54,6 +57,21 @@ function Page () {
   useEffect(() => {
     setError('')
   }, [email, password])
+
+  useEffect(() => {
+    if (session?.user != null) {
+      const role = session?.user.role
+      if (role === 'Administrador') {
+        router.push('/admin')
+      } else if (role === 'Usuario') {
+        router.push('/user')
+      } else if (role === 'Empresa') {
+        router.push('/company')
+      } else {
+        router.push('/delivery')
+      }
+    }
+  }, [session, router])
 
   return (
     <>

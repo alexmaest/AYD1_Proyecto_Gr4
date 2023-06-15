@@ -60,6 +60,7 @@ function Page () {
     setDepartment(department)
     const _towns = departments.find(d => d.descripcion === department)?.municipios
     if (_towns != null) setTowns(_towns)
+    setTown(_towns?.[0]?.descripcion)
   }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
