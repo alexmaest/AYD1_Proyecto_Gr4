@@ -32,22 +32,15 @@ exports.deliveryManInfoRequest = (req, res) => {
     where u.rol_usuario_id=3 and u.habilitado=1 and u.correo = ?;
 `;
 
-  // Ejecutar la consulta
   const values = [correo];
   db.query(query, values, (error, results) => {
-    // Cerrar la conexión a la base de datos
-    //connection.end();
-
     if (error) {
-      // Si ocurre un error, enviar una respuesta de error
       res.status(500).json({ error: 'Error en la consulta MySQL' });
     } else {
-      // Si la consulta es exitosa, enviar los resultados en formato JSON
       res.json(results);
     }
   });
   
-  // delivery man current score
   exports.deliveryManCurrentScore = (req, res) => {
     res.send('Information: Delivery Man Curren score');
   };

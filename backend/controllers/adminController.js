@@ -1,13 +1,13 @@
 const nodemailer = require('nodemailer');
 const db = require('../database');
-require('dotenv').config(); 
+require('dotenv').config();
 
 exports.main = (req, res) => {
-    res.send('Information: Admin main page');
+  res.send('Information: Admin main page');
 };
 
 exports.companyRequests = (req, res) => {
-    const query = `
+  const query = `
       SELECT
         se.solicitud_empresa_id,
         se.nombre,
@@ -32,23 +32,23 @@ exports.companyRequests = (req, res) => {
       WHERE se.estado_solicitud_id = 1
       GROUP BY se.solicitud_empresa_id;
     `;
-  
-    db.query(query, (err, result) => {
-      if (err) {
-        console.error(err);
-        res.status(500).send('Error retrieving company requests');
-      } else {
-        const requests = result.map(row => ({
-          ...row,
-          documentos: JSON.parse(row.documentos)
-        }));
-        res.json(requests);
-      }
-    });
+
+  db.query(query, (err, result) => {
+    if (err) {
+      console.error(err);
+      res.status(500).send('Error retrieving company requests');
+    } else {
+      const requests = result.map(row => ({
+        ...row,
+        documentos: JSON.parse(row.documentos)
+      }));
+      res.json(requests);
+    }
+  });
 };
 
 exports.deliveryRequests = (req, res) => {
-    const query = `
+  const query = `
       SELECT
         sr.solicitud_repartidor_id,
         sr.nombres,
@@ -74,15 +74,15 @@ exports.deliveryRequests = (req, res) => {
       JOIN tbl_cat_tipo_licencia_conducir tlc ON sr.tipo_licencia_id = tlc.tipo_licencia_conducir_id
       WHERE sr.estado_solicitud_id = 1;
     `;
-  
-    db.query(query, (err, result) => {
-      if (err) {
-        console.error(err);
-        res.status(500).send('Error retrieving delivery requests');
-      } else {
-        res.json(result);
-      }
-    });
+
+  db.query(query, (err, result) => {
+    if (err) {
+      console.error(err);
+      res.status(500).send('Error retrieving delivery requests');
+    } else {
+      res.json(result);
+    }
+  });
 };
 
 exports.deliveryRequestApprove = (req, res) => {
@@ -97,6 +97,10 @@ exports.deliveryRequestApprove = (req, res) => {
         FROM tbl_solicitud_repartidor
         WHERE solicitud_repartidor_id = ${id}
       );
+
+      UPDATE tbl_solicitud_repartidor
+      SET estado_solicitud_id = 2
+      WHERE solicitud_repartidor_id = ${id};
     `;
 
     db.query(approveQuery, (err, result) => {
@@ -117,6 +121,10 @@ exports.deliveryRequestApprove = (req, res) => {
         FROM tbl_solicitud_repartidor
         WHERE solicitud_repartidor_id = ${id}
       );
+
+      UPDATE tbl_solicitud_repartidor
+      SET estado_solicitud_id = 3
+      WHERE solicitud_repartidor_id = ${id};
     `;
 
     db.query(rejectQuery, (err, result) => {
@@ -145,6 +153,10 @@ exports.companyRequestApprove = (req, res) => {
         FROM tbl_solicitud_empresa
         WHERE solicitud_empresa_id = ${id}
       );
+
+      UPDATE tbl_solicitud_empresa
+      SET estado_solicitud_id = 2
+      WHERE solicitud_empresa_id = ${id};
     `;
 
     db.query(approveQuery, (err, result) => {
@@ -165,6 +177,10 @@ exports.companyRequestApprove = (req, res) => {
         FROM tbl_solicitud_empresa
         WHERE solicitud_empresa_id = ${id}
       );
+
+      UPDATE tbl_solicitud_empresa
+      SET estado_solicitud_id = 3
+      WHERE solicitud_empresa_id = ${id};
     `;
 
     db.query(rejectQuery, (err, result) => {
@@ -183,28 +199,19 @@ exports.companyRequestApprove = (req, res) => {
 
 function sendEmail(id, state, type, description) {
   var userQuery = ``;
-  var deleteQuery = ``;
-  if(type === 0){
+  if (type === 0) {
     userQuery = `
       SELECT u.correo, s.nombres, s.apellidos
       FROM tbl_solicitud_repartidor s
       INNER JOIN tbl_usuario u ON s.usuario_id = u.usuario_id
       WHERE s.solicitud_repartidor_id = ${id}
     `;
-    deleteQuery = `
-      DELETE FROM tbl_solicitud_repartidor
-      WHERE solicitud_repartidor_id = ${id};
-    `;
-  }else{
+  } else {
     userQuery = `
       SELECT u.correo, s.nombre
       FROM tbl_solicitud_empresa s
       INNER JOIN tbl_usuario u ON s.usuario_id = u.usuario_id
       WHERE s.solicitud_empresa_id = ${id}
-    `;
-    deleteQuery = `
-      DELETE FROM tbl_documentos_x_empresa
-      WHERE solicitud_empresa_id = ${id};
     `;
   }
 
@@ -213,7 +220,7 @@ function sendEmail(id, state, type, description) {
       console.error(err);
       return;
     }
-  
+
     if (result.length === 0) {
       console.log('Error: Request not found');
       return;
@@ -259,27 +266,69 @@ function sendEmail(id, state, type, description) {
       }
     });
   });
-
-  
-  db.query(deleteQuery, (err, result) => {
-    if(type === 1){
-      if (err) throw err;
-      const deleteSolicitudQuery = `
-        DELETE FROM tbl_solicitud_empresa
-        WHERE solicitud_empresa_id = ${id};
-      `;
-      db.query(deleteSolicitudQuery, (err, deleteSolicitudResults) => {
-        if (err) throw err;
-      });
-    }
-    if (err) {
-      console.error(err);
-    } else {
-      console.log('Information: Reply sent');
-    }
-  });
 }
 
 exports.reports = (req, res) => {
-    res.send('Information: Admin reports page');
+  const countEnabledQuery = `
+    SELECT COUNT(*) AS contador
+    FROM tbl_usuario
+    WHERE habilitado = 1;
+  `;
+
+  const currentDate = new Date();
+  const currentDay = currentDate.getDate();
+  const currentMonth = currentDate.getMonth() + 1;
+  const currentYear = currentDate.getFullYear();
+  const countDayQuery = `
+    SELECT (
+      (SELECT COUNT(*) FROM tbl_solicitud_empresa WHERE DAY(fecha_solicitud) = ${currentDay})
+      + (SELECT COUNT(*) FROM tbl_solicitud_repartidor WHERE DAY(fecha_solicitud) = ${currentDay})
+      + (SELECT COUNT(*) FROM tbl_informacion_usuario WHERE DAY(fecha_registro) = ${currentDay})
+    ) AS contador;
+  `;
+
+  const countMonthQuery = `
+    SELECT (
+      (SELECT COUNT(*) FROM tbl_solicitud_empresa WHERE MONTH(fecha_solicitud) = ${currentMonth})
+      + (SELECT COUNT(*) FROM tbl_solicitud_repartidor WHERE MONTH(fecha_solicitud) = ${currentMonth})
+      + (SELECT COUNT(*) FROM tbl_informacion_usuario WHERE MONTH(fecha_registro) = ${currentMonth})
+    ) AS contador;
+  `;
+
+  const countYearQuery = `
+    SELECT (
+      (SELECT COUNT(*) FROM tbl_solicitud_empresa WHERE YEAR(fecha_solicitud) = ${currentYear})
+      + (SELECT COUNT(*) FROM tbl_solicitud_repartidor WHERE YEAR(fecha_solicitud) = ${currentYear})
+      + (SELECT COUNT(*) FROM tbl_informacion_usuario WHERE YEAR(fecha_registro) = ${currentYear})
+    ) AS contador;
+  `;
+
+  db.query(countEnabledQuery, (err, resultEnabled) => {
+    if (err) throw err;
+    const enabledCount = resultEnabled[0].contador;
+
+    db.query(countDayQuery, (err, resultDay) => {
+      if (err) throw err;
+      const dayCount = resultDay[0].contador;
+
+      db.query(countMonthQuery, (err, resultMonth) => {
+        if (err) throw err;
+        const monthCount = resultMonth[0].contador;
+
+        db.query(countYearQuery, (err, resultYear) => {
+          if (err) throw err;
+          const yearCount = resultYear[0].contador;
+
+          const response = {
+            "allUsers" : enabledCount,
+            "byDay" : dayCount,
+            "byMonth" : monthCount,
+            "byYear" : yearCount
+          };
+
+          res.json(response);
+        });
+      });
+    });
+  });
 };
