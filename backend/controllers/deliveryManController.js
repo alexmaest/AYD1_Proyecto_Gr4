@@ -46,5 +46,9 @@ exports.deliveryManInfoRequest = (req, res) => {
       res.json(results);
     }
   });
-    
+  
+  // delivery man current score
+  exports.deliveryManCurrentScore = (req, res) => {
+    res.send('Information: Delivery Man Curren score');
+  };
   };
