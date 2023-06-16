@@ -5,6 +5,31 @@ export interface User {
   accessToken?: string
 }
 
+export interface Product {
+  id?: number
+  name?: string
+  description?: string
+  price?: number
+  image?: string
+  category?: string
+}
+
+export interface Combo {
+  id?: number
+  name?: string
+  description?: string
+  price?: number
+  image?: string
+  category?: string
+  products?: Product[]
+}
+
+export interface Category {
+  id?: number
+  name?: string
+  image?: string
+}
+
 export interface CompanyRequest {
   categoria_empresa: string
   correo: string

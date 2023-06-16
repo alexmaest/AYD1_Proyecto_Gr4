@@ -3,7 +3,6 @@
 import { useEffect, useState, useRef } from 'react'
 import baseUrl from '@/constants/baseUrl'
 import Navbar from '@/components/Navbar'
-import axios from 'axios'
 import { signIn } from 'next-auth/react'
 
 const zones = [
@@ -100,13 +99,18 @@ function Page () {
 
     // send form data
     try {
-      await axios.post(`${baseUrl}/companyRegister`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
+      const res = await fetch(`${baseUrl}/deliveryRegister`, {
+        method: 'POST',
+        body: formData
       })
-      alert('Solicitud enviada con éxito')
-      window.location.href = '/login'
+      if (res.status === 200) {
+        alert('Solicitud enviada con éxito')
+        await signIn()
+      } else {
+        const { error } = await res.json()
+        setError(error)
+        errorRef.current?.focus()
+      }
     } catch (error) {
       setError('Error al enviar la solicitud')
       errorRef.current?.focus()

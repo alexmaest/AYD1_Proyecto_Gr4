@@ -47,7 +47,7 @@ body {
 }
 
 .form_textarea {
-  @apply w-full flex rounded-lg h-[100px] mt-2 p-3 text-sm text-gray-500 outline-0;
+  @apply w-full flex rounded-lg h-[75px] mt-2 p-3 text-sm text-gray-500 outline-0;
 }
 
 .form_radio {
@@ -63,7 +63,15 @@ body {
 }
 
 .black_btn {
-  @apply rounded-full border-2 border-al-black bg-al-black py-1.5 px-5 text-al-yellow transition-all hover:bg-al-gray  hover:text-al-black text-center text-lg font-medium flex items-center justify-center;
+  @apply rounded-full border-2 border-al-black bg-al-black py-1.5 px-5 text-al-yellow transition-all duration-0 ease-in-out hover:duration-700 hover:scale-90 text-center text-lg font-medium flex items-center justify-center;
+}
+
+.outline_btn {
+  @apply rounded-full border-2 border-al-yellow py-1.5 px-5 text-al-yellow transition-all duration-0 ease-in-out hover:duration-700 hover:scale-90 p-2 text-center text-lg font-medium flex items-center justify-center;
+}
+
+.transparent_btn {
+  @apply rounded-full border-2 border-al-black py-1.5 px-5 text-al-black transition-all duration-0 ease-in-out hover:duration-700 hover:scale-90 text-center text-lg font-medium flex items-center justify-center;
 }
 
 .navbar_item {
