@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Category, Product } from '@/types/interfaces'
+import { Category, Product, ComboProduct } from '@/types/interfaces'
 import Image from 'next/image'
 import baseUrl from '@/constants/baseUrl'
 
@@ -10,6 +10,7 @@ interface IComboForm {
 }
 
 const imageMimeType = /image\/(png|jpg|jpeg)/i
+const categoryTypes = ['Producto', 'Combo']
 
 function ComboForm ({
   categories,
@@ -22,8 +23,9 @@ function ComboForm ({
   const [description, setDescription] = useState('')
   const [price, setPrice] = useState('')
   const [category, setCategory] = useState('')
-  const [selectedProduct, setSelectedProduct] = useState('')
-  const [selectedProducts, setSelectedProducts] = useState<string[]>([])
+  const [categoryType, setCategoryType] = useState('Producto')
+  const [selectedProduct, setSelectedProduct] = useState<Product>()
+  const [selectedProducts, setSelectedProducts] = useState<ComboProduct[]>([])
 
   // Handle image
   const changeHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -57,14 +59,38 @@ function ComboForm ({
   }, [file])
 
   const handleAddProduct = () => {
-    console.log(selectedProduct)
     if (selectedProduct != null) {
-      setSelectedProducts((prev) => [...prev, selectedProduct])
+      if (selectedProducts.find((p) => p.id === selectedProduct.id) != null) {
+        // if the product is already in the list, increase the quantity
+        setSelectedProducts((prev) => prev.map((p) => {
+          if (p.id === selectedProduct.id) {
+            return {
+              ...p,
+              quantity: p.quantity + 1
+            }
+          }
+          return p
+        }
+        ))
+        return
+      }
+      setSelectedProducts((prev) => [...prev, {
+        id: selectedProduct.id,
+        name: selectedProduct.name,
+        quantity: 1
+      }])
     }
   }
 
-  const handleRemoveProduct = (product: string) => {
-    setSelectedProducts((prev) => prev.filter((p) => p !== product))
+  const handleRemoveProduct = (product: ComboProduct) => {
+    setSelectedProducts((prev) => prev.filter((p) => p.id !== product.id))
+  }
+
+  const handleSetSelectedProduct = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const _product = products.find((p) => p.id === Number(e.target.value))
+    if (_product != null) {
+      setSelectedProduct(_product)
+    }
   }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -77,18 +103,22 @@ function ComboForm ({
     const formData = JSON.stringify({
       name,
       description,
-      price,
-      category,
+      price: Number(price),
+      category: Number(category),
       email,
-      products: selectedProducts
+      products: selectedProducts,
+      image: fileDataURL
     })
     try {
-      const res = await fetch(`${baseUrl}/addCombo`, {
+      const res = await fetch(`${baseUrl}/company/controlPanel/addCombo`, {
         method: 'POST',
-        body: formData
+        body: formData,
+        headers: {
+          'Content-Type': 'application/json'
+        }
       })
       if (res.status === 200) {
-        alert('Producto agregado con éxito')
+        alert('Combo agregado con éxito')
       } else {
         const { error } = await res.json()
         alert(error)
@@ -125,20 +155,67 @@ function ComboForm ({
             />
             )}
       </div>
-      <div className='w-full px-3'>
-        <label htmlFor='name' className='form_label'>
-          Nombre
-        </label>
-        <input
-          type='text'
-          name='name'
-          id='name'
-          className='form_input'
-          autoComplete='off'
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
-        />
+      <div className='flex flex-row w-full'>
+        <div className='w-1/2 px-3'>
+          <label htmlFor='name' className='form_label'>
+            Nombre
+          </label>
+          <input
+            type='text'
+            name='name'
+            id='name'
+            className='form_input'
+            autoComplete='off'
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+          />
+        </div>
+        <div className='w-1/2 px-3'>
+          <label htmlFor='price' className='form_label'>Precio</label>
+          <input
+            type='text'
+            name='price'
+            id='price'
+            className='form_input'
+            autoComplete='off'
+            value={price}
+            onChange={(e) => setPrice(e.target.value)}
+            required
+          />
+        </div>
+      </div>
+      <div className='flex flex-row w-full'>
+        <div className='w-1/2 px-3'>
+          <label htmlFor='price' className='form_label'>Tipo de Categoría</label>
+          <select
+            name='categoryType'
+            id='categoryType'
+            className='form_select'
+            required
+            value={categoryType}
+            onChange={(e) => setCategoryType(e.target.value)}
+          >
+            {categoryTypes.map((categoryType) => (
+              <option key={categoryType} value={categoryType}>{categoryType}</option>
+            ))}
+          </select>
+        </div>
+        <div className='w-1/2 px-3'>
+          <label htmlFor='category' className='form_label'>Categoría</label>
+          <select
+            name='category'
+            id='category'
+            className='form_select'
+            required
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+          >
+            {categories.map((category) => (
+              <option key={category.id} value={category.id}>{category.name}</option>
+            ))}
+          </select>
+        </div>
       </div>
       <div className='w-full px-3'>
         <label htmlFor='description' className='form_label'>Descripción</label>
@@ -154,53 +231,23 @@ function ComboForm ({
       </div>
       <div className='flex flex-row w-full'>
         <div className='w-1/2 px-3'>
-          <label htmlFor='price' className='form_label'>Precio</label>
-          <input
-            type='text'
-            name='price'
-            id='price'
-            className='form_input'
-            autoComplete='off'
-            value={price}
-            onChange={(e) => setPrice(e.target.value)}
-            required
-          />
-        </div>
-        <div className='w-1/2 px-3'>
-          <label htmlFor='category' className='form_label'>Categoría</label>
-          <select
-            name='category'
-            id='category'
-            className='form_select'
-            required
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-          >
-            {categories.map((category) => (
-              <option key={category.id} value={category.name}>{category.name}</option>
-            ))}
-          </select>
-        </div>
-      </div>
-      <div className='flex flex-row w-full'>
-        <div className='w-1/2 px-3'>
           <label htmlFor='product' className='form_label'>Producto</label>
           <select
             name='product'
             id='product'
             className='form_select'
-            value={selectedProduct}
-            onChange={(e) => setSelectedProduct(e.target.value)}
+            value={selectedProduct?.id}
+            onChange={(e) => handleSetSelectedProduct(e)}
             required
           >
             {products.map((product) => (
-              <option key={product.id} value={product.name}>{product.name}</option>
+              <option key={product.id} value={product.id}>{product.name}</option>
             ))}
           </select>
         </div>
         <div className='w-1/2 px-3 self-end'>
           <button
-            className='transparent_btn'
+            className='transparent_btn w-full'
             type='button'
             onClick={() => handleAddProduct()}
           >
@@ -216,7 +263,8 @@ function ComboForm ({
               className='inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2'
               key={index}
             >
-              {product}
+              {product.quantity} x&nbsp;
+              {product.name}
               &nbsp;
               <button
                 type='button'

@@ -14,6 +14,7 @@ function CategoryForm ({ email }: ICategoryProps) {
   const [fileDataURL, setFileDataURL] = useState(null)
   const [name, setName] = useState('')
   const [categoryType, setCategoryType] = useState('Producto')
+
   // Handle image
   const changeHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
     const _file = e.currentTarget.files?.item(0)
@@ -54,9 +55,12 @@ function CategoryForm ({ email }: ICategoryProps) {
       image: fileDataURL
     })
     try {
-      const res = await fetch(`${baseUrl}/addCategory`, {
+      const res = await fetch(`${baseUrl}/company/controlPanel/addCategory`, {
         method: 'POST',
-        body: formData
+        body: formData,
+        headers: {
+          'Content-Type': 'application/json'
+        }
       })
       if (res.status === 200) {
         alert('Producto agregado con éxito')

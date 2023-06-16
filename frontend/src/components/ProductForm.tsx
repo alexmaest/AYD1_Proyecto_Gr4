@@ -9,6 +9,7 @@ interface IProductForm {
 }
 
 const imageMimeType = /image\/(png|jpg|jpeg)/i
+const categoryTypes = ['Producto', 'Combo']
 
 function ProductForm ({
   categories,
@@ -20,6 +21,7 @@ function ProductForm ({
   const [description, setDescription] = useState('')
   const [price, setPrice] = useState('')
   const [category, setCategory] = useState('')
+  const [categoryType, setCategoryType] = useState('Producto')
 
   // Handle image
   const changeHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -61,15 +63,19 @@ function ProductForm ({
     const formData = JSON.stringify({
       name,
       description,
-      price,
-      category,
+      price: Number(price),
+      category: Number(category),
+      categoryType,
       email,
       image: fileDataURL
     })
     try {
-      const res = await fetch(`${baseUrl}/addProduct`, {
+      const res = await fetch(`${baseUrl}/company/controlPanel/addProduct`, {
         method: 'POST',
-        body: formData
+        body: formData,
+        headers: {
+          'Content-Type': 'application/json'
+        }
       })
       if (res.status === 200) {
         alert('Producto agregado con éxito')
@@ -109,34 +115,22 @@ function ProductForm ({
             />
             )}
       </div>
-      <div className='w-full px-3'>
-        <label htmlFor='name' className='form_label'>
-          Nombre
-        </label>
-        <input
-          type='text'
-          name='name'
-          id='name'
-          className='form_input'
-          autoComplete='off'
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
-        />
-      </div>
-      <div className='w-full px-3'>
-        <label htmlFor='description' className='form_label'>Descripción</label>
-        <textarea
-          name='description'
-          id='description'
-          className='form_textarea resize-none'
-          autoComplete='off'
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          required
-        />
-      </div>
       <div className='flex flex-row w-full'>
+        <div className='w-1/2 px-3'>
+          <label htmlFor='name' className='form_label'>
+            Nombre
+          </label>
+          <input
+            type='text'
+            name='name'
+            id='name'
+            className='form_input'
+            autoComplete='off'
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+          />
+        </div>
         <div className='w-1/2 px-3'>
           <label htmlFor='price' className='form_label'>Precio</label>
           <input
@@ -150,6 +144,23 @@ function ProductForm ({
             required
           />
         </div>
+      </div>
+      <div className='flex flex-row w-full'>
+        <div className='w-1/2 px-3'>
+          <label htmlFor='price' className='form_label'>Tipo de Categoría</label>
+          <select
+            name='categoryType'
+            id='categoryType'
+            className='form_select'
+            required
+            value={categoryType}
+            onChange={(e) => setCategoryType(e.target.value)}
+          >
+            {categoryTypes.map((categoryType) => (
+              <option key={categoryType} value={categoryType}>{categoryType}</option>
+            ))}
+          </select>
+        </div>
         <div className='w-1/2 px-3'>
           <label htmlFor='category' className='form_label'>Categoría</label>
           <select
@@ -161,10 +172,22 @@ function ProductForm ({
             onChange={(e) => setCategory(e.target.value)}
           >
             {categories.map((category) => (
-              <option key={category.id} value={category.name}>{category.name}</option>
+              <option key={category.id} value={category.id}>{category.name}</option>
             ))}
           </select>
         </div>
+      </div>
+      <div className='w-full px-3'>
+        <label htmlFor='description' className='form_label'>Descripción</label>
+        <textarea
+          name='description'
+          id='description'
+          className='form_textarea resize-none'
+          autoComplete='off'
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          required
+        />
       </div>
       <div className='w-full flex flex-row justify-between gap-4 px-3 mt-4'>
         <label
