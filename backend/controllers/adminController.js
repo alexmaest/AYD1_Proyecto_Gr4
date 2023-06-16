@@ -49,7 +49,7 @@ exports.companyRequests = (req, res) => {
 
 exports.deliveryRequests = (req, res) => {
   const query = `
-      SELECT
+        SELECT
         sr.solicitud_repartidor_id,
         sr.nombres,
         sr.apellidos,
@@ -57,21 +57,24 @@ exports.deliveryRequests = (req, res) => {
         sr.no_celular,
         cd.descripcion AS departamento,
         cm.descripcion AS municipio,
-        tlc.descripcion AS tipo_licencia,
+        CASE
+          WHEN sr.tipo_licencia_id IS NULL THEN 'No tiene'
+          ELSE tlc.descripcion
+        END AS tipo_licencia,
         sr.fecha_solicitud,
         CASE
           WHEN sr.estado_solicitud_id = 1 THEN 'Pendiente'
         END AS estado_solicitud,
         CASE
-          WHEN sr.tiene_vehiculo = 0 THEN 'no'
-          WHEN sr.tiene_vehiculo = 1 THEN 'si'
+          WHEN sr.tiene_vehiculo = 0 THEN 'No'
+          WHEN sr.tiene_vehiculo = 1 THEN 'Si'
         END AS tiene_vehiculo,
         sr.documento_url
       FROM tbl_solicitud_repartidor sr
       JOIN tbl_usuario u ON sr.usuario_id = u.usuario_id
       JOIN tbl_cat_municipio cm ON sr.municipio_id = cm.municipio_id
       JOIN tbl_cat_departamento cd ON cm.departamento_id = cd.departamento_id
-      JOIN tbl_cat_tipo_licencia_conducir tlc ON sr.tipo_licencia_id = tlc.tipo_licencia_conducir_id
+      LEFT JOIN tbl_cat_tipo_licencia_conducir tlc ON sr.tipo_licencia_id = tlc.tipo_licencia_conducir_id
       WHERE sr.estado_solicitud_id = 1;
     `;
 
@@ -275,60 +278,25 @@ exports.reports = (req, res) => {
     WHERE habilitado = 1;
   `;
 
-  const currentDate = new Date();
-  const currentDay = currentDate.getDate();
-  const currentMonth = currentDate.getMonth() + 1;
-  const currentYear = currentDate.getFullYear();
-  const countDayQuery = `
-    SELECT (
-      (SELECT COUNT(*) FROM tbl_solicitud_empresa WHERE DAY(fecha_solicitud) = ${currentDay})
-      + (SELECT COUNT(*) FROM tbl_solicitud_repartidor WHERE DAY(fecha_solicitud) = ${currentDay})
-      + (SELECT COUNT(*) FROM tbl_informacion_usuario WHERE DAY(fecha_registro) = ${currentDay})
-    ) AS contador;
-  `;
-
-  const countMonthQuery = `
-    SELECT (
-      (SELECT COUNT(*) FROM tbl_solicitud_empresa WHERE MONTH(fecha_solicitud) = ${currentMonth})
-      + (SELECT COUNT(*) FROM tbl_solicitud_repartidor WHERE MONTH(fecha_solicitud) = ${currentMonth})
-      + (SELECT COUNT(*) FROM tbl_informacion_usuario WHERE MONTH(fecha_registro) = ${currentMonth})
-    ) AS contador;
-  `;
-
-  const countYearQuery = `
-    SELECT (
-      (SELECT COUNT(*) FROM tbl_solicitud_empresa WHERE YEAR(fecha_solicitud) = ${currentYear})
-      + (SELECT COUNT(*) FROM tbl_solicitud_repartidor WHERE YEAR(fecha_solicitud) = ${currentYear})
-      + (SELECT COUNT(*) FROM tbl_informacion_usuario WHERE YEAR(fecha_registro) = ${currentYear})
-    ) AS contador;
+  const countDisabledQuery = `
+    SELECT COUNT(*) AS contador
+    FROM tbl_usuario
+    WHERE habilitado = 0;
   `;
 
   db.query(countEnabledQuery, (err, resultEnabled) => {
     if (err) throw err;
     const enabledCount = resultEnabled[0].contador;
 
-    db.query(countDayQuery, (err, resultDay) => {
+    db.query(countDisabledQuery, (err, resultDisabled) => {
       if (err) throw err;
-      const dayCount = resultDay[0].contador;
+      const disabledCount = resultDisabled[0].contador;
 
-      db.query(countMonthQuery, (err, resultMonth) => {
-        if (err) throw err;
-        const monthCount = resultMonth[0].contador;
-
-        db.query(countYearQuery, (err, resultYear) => {
-          if (err) throw err;
-          const yearCount = resultYear[0].contador;
-
-          const response = {
-            "allUsers" : enabledCount,
-            "byDay" : dayCount,
-            "byMonth" : monthCount,
-            "byYear" : yearCount
-          };
-
-          res.json(response);
-        });
-      });
+      const response = {
+        enabledUsers: enabledCount,
+        disabledUsers: disabledCount
+      };
+      res.json(response);
     });
   });
 };
