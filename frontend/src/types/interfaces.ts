@@ -6,28 +6,35 @@ export interface User {
 }
 
 export interface Product {
-  id?: number
-  name?: string
-  description?: string
-  price?: number
-  image?: string
-  category?: string
+  id: number
+  name: string
+  description: string
+  price: number
+  image: string
+  category: string
 }
 
 export interface Combo {
-  id?: number
-  name?: string
-  description?: string
-  price?: number
-  image?: string
-  category?: string
-  products?: Product[]
+  id: number
+  name: string
+  description: string
+  price: number
+  image: string
+  category: string
+  products: ComboProduct[]
 }
 
 export interface Category {
-  id?: number
-  name?: string
-  image?: string
+  id: number
+  name: string
+  image: string
+  type: string
+}
+
+export interface ComboProduct {
+  id: number
+  name: string
+  quantity: number
 }
 
 export interface CompanyRequest {
