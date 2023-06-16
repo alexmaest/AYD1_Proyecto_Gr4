@@ -43,3 +43,8 @@ export interface CompanyRequest {
   solicitud_empresa_id: number
   zona: string
 }
+
+export interface UserReport {
+  disabledUsers: number
+  enabledUsers: number
+}
