@@ -25,6 +25,12 @@ export default function DeliveryManDashboard () {
       description: 'Inhabilita tanto repartidores como empresas de la plataforma.',
       image: './maintance.webp',
       linkTo: '/admin/maintance'
+    },
+    {
+      title: 'Reportes',
+      description: 'Genera reportes de productos, empresas y más.',
+      image: '/reports.webp',
+      linkTo: '/admin/reports'
     }
   ]
 
