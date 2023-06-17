@@ -79,6 +79,14 @@ function ProductForm ({
       })
       if (res.status === 200) {
         alert('Producto agregado con éxito')
+        // reset form
+        setFile(null)
+        setFileDataURL(null)
+        setName('')
+        setDescription('')
+        setPrice('')
+        setCategory('')
+        setCategoryType('Producto')
       } else {
         const { error } = await res.json()
         alert(error)

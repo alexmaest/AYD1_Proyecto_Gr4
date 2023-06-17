@@ -119,6 +119,16 @@ function ComboForm ({
       })
       if (res.status === 200) {
         alert('Combo agregado con éxito')
+        // reset form
+        setFile(null)
+        setFileDataURL(null)
+        setName('')
+        setDescription('')
+        setPrice('')
+        setCategory('')
+        setCategoryType('Producto')
+        setSelectedProduct(undefined)
+        setSelectedProducts([])
       } else {
         const { error } = await res.json()
         alert(error)

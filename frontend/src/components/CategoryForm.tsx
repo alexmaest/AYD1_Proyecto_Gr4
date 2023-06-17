@@ -63,7 +63,12 @@ function CategoryForm ({ email }: ICategoryProps) {
         }
       })
       if (res.status === 200) {
-        alert('Producto agregado con éxito')
+        alert('Categoría agregada con éxito')
+        // reset form
+        setName('')
+        setCategoryType('Producto')
+        setFile(null)
+        setFileDataURL(null)
       } else {
         const { error } = await res.json()
         alert(error)
