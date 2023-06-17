@@ -12,6 +12,7 @@ const adminRoutes = require('./routes/adminRoutes');
 const deliveryManRoutes= require('./routes/deliveryManRoutes');
 const departmentRoutes = require('./routes/departmentRoutes');
 const companyRoutes= require('./routes/companyRoutes');
+const userRoutes= require('./routes/userRoutes');
 
 app.use(express.json());
 app.use(cors());
@@ -25,6 +26,7 @@ app.use('/admin', adminRoutes);
 app.use('/departments', departmentRoutes);
 app.use('/deliveryMan',deliveryManRoutes);
 app.use('/company',companyRoutes);
+app.use('/user',userRoutes);
 
 app.listen(port, () => {
   console.log(`Information: Server running on http://localhost:${port}`);
