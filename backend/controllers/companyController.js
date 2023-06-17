@@ -36,7 +36,7 @@ exports.categories = (req, res) => {
 };
 
 exports.products = (req, res) => {
-  const userEmail = req.body.userEmail;
+  const userEmail = req.params.userEmail;
 
   const query = `
       SELECT p.*
@@ -53,6 +53,96 @@ exports.products = (req, res) => {
       } else {
           res.json(results);
       }
+  });
+};
+
+exports.combos = (req, res) => {
+  const userEmail = req.params.userEmail;
+
+  const query = `
+    SELECT cp.combo_producto_id AS id, cp.nombre AS name, cp.descripcion AS description,
+      cp.precio AS price, cp.ilustracion_url AS image, cc.descripcion AS category,
+      pd.producto_id AS product_id, p.nombre AS product_name, pd.cantidad AS quantity
+    FROM tbl_combo_producto cp
+    INNER JOIN tbl_solicitud_empresa se ON cp.solicitud_empresa_id = se.solicitud_empresa_id
+    INNER JOIN tbl_usuario u ON se.usuario_id = u.usuario_id
+    INNER JOIN tbl_combo_producto_detalle pd ON cp.combo_producto_id = pd.combo_producto_id
+    INNER JOIN tbl_producto p ON pd.producto_id = p.producto_id
+    INNER JOIN tbl_cat_categoria_producto cc ON cp.categoria_producto_id = cc.categoria_producto_id
+    WHERE u.correo = ?;
+  `;
+
+  db.query(query, [userEmail], (error, results) => {
+    if (error) {
+      console.error('Error al obtener los combos:', error);
+      res.status(500).json({ error: 'Error interno del servidor' });
+    } else {
+      const combos = {};
+      results.forEach((row) => {
+        const {
+          id,
+          name,
+          description,
+          price,
+          image,
+          category,
+          product_id,
+          product_name,
+          quantity
+        } = row;
+        if (!combos[id]) {
+          combos[id] = {
+            id,
+            name,
+            description,
+            price,
+            image,
+            category,
+            products: []
+          };
+        }
+        combos[id].products.push({
+          id: product_id,
+          name: product_name,
+          quantity
+        });
+      });
+      res.json(Object.values(combos));
+    }
+  });
+};
+
+exports.productsCategories = (req, res) => {
+  const query = `
+    SELECT categoria_producto_id, descripcion, ilustracion_url
+    FROM tbl_cat_categoria_producto
+    WHERE es_combo = 0;
+  `;
+
+  db.query(query, (error, results) => {
+    if (error) {
+      console.error('Error al obtener las categorías de productos:', error);
+      res.status(500).json({ error: 'Error interno del servidor' });
+    } else {
+      res.json(results);
+    }
+  });
+};
+
+exports.combosCategories = (req, res) => {
+  const query = `
+    SELECT categoria_producto_id, descripcion, ilustracion_url
+    FROM tbl_cat_categoria_producto
+    WHERE es_combo = 1;
+  `;
+
+  db.query(query, (error, results) => {
+    if (error) {
+      console.error('Error al obtener las categorías de combos:', error);
+      res.status(500).json({ error: 'Error interno del servidor' });
+    } else {
+      res.json(results);
+    }
   });
 };
 
@@ -313,6 +403,102 @@ exports.addCombo = (req, res) => {
           });
         }
       });
+    }
+  });
+};
+
+exports.editProduct = (req, res) => {
+  const { id, name, description, price, category, image } = req.body;
+
+  const selectCategoryQuery = `
+    SELECT categoria_producto_id
+    FROM tbl_cat_categoria_producto
+    WHERE descripcion = ?;
+  `;
+
+  const updateProductQuery = `
+    UPDATE tbl_producto
+    SET nombre = ?, descripcion = ?, precio_unitario = ?, categoria_producto_id = ?, ilustracion_url = ?
+    WHERE producto_id = ?;
+  `;
+
+  db.query(selectCategoryQuery, [category], (error, categoryResult) => {
+    if (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Internal server error' });
+    } else {
+      if (categoryResult.length === 0) {
+        res.status(400).json({ error: 'Category not found' });
+      } else {
+        const categoryId = categoryResult[0].categoria_producto_id;
+
+        const buff = new Buffer.from(
+          image.replace(/^data:image\/\w+;base64,/, ''),
+          'base64'
+        );
+
+        const uploadParams = {
+          Bucket: AWS_BUCKET_NAME,
+          Key: `product_images/${Date.now()}_${name}`,
+          Body: buff,
+          ContentType: 'image'
+        };
+
+        s3.upload(uploadParams, (err, uploadData) => {
+          if (err) {
+            console.error(err);
+            res.status(500).json({ error: 'Internal server error' });
+          } else {
+            const imageUrl = uploadData.Location;
+
+            const values = [name, description, price, categoryId, imageUrl, id];
+            db.query(updateProductQuery, values, (error, result) => {
+              if (error) {
+                console.error(error);
+                res.status(500).json({ error: 'Internal server error' });
+              } else {
+                res.json({ message: 'Product updated successfully' });
+              }
+            });
+          }
+        });
+      }
+    }
+  });
+};
+
+exports.deleteProduct = (req, res) => {
+  const productId = req.params.id;
+
+  const checkAssociationQuery = `
+    SELECT COUNT(*) AS associationCount
+    FROM tbl_combo_producto_detalle
+    WHERE producto_id = ?;
+  `;
+
+  const deleteProductQuery = `
+    DELETE FROM tbl_producto
+    WHERE producto_id = ?;
+  `;
+
+  db.query(checkAssociationQuery, [productId], (error, result) => {
+    if (error) {
+      console.error('Error: Data asociations failure', error);
+      res.status(500).json({ error: 'Error: Intern server failure' });
+    } else {
+      const associationCount = result[0].associationCount;
+      if (associationCount > 0) {
+        res.status(400).json({ error: 'Cannot delete, combos already have this product' });
+      } else {
+        db.query(deleteProductQuery, [productId], (error, deleteResult) => {
+          if (error) {
+            console.error('Error: The product could not be deleted', error);
+            res.status(500).json({ error: 'Error: Intern server failure' });
+          } else {
+            res.json({ message: 'Product successfully removed' });
+          }
+        });
+      }
     }
   });
 };
