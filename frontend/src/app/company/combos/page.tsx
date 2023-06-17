@@ -7,19 +7,6 @@ import ComboCard from '@/components/ComboCard'
 import { Combo } from '@/types/interfaces'
 import baseUrl from '@/constants/baseUrl'
 
-const sampleCombo: Combo = {
-  id: 1,
-  name: 'Combo 1',
-  description: 'Descripción del combo 1',
-  price: 100,
-  image: '/pizza.webp',
-  category: 'Categoría 1',
-  products: [
-    { id: 2, name: 'Producto 2', quantity: 5 },
-    { id: 1, name: 'Producto 1', quantity: 2 }
-  ]
-}
-
 function Page () {
   const { data: session } = useSession()
 
@@ -30,14 +17,14 @@ function Page () {
   useEffect(() => {
     const getCombos = async () => {
       try {
-        const res = await fetch(`${baseUrl}/company/combos?email=${email}`)
+        const res = await fetch(`${baseUrl}/company/controlPanel/combos/${email}`)
         const data = await res.json()
         setCombos(data)
       } catch (error: any) {
         alert(error.message)
       }
     }
-    void getCombos()
+    if (email !== '') void getCombos()
   }, [email])
 
   // const handleDelete = async (id: number) => {
@@ -70,9 +57,9 @@ function Page () {
           </Link>
         </div>
         <div className='grid gap-4 2xl:grid-cols-4 xl:grid-cols-3 md:grid-cols-3 mt-8'>
-          <ComboCard
-            combo={sampleCombo}
-          />
+          {combos.map((combo) => (
+            <ComboCard combo={combo} key={combo.id} />
+          ))}
         </div>
       </section>
     </div>

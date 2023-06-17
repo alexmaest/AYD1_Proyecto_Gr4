@@ -22,7 +22,7 @@ function Page () {
   useEffect(() => {
     const getProducts = async () => {
       try {
-        const res = await fetch(`${baseUrl}/company/controlPanel/products/email?=${email}`)
+        const res = await fetch(`${baseUrl}/company/controlPanel/products/${email}`)
         const data = await res.json()
         setProducts(data)
       } catch (error: any) {
@@ -37,17 +37,6 @@ function Page () {
       try {
         const res = await fetch(`${baseUrl}/company/controlPanel/categories`)
         const data = await res.json()
-        // rename data to math with the interface
-        for (let i = 0; i < data.length; i++) {
-          data[i].id = data[i].categoria_producto_id
-          delete data[i].categoria_producto_id
-          data[i].name = data[i].descripcion
-          delete data[i].descripcion
-          data[i].image = data[i].ilustracion_url
-          delete data[i].ilustracion_url
-          data[i].type = data[i].es_combo === 1 ? 'Combo' : 'Producto'
-          delete data[i].es_combo
-        }
         setCategories(data)
       } catch (error: any) {
         alert(error.message)

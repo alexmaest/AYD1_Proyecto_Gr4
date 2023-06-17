@@ -166,6 +166,7 @@ function ComboForm ({
             <Image
               src={fileDataURL}
               alt='product_image'
+              loader={({ src }) => src}
               width={200}
               height={200}
               className='mx-auto object-contain w-[200px] h-[200px]'

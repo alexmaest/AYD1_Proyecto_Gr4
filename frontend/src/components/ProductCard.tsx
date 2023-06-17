@@ -12,14 +12,15 @@ function ProductCard ({ product, handleDelete, handleEdit }: IProps) {
     <div className='flex flex-col rounded overflow-hidden bg-slate-400'>
       <div className='w-full h-[200px] flex items-center justify-center'>
         <Image
-          className='object-contain w-[200px] h-[200px] self'
-          src={product.image === undefined ? '/sin-fotos.png' : product.image}
-          alt={product.name === undefined ? 'Sin nombre' : product.name}
+          className='object-contain w-[200px] h-[200px] pt-2'
+          loader={({ src }) => src}
+          src={product.image}
+          alt={product.name}
           width={200}
           height={200}
         />
       </div>
-      <div className='px-6 py-4'>
+      <div className='px-6 py-4 grow'>
         <span className='flex flex-row lg:flex-row md:flex-col'>
           <h2 className='grow font-bold text-xl mb-2'>{product.name}</h2>
           <p className='text-2xl font-bold text-al-black'>Q.{product.price}</p>
