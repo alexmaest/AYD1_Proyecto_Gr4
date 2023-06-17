@@ -74,6 +74,10 @@ body {
   @apply rounded-full border-2 border-al-black py-1.5 px-5 text-al-black transition-all duration-0 ease-in-out hover:duration-700 hover:scale-90 text-center text-lg font-medium flex items-center justify-center;
 }
 
+.yellow_btn {
+  @apply rounded-full border-2 border-al-yellow bg-al-yellow py-1.5 px-5 text-al-black transition-all duration-0 ease-in-out hover:duration-700 hover:scale-90 text-center text-lg font-medium flex items-center justify-center;
+}
+
 .navbar_item {
   @apply text-al-white font-semibold text-center border-2 border-transparent rounded-full transition duration-0 ease-in-out p-2  hover:border-al-yellow  hover:duration-700 hover:scale-110;
 }

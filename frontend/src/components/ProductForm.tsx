@@ -9,6 +9,7 @@ interface IProductForm {
 }
 
 const imageMimeType = /image\/(png|jpg|jpeg)/i
+const categoryTypes = ['Producto', 'Combo']
 
 function ProductForm ({
   categories,
@@ -20,6 +21,8 @@ function ProductForm ({
   const [description, setDescription] = useState('')
   const [price, setPrice] = useState('')
   const [category, setCategory] = useState('')
+  const [subCategories, setSubCategories] = useState<Category[]>([])
+  const [categoryType, setCategoryType] = useState('Producto')
 
   // Handle image
   const changeHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -52,6 +55,22 @@ function ProductForm ({
     }
   }, [file])
 
+  useEffect(() => {
+    const _subCategories = categories.filter((category) => category.type === 'Producto')
+    setSubCategories(_subCategories)
+  }, [categories])
+
+  const handleCategoryTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setCategoryType(e.target.value)
+    if (e.target.value === 'Producto') {
+      const _subCategories = categories.filter((category) => category.type === 'Producto')
+      setSubCategories(_subCategories)
+    } else {
+      const _subCategories = categories.filter((category) => category.type === 'Combo')
+      setSubCategories(_subCategories)
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     if (Number(price) <= 0) {
@@ -61,18 +80,31 @@ function ProductForm ({
     const formData = JSON.stringify({
       name,
       description,
-      price,
-      category,
+      price: Number(price),
+      category: Number(category),
+      categoryType: (categoryType === 'Combo') ? 1 : 0,
       email,
       image: fileDataURL
     })
+    console.log(formData)
     try {
-      const res = await fetch(`${baseUrl}/addProduct`, {
+      const res = await fetch(`${baseUrl}/company/controlPanel/addProduct`, {
         method: 'POST',
-        body: formData
+        body: formData,
+        headers: {
+          'Content-Type': 'application/json'
+        }
       })
       if (res.status === 200) {
         alert('Producto agregado con éxito')
+        // reset form
+        setFile(null)
+        setFileDataURL(null)
+        setName('')
+        setDescription('')
+        setPrice('')
+        setCategory('')
+        setCategoryType('Producto')
       } else {
         const { error } = await res.json()
         alert(error)
@@ -109,34 +141,22 @@ function ProductForm ({
             />
             )}
       </div>
-      <div className='w-full px-3'>
-        <label htmlFor='name' className='form_label'>
-          Nombre
-        </label>
-        <input
-          type='text'
-          name='name'
-          id='name'
-          className='form_input'
-          autoComplete='off'
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
-        />
-      </div>
-      <div className='w-full px-3'>
-        <label htmlFor='description' className='form_label'>Descripción</label>
-        <textarea
-          name='description'
-          id='description'
-          className='form_textarea resize-none'
-          autoComplete='off'
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          required
-        />
-      </div>
       <div className='flex flex-row w-full'>
+        <div className='w-1/2 px-3'>
+          <label htmlFor='name' className='form_label'>
+            Nombre
+          </label>
+          <input
+            type='text'
+            name='name'
+            id='name'
+            className='form_input'
+            autoComplete='off'
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+          />
+        </div>
         <div className='w-1/2 px-3'>
           <label htmlFor='price' className='form_label'>Precio</label>
           <input
@@ -150,6 +170,23 @@ function ProductForm ({
             required
           />
         </div>
+      </div>
+      <div className='flex flex-row w-full'>
+        <div className='w-1/2 px-3'>
+          <label htmlFor='price' className='form_label'>Tipo de Categoría</label>
+          <select
+            name='categoryType'
+            id='categoryType'
+            className='form_select'
+            required
+            value={categoryType}
+            onChange={(e) => handleCategoryTypeChange(e)}
+          >
+            {categoryTypes.map((categoryType) => (
+              <option key={categoryType} value={categoryType}>{categoryType}</option>
+            ))}
+          </select>
+        </div>
         <div className='w-1/2 px-3'>
           <label htmlFor='category' className='form_label'>Categoría</label>
           <select
@@ -160,11 +197,23 @@ function ProductForm ({
             value={category}
             onChange={(e) => setCategory(e.target.value)}
           >
-            {categories.map((category) => (
-              <option key={category.id} value={category.name}>{category.name}</option>
+            {subCategories.map((category) => (
+              <option key={category.id} value={category.id}>{category.name}</option>
             ))}
           </select>
         </div>
+      </div>
+      <div className='w-full px-3'>
+        <label htmlFor='description' className='form_label'>Descripción</label>
+        <textarea
+          name='description'
+          id='description'
+          className='form_textarea resize-none'
+          autoComplete='off'
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          required
+        />
       </div>
       <div className='w-full flex flex-row justify-between gap-4 px-3 mt-4'>
         <label
