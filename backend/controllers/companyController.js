@@ -26,12 +26,26 @@ exports.main = (req, res) => {
 
 exports.categories = (req, res) => {
   const query = `
-    SELECT * FROM tbl_cat_categoria_producto;
+    SELECT categoria_producto_id AS id, descripcion AS name, ilustracion_url AS image, es_combo AS type
+    FROM tbl_cat_categoria_producto;
   `;
 
-  db.query(query, (err, result) => {
-    if (err) throw err;
-    res.json(result);
+  db.query(query, (error, result) => {
+    if (error) {
+      console.error('Error: Could not get the categories', error);
+      res.status(500).json({ error: 'Error: Internal server failure' });
+    } else {
+      const formattedResult = result.map((category) => {
+        return {
+          id: category.id,
+          name: category.name,
+          image: category.image,
+          type: category.type === 0 ? 'Producto' : 'Combo'
+        };
+      });
+
+      res.json(formattedResult);
+    }
   });
 };
 
@@ -39,20 +53,29 @@ exports.products = (req, res) => {
   const userEmail = req.params.userEmail;
 
   const query = `
-      SELECT p.*
-      FROM tbl_producto p
-      INNER JOIN tbl_solicitud_empresa se ON p.solicitud_empresa_id = se.solicitud_empresa_id
-      INNER JOIN tbl_usuario u ON se.usuario_id = u.usuario_id
-      WHERE u.correo = ?;
+    SELECT p.producto_id AS id, p.nombre AS name, p.descripcion AS description, p.precio_unitario AS price, p.ilustracion_url AS image, cp.descripcion AS category
+    FROM tbl_producto p
+    INNER JOIN tbl_solicitud_empresa se ON p.solicitud_empresa_id = se.solicitud_empresa_id
+    INNER JOIN tbl_usuario u ON se.usuario_id = u.usuario_id
+    INNER JOIN tbl_cat_categoria_producto cp ON p.categoria_producto_id = cp.categoria_producto_id
+    WHERE u.correo = ?;
   `;
 
   db.query(query, [userEmail], (error, results) => {
-      if (error) {
-          console.error('Error al obtener los productos:', error);
-          res.status(500).json({ error: 'Error interno del servidor' });
-      } else {
-          res.json(results);
-      }
+    if (error) {
+      console.error('Error: Could not get the products', error);
+      res.status(500).json({ error: 'Error: Internal server failure' });
+    } else {
+      const formattedResults = results.map((product) => ({
+        id: product.id,
+        name: product.name,
+        description: product.description,
+        price: product.price,
+        image: product.image,
+        category: product.category
+      }));
+      res.json(formattedResults);
+    }
   });
 };
 
@@ -74,8 +97,8 @@ exports.combos = (req, res) => {
 
   db.query(query, [userEmail], (error, results) => {
     if (error) {
-      console.error('Error al obtener los combos:', error);
-      res.status(500).json({ error: 'Error interno del servidor' });
+      console.error('Error: Could not get the combos', error);
+      res.status(500).json({ error: 'Error: Internal server failure' });
     } else {
       const combos = {};
       results.forEach((row) => {
@@ -121,8 +144,8 @@ exports.productsCategories = (req, res) => {
 
   db.query(query, (error, results) => {
     if (error) {
-      console.error('Error al obtener las categorías de productos:', error);
-      res.status(500).json({ error: 'Error interno del servidor' });
+      console.error('Error: Could not get the product categories', error);
+      res.status(500).json({ error: 'Error: Internal server failure' });
     } else {
       res.json(results);
     }
@@ -138,8 +161,8 @@ exports.combosCategories = (req, res) => {
 
   db.query(query, (error, results) => {
     if (error) {
-      console.error('Error al obtener las categorías de combos:', error);
-      res.status(500).json({ error: 'Error interno del servidor' });
+      console.error('Error: Could not get the combo categories', error);
+      res.status(500).json({ error: 'Error: Internal server failure' });
     } else {
       res.json(results);
     }
@@ -213,7 +236,7 @@ exports.addProduct = (req, res) => {
   const selectCategoryQuery = `
     SELECT categoria_producto_id
     FROM tbl_cat_categoria_producto
-    WHERE descripcion = ?;
+    WHERE categoria_producto_id = ?;
   `;
 
   const selectSolicitudEmpresaQuery = `
@@ -248,7 +271,7 @@ exports.addProduct = (req, res) => {
             res.status(500).json({ error: 'Internal server error' });
           } else {
             if (solicitudEmpresaResult.length === 0) {
-              res.status(400).json({ error: 'Solicitud Empresa not found' });
+              res.status(400).json({ error: 'Company request not found' });
             } else {
               const solicitudEmpresaId = solicitudEmpresaResult[0].solicitud_empresa_id;
 
@@ -293,7 +316,6 @@ exports.addProduct = (req, res) => {
 exports.addCombo = (req, res) => {
   const { name, description, price, category, email, products, image } = req.body;
 
-  // Obtener el ID de la categoría a partir del valor numérico
   const getCategoryIDQuery = `
     SELECT categoria_producto_id
     FROM tbl_cat_categoria_producto
@@ -302,18 +324,16 @@ exports.addCombo = (req, res) => {
 
   db.query(getCategoryIDQuery, [category], (error, categoryResults) => {
     if (error) {
-      console.error('Error al obtener la categoría:', error);
-      res.status(500).json({ error: 'Internal server error' });
+      console.error('Error: Could not get the category', error);
+      res.status(500).json({ error: 'Error: Internal server failure' });
     } else {
       if (categoryResults.length === 0) {
-        console.error('Categoría no encontrada');
-        res.status(400).json({ error: 'Categoría no encontrada' });
+        console.error('Category not founded');
+        res.status(400).json({ error: 'Category not founded' });
         return;
       }
 
       const categoryID = categoryResults[0].categoria_producto_id;
-
-      // Obtener el ID de solicitud_empresa a partir del correo electrónico
       const getSolicitudEmpresaIDQuery = `
         SELECT solicitud_empresa_id
         FROM tbl_solicitud_empresa
@@ -326,37 +346,31 @@ exports.addCombo = (req, res) => {
 
       db.query(getSolicitudEmpresaIDQuery, [email], (error, solicitudEmpresaResults) => {
         if (error) {
-          console.error('Error al obtener la solicitud de empresa:', error);
+          console.error('Company request not founded', error);
           res.status(500).json({ error: 'Internal server error' });
         } else {
           if (solicitudEmpresaResults.length === 0) {
-            console.error('Solicitud de empresa no encontrada');
-            res.status(400).json({ error: 'Solicitud de empresa no encontrada' });
+            console.error('Company request not founded');
+            res.status(400).json({ error: 'Company request not founded' });
             return;
           }
 
           const solicitudEmpresaID = solicitudEmpresaResults[0].solicitud_empresa_id;
-
-          // Convertir la imagen a Buffer desde base64
           const buff = Buffer.from(image.replace(/^data:image\/\w+;base64,/, ''), 'base64');
-
-          // Configuración del objeto de carga para AWS S3
           const uploadParams = {
             Bucket: AWS_BUCKET_NAME,
-            Key: `combo_images/${Date.now()}_${name}`, // Personaliza la clave según tus requisitos
+            Key: `combo_images/${Date.now()}_${name}`,
             Body: buff,
-            ContentType: 'image/png', // Cambia el tipo de contenido si es necesario
+            ContentType: 'image/png',
           };
 
-          // Subir la imagen al bucket de AWS S3
           s3.upload(uploadParams, (err, uploadData) => {
             if (err) {
-              console.error('Error al subir la imagen al bucket de AWS S3:', err);
+              console.error('Image cannot be uploaded to AWS S3', err);
               res.status(500).json({ error: 'Internal server error' });
             } else {
               const imageUrl = uploadData.Location;
 
-              // Insertar una nueva fila en tbl_combo_producto
               const insertComboQuery = `
                 INSERT INTO tbl_combo_producto (nombre, descripcion, precio, fecha_creacion, categoria_producto_id, ilustracion_url, solicitud_empresa_id)
                 VALUES (?, ?, ?, NOW(), ?, ?, ?);
@@ -367,12 +381,10 @@ exports.addCombo = (req, res) => {
                 [name, description, price, categoryID, imageUrl, solicitudEmpresaID],
                 (error, insertResults) => {
                   if (error) {
-                    console.error('Error al insertar el combo:', error);
+                    console.error('Combo cannot be inserted', error);
                     res.status(500).json({ error: 'Internal server error' });
                   } else {
                     const comboID = insertResults.insertId;
-
-                    // Insertar las filas en tbl_combo_producto_detalle
                     const insertComboDetailsQuery = `
                       INSERT INTO tbl_combo_producto_detalle (producto_id, cantidad, combo_producto_id)
                       VALUES ?;
@@ -389,7 +401,7 @@ exports.addCombo = (req, res) => {
                       [comboDetailsValues],
                       (error, insertDetailsResults) => {
                         if (error) {
-                          console.error('Error al insertar los detalles del combo:', error);
+                          console.error('Combo details cannot be inserted', error);
                           res.status(500).json({ error: 'Internal server error' });
                         } else {
                           res.json({ success: true });
@@ -413,7 +425,7 @@ exports.editProduct = (req, res) => {
   const selectCategoryQuery = `
     SELECT categoria_producto_id
     FROM tbl_cat_categoria_producto
-    WHERE descripcion = ?;
+    WHERE categoria_producto_id = ?;
   `;
 
   const updateProductQuery = `
