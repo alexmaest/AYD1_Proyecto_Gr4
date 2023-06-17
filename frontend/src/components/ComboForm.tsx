@@ -26,7 +26,23 @@ function ComboForm ({
   const [categoryType, setCategoryType] = useState('Producto')
   const [selectedProduct, setSelectedProduct] = useState<Product>()
   const [selectedProducts, setSelectedProducts] = useState<ComboProduct[]>([])
+  const [subCategories, setSubCategories] = useState<Category[]>([])
 
+  useEffect(() => {
+    const _subCategories = categories.filter((category) => category.type === 'Producto')
+    setSubCategories(_subCategories)
+  }, [categories])
+
+  const handleCategoryTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setCategoryType(e.target.value)
+    if (e.target.value === 'Producto') {
+      const _subCategories = categories.filter((category) => category.type === 'Producto')
+      setSubCategories(_subCategories)
+    } else {
+      const _subCategories = categories.filter((category) => category.type === 'Combo')
+      setSubCategories(_subCategories)
+    }
+  }
   // Handle image
   const changeHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
     const _file = e.currentTarget.files?.item(0)
@@ -204,7 +220,7 @@ function ComboForm ({
             className='form_select'
             required
             value={categoryType}
-            onChange={(e) => setCategoryType(e.target.value)}
+            onChange={(e) => handleCategoryTypeChange(e)}
           >
             {categoryTypes.map((categoryType) => (
               <option key={categoryType} value={categoryType}>{categoryType}</option>
@@ -221,7 +237,7 @@ function ComboForm ({
             value={category}
             onChange={(e) => setCategory(e.target.value)}
           >
-            {categories.map((category) => (
+            {subCategories.map((category) => (
               <option key={category.id} value={category.id}>{category.name}</option>
             ))}
           </select>

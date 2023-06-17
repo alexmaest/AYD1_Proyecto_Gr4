@@ -11,8 +11,9 @@ function CategoryCard ({ category }: IProps) {
       <div className='w-full h-[200px] flex items-center justify-center'>
         <Image
           className='object-contain w-[200px] h-[200px] self'
-          src={category.image === undefined ? '/sin-fotos.png' : category.image}
-          alt={category.name === undefined ? 'Sin nombre' : category.name}
+          loader={({ src }) => src}
+          src={category.image}
+          alt={category.name}
           width={200}
           height={200}
         />
