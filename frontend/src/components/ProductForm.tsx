@@ -20,9 +20,9 @@ function ProductForm ({
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [price, setPrice] = useState('')
-  const [category, setCategory] = useState('')
-  const [subCategories, setSubCategories] = useState<Category[]>([])
   const [categoryType, setCategoryType] = useState('Producto')
+  const [category, setCategory] = useState<Category | undefined>(categories[0])
+  const [subCategories, setSubCategories] = useState<Category[]>([])
 
   // Handle image
   const changeHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -55,9 +55,15 @@ function ProductForm ({
     }
   }, [file])
 
+  const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const _category = subCategories.find((c) => c.name === e.target.value)
+    setCategory(_category)
+  }
+
   useEffect(() => {
     const _subCategories = categories.filter((category) => category.type === 'Producto')
     setSubCategories(_subCategories)
+    setCategory(_subCategories[0])
   }, [categories])
 
   const handleCategoryTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -65,9 +71,11 @@ function ProductForm ({
     if (e.target.value === 'Producto') {
       const _subCategories = categories.filter((category) => category.type === 'Producto')
       setSubCategories(_subCategories)
+      setCategory(_subCategories[0])
     } else {
       const _subCategories = categories.filter((category) => category.type === 'Combo')
       setSubCategories(_subCategories)
+      setCategory(_subCategories[0])
     }
   }
 
@@ -103,7 +111,7 @@ function ProductForm ({
         setName('')
         setDescription('')
         setPrice('')
-        setCategory('')
+        setCategory(subCategories[0])
         setCategoryType('Producto')
       } else {
         const { error } = await res.json()
@@ -194,8 +202,8 @@ function ProductForm ({
             id='category'
             className='form_select'
             required
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
+            value={category?.name}
+            onChange={(e) => handleCategoryChange(e)}
           >
             {subCategories.map((category) => (
               <option key={category.id} value={category.id}>{category.name}</option>

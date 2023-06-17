@@ -29,7 +29,7 @@ function Page () {
         alert(error.message)
       }
     }
-    void getProducts()
+    if (email !== '') void getProducts()
   }, [email])
 
   useEffect(() => {

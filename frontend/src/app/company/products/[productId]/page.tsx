@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { Category, Product } from '@/types/interfaces'
+import { Category } from '@/types/interfaces'
 import baseUrl from '@/constants/baseUrl'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -11,41 +11,73 @@ interface Params {
   }
 }
 
-const sampleProduct: Product = {
-  id: 1,
-  name: 'Producto 1',
-  description: 'Descripción del producto 1',
-  price: 100,
-  image: '/pizza.webp',
-  category: 'Categoría 1'
-}
-
-const categories: Category[] = [
-  {
-    id: 1,
-    name: 'Categoría 1',
-    type: 'Producto',
-    image: '/pizza.webp'
-  },
-  {
-    id: 2,
-    name: 'Categoría 2',
-    type: 'Producto',
-    image: '/pizza.webp'
-  }
-]
-
 const imageMimeType = /image\/(png|jpg|jpeg)/i
 const categoryTypes = ['Producto', 'Combo']
 
 function Page ({ params: { productId } }: Params) {
+  const [categories, setCategories] = useState<Category[]>([])
+  const [subCategories, setSubCategories] = useState<Category[]>([])
   const [file, setFile] = useState<File | null>(null)
-  const [fileDataURL, setFileDataURL] = useState(sampleProduct.image)
-  const [name, setName] = useState(sampleProduct.name)
-  const [description, setDescription] = useState(sampleProduct.description)
-  const [price, setPrice] = useState(sampleProduct.price.toString())
-  const [category, setCategory] = useState(sampleProduct.category)
+  const [fileDataURL, setFileDataURL] = useState('')
+  const [name, setName] = useState('')
+  const [description, setDescription] = useState('')
+  const [price, setPrice] = useState('')
+  const [category, setCategory] = useState<Category>()
   const [categoryType, setCategoryType] = useState('Producto')
+
+  useEffect(() => {
+    const getCategories = async () => {
+      try {
+        const res = await fetch(`${baseUrl}/company/controlPanel/categories`)
+        const data = await res.json()
+        setCategories(data)
+      } catch (error: any) {
+        alert(error.message)
+      }
+    }
+    void getCategories()
+  }, [])
+
+  useEffect(() => {
+    const getProduct = async () => {
+      try {
+        const res = await fetch(`${baseUrl}/company/controlPanel/singleProduct/${productId}`)
+        const data = await res.json()
+        const { name, description, price, category, categoryType, image } = data
+        setName(name)
+        setDescription(description)
+        setPrice(price)
+        setCategory(category)
+        setCategoryType(categoryType)
+        setFileDataURL(image)
+      } catch (error: any) {
+        alert(error.message)
+      }
+    }
+    void getProduct()
+  }, [productId])
+
+  useEffect(() => {
+    const _subCategories = categories.filter((category) => category.type === 'Producto')
+    setSubCategories(_subCategories)
+    setCategory(_subCategories[0])
+  }, [categories])
+
+  const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const _category = subCategories.find((category) => category.name === e.target.value)
+    setCategory(_category)
+  }
+
+  const handleCategoryTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setCategoryType(e.target.value)
+    if (e.target.value === 'Producto') {
+      const _subCategories = categories.filter((category) => category.type === 'Producto')
+      setSubCategories(_subCategories)
+    } else {
+      const _subCategories = categories.filter((category) => category.type === 'Combo')
+      setSubCategories(_subCategories)
+    }
+  }
 
   // Handle image
   const changeHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -132,10 +164,11 @@ function Page ({ params: { productId } }: Params) {
             ? (
               <Image
                 src={fileDataURL}
+                loader={({ src }) => src}
                 alt='product_image'
                 width={200}
                 height={200}
-                className='mx-auto object-contain w-[200px] h-[200px]'
+                className='mx-auto object-contain w-[200px] h-[200px] p-2'
               />
               )
             : (
@@ -187,7 +220,7 @@ function Page ({ params: { productId } }: Params) {
               className='form_select'
               required
               value={categoryType}
-              onChange={(e) => setCategoryType(e.target.value)}
+              onChange={(e) => handleCategoryTypeChange(e)}
             >
               {categoryTypes.map((categoryType) => (
                 <option key={categoryType} value={categoryType}>{categoryType}</option>
@@ -201,11 +234,11 @@ function Page ({ params: { productId } }: Params) {
               id='category'
               className='form_select'
               required
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
+              value={category?.name}
+              onChange={(e) => handleCategoryChange(e)}
             >
-              {categories.map((category) => (
-                <option key={category.id} value={category.id}>{category.name}</option>
+              {subCategories.map((_category) => (
+                <option key={_category.id} value={_category.id}>{_category.name}</option>
               ))}
             </select>
           </div>
