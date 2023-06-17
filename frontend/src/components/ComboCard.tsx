@@ -10,9 +10,10 @@ function ComboCard ({ combo }: ComboCardProps) {
     <div className='flex flex-col rounded overflow-hidden bg-slate-400'>
       <div className='w-full h-[200px] flex items-center justify-center'>
         <Image
-          className='object-contain w-[200px] h-[200px] self'
-          src={combo.image === undefined ? '/sin-fotos.png' : combo.image}
-          alt={combo.name === undefined ? 'Sin nombre' : combo.name}
+          className='object-contain w-[200px] h-[200px] pt-2'
+          loader={({ src }) => src}
+          src={combo.image}
+          alt={combo.name}
           width={200}
           height={200}
         />

@@ -10,7 +10,7 @@ function CategoryCard ({ category }: IProps) {
     <div className='flex flex-col rounded overflow-hidden bg-slate-400'>
       <div className='w-full h-[200px] flex items-center justify-center'>
         <Image
-          className='object-contain w-[200px] h-[200px] self'
+          className='object-contain w-[200px] h-[200px] p-2'
           loader={({ src }) => src}
           src={category.image}
           alt={category.name}

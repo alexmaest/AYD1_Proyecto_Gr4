@@ -18,23 +18,24 @@ function Page () {
   useEffect(() => {
     const getProducts = async () => {
       try {
-        const res = await fetch(`${baseUrl}/company/controlPanel/products/email?=${email}`)
+        const res = await fetch(`${baseUrl}/company/controlPanel/products/${email}`)
         const data = await res.json()
         setProducts(data)
       } catch (error: any) {
         alert(error.message)
       }
     }
-    void getProducts()
+    if (email !== '') void getProducts()
   }, [email])
 
   const handleDelete = async (id: number) => {
     try {
-      const res = await fetch(`${baseUrl}/company/products/${id}`, {
+      const res = await fetch(`${baseUrl}/company/controlPanel/products/${id}`, {
         method: 'DELETE'
       })
       const data = await res.json()
       alert(data.message)
+      setProducts(products.filter(product => product.id !== id))
     } catch (error: any) {
       alert(error.message)
     }
