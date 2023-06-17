@@ -135,6 +135,40 @@ exports.combos = (req, res) => {
   });
 };
 
+exports.singleProduct = (req, res) => {
+  const productId = req.params.id;
+  const query = `
+    SELECT p.producto_id AS id, p.nombre AS name, p.descripcion AS description, p.precio_unitario AS price, p.ilustracion_url AS image, cp.descripcion AS category
+    FROM tbl_producto p
+    INNER JOIN tbl_cat_categoria_producto cp ON p.categoria_producto_id = cp.categoria_producto_id
+    WHERE p.producto_id = ?;
+  `;
+
+  db.query(query, [productId], (error, results) => {
+    if (error) {
+      console.error('Error: Could not get the product', error);
+      res.status(500).json({ error: 'Error: Internal server failure' });
+    } else {
+      if (results.length === 0) {
+        res.status(404).json({ error: 'Product not found' });
+      } else {
+        const product = results[0];
+
+        const formattedResult = {
+          id: product.id,
+          name: product.name,
+          description: product.description,
+          price: product.price,
+          image: product.image,
+          category: product.category
+        };
+
+        res.json(formattedResult);
+      }
+    }
+  });
+};
+
 exports.productsCategories = (req, res) => {
   const query = `
     SELECT categoria_producto_id, descripcion, ilustracion_url
