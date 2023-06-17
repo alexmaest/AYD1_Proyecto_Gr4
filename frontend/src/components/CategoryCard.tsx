@@ -3,11 +3,9 @@ import { Category } from '@/types/interfaces'
 
 interface IProps {
   category: Category
-  handleDelete: () => Promise<void>
-  handleEdit: () => void
 }
 
-function CategoryCard ({ category, handleDelete, handleEdit }: IProps) {
+function CategoryCard ({ category }: IProps) {
   return (
     <div className='flex flex-col rounded overflow-hidden bg-slate-400'>
       <div className='w-full h-[200px] flex items-center justify-center'>
@@ -25,12 +23,12 @@ function CategoryCard ({ category, handleDelete, handleEdit }: IProps) {
           <p className='text-2xl font-bold text-al-black'>{category.type}</p>
         </span>
       </div>
-      <div
+      {/* <div
         className='flex lg:flex-row md:flex-col 2xl:justify-end lg:justify-between justify-end gap-2 m-4'
       >
         <button className='yellow_btn' onClick={handleDelete}>Eliminar</button>
         <button className='black_btn' onClick={handleEdit}>Editar</button>
-      </div>
+      </div> */}
     </div>
   )
 }

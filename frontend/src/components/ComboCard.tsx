@@ -3,11 +3,9 @@ import { Combo } from '@/types/interfaces'
 
 interface ComboCardProps {
   combo: Combo
-  handleDelete: () => Promise<void>
-  handleEdit: () => void
 }
 
-function ComboCard ({ combo, handleDelete, handleEdit }: ComboCardProps) {
+function ComboCard ({ combo }: ComboCardProps) {
   return (
     <div className='flex flex-col rounded overflow-hidden bg-slate-400'>
       <div className='w-full h-[200px] flex items-center justify-center'>
@@ -46,12 +44,12 @@ function ComboCard ({ combo, handleDelete, handleEdit }: ComboCardProps) {
           </span>
         ))}
       </div>
-      <div
+      {/* <div
         className='flex lg:flex-row md:flex-col 2xl:justify-end lg:justify-between justify-end gap-2 m-4'
       >
         <button className='yellow_btn' onClick={handleDelete}>Eliminar</button>
         <button className='black_btn' onClick={handleEdit}>Editar</button>
-      </div>
+      </div> */}
     </div>
   )
 }
