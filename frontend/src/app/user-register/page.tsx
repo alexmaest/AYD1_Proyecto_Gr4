@@ -28,6 +28,7 @@ const liItems = [
 
 export default function Register () {
   const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
   const [selectedDepartment, setSelectedDepartment] = useState('')
   const [selectedMunicipality, setSelectedMunicipality] = useState('')
   const { departments } = useDepartment()
@@ -75,8 +76,13 @@ export default function Register () {
           department: data.department
         })
       })
-      const dataJson = await res.json()
-      console.log(dataJson)
+      if (res.ok) {
+        setSuccess('Usuario registrado con éxito')
+        setError('')
+      } else {
+        const dataJson = await res.json()
+        setError(dataJson.error)
+      }
     } catch (error) {
       console.log(error)
       setError('Ha ocurrido un error, intenta de nuevo')
@@ -110,18 +116,29 @@ export default function Register () {
           </div>
         )
       }
+        {
+        success !== '' && (
+          <div className='flex flex-col p-2 mb-4 absolute bottom-0 w-full rounded-lg items-center justify-center bg-green-500 text-white text-center max-w-md'>
+            <p>{success}</p>
+          </div>
+        )
+        }
         <div className='flex flex-row'>
           <input
             name='firstName'
             className='w-full mr-2 px-4 py-2 mb-4 text-base text-gray-700 placeholder-gray-600 border rounded-lg focus:outline-none focus:border-green-500'
             type='text'
             placeholder='Nombre'
+            autoComplete='off'
+            required
           />
           <input
             name='lastName'
             className='w-full ml-2 px-4 py-2 mb-4 text-base text-gray-700 placeholder-gray-600 border rounded-lg focus:outline-none focus:border-green-500'
             type='text'
             placeholder='Apellido'
+            autoComplete='off'
+            required
           />
         </div>
         <input
@@ -129,12 +146,16 @@ export default function Register () {
           className='w-full px-4 py-2 mb-4 text-base text-gray-700 placeholder-gray-600 border rounded-lg focus:outline-none focus:border-green-500'
           type='email'
           placeholder='Correo electrónico'
+          autoComplete='off'
+          required
         />
         <input
           name='phoneNumber'
           className='w-full px-4 py-2 mb-4 text-base text-gray-700 placeholder-gray-600 border rounded-lg focus:outline-none focus:border-green-500'
           type='text'
           placeholder='Número de teléfono'
+          autoComplete='off'
+          required
         />
         <div className='flex flex-row justify-center items-center'>
           <div className='flex-1 mr-2'>
@@ -152,8 +173,8 @@ export default function Register () {
             >
               <option value=''>Selecciona un departamento</option>
               {
-              departments?.map(({ id, descripcion }: { id: number, descripcion: string }) => (
-                <option key={id} value={descripcion}>{descripcion}</option>
+              departments?.map(({ departamento_id: departamentoId, descripcion }: { departamento_id: number, descripcion: string }) => (
+                <option key={departamentoId} value={descripcion}>{descripcion}</option>
               ))
             }
             </select>
@@ -170,8 +191,8 @@ export default function Register () {
             >
               <option value=''>Selecciona un municipio</option>
               {
-                filteredMunicipalities.map(({ id, descripcion }: { id: number, descripcion: string }) => (
-                  <option key={id} value={descripcion}>{descripcion}</option>
+                filteredMunicipalities.map(({ municipio_id: municipioId, descripcion }: { municipio_id: number, descripcion: string }) => (
+                  <option key={municipioId} value={descripcion}>{descripcion}</option>
                 ))
                }
             </select>
@@ -182,12 +203,16 @@ export default function Register () {
           className='w-full px-4 py-2 mb-4 text-base text-gray-700 placeholder-gray-600 border rounded-lg focus:outline-none focus:border-green-500'
           type='password'
           placeholder='Contraseña'
+          autoComplete='off'
+          required
         />
         <input
           name='confirmPassword'
           className='w-full px-4 py-2 mb-4 text-base text-gray-700 placeholder-gray-600 border rounded-lg focus:outline-none focus:border-green-500'
           type='password'
           placeholder='Confirmar contraseña'
+          autoComplete='off'
+          required
         />
         <button
           className='w-full px-4 py-2 mb-4 text-base font-semibold text-white transition duration-200 bg-green-500 rounded-lg shadow-md hover:bg-green-700 focus:outline-none focus:bg-green-700'
