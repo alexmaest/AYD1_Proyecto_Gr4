@@ -1,3 +1,4 @@
+const bodyParser = require('body-parser');
 const express = require('express');
 const cors = require('cors');
 const app = express();
@@ -14,6 +15,7 @@ const departmentRoutes = require('./routes/departmentRoutes');
 const companyRoutes= require('./routes/companyRoutes');
 const userRoutes= require('./routes/userRoutes');
 
+app.use(bodyParser.json({ limit: '10mb' }));
 app.use(express.json());
 app.use(cors());
 

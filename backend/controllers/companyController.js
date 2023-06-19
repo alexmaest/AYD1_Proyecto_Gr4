@@ -462,6 +462,12 @@ exports.editProduct = (req, res) => {
     WHERE categoria_producto_id = ?;
   `;
 
+  const selectProductQuery = `
+    SELECT ilustracion_url
+    FROM tbl_producto
+    WHERE producto_id = ?;
+  `;
+
   const updateProductQuery = `
     UPDATE tbl_producto
     SET nombre = ?, descripcion = ?, precio_unitario = ?, categoria_producto_id = ?, ilustracion_url = ?
@@ -478,36 +484,56 @@ exports.editProduct = (req, res) => {
       } else {
         const categoryId = categoryResult[0].categoria_producto_id;
 
-        const buff = new Buffer.from(
-          image.replace(/^data:image\/\w+;base64,/, ''),
-          'base64'
-        );
+        if (image !== "") {
+          const buff = new Buffer.from(
+            image.replace(/^data:image\/\w+;base64,/, ''),
+            'base64'
+          );
 
-        const uploadParams = {
-          Bucket: AWS_BUCKET_NAME,
-          Key: `product_images/${Date.now()}_${name}`,
-          Body: buff,
-          ContentType: 'image'
-        };
+          const uploadParams = {
+            Bucket: AWS_BUCKET_NAME,
+            Key: `product_images/${Date.now()}_${name}`,
+            Body: buff,
+            ContentType: 'image'
+          };
 
-        s3.upload(uploadParams, (err, uploadData) => {
-          if (err) {
-            console.error(err);
-            res.status(500).json({ error: 'Internal server error' });
-          } else {
-            const imageUrl = uploadData.Location;
+          s3.upload(uploadParams, (err, uploadData) => {
+            if (err) {
+              console.error(err);
+              res.status(500).json({ error: 'Internal server error' });
+            } else {
+              const imageUrl = uploadData.Location;
 
-            const values = [name, description, price, categoryId, imageUrl, id];
-            db.query(updateProductQuery, values, (error, result) => {
-              if (error) {
-                console.error(error);
-                res.status(500).json({ error: 'Internal server error' });
-              } else {
-                res.json({ message: 'Product updated successfully' });
-              }
-            });
-          }
-        });
+              const values = [name, description, price, categoryId, imageUrl, id];
+              db.query(updateProductQuery, values, (error, result) => {
+                if (error) {
+                  console.error(error);
+                  res.status(500).json({ error: 'Internal server error' });
+                } else {
+                  res.json({ message: 'Product updated successfully' });
+                }
+              });
+            }
+          });
+        } else {
+          db.query(selectProductQuery, [id], (error, productResult) => {
+            if (error) {
+              console.error(error);
+              res.status(500).json({ error: 'Internal server error' });
+            } else {
+              const previousImageUrl = productResult[0].ilustracion_url;
+              const values = [name, description, price, categoryId, previousImageUrl, id];
+              db.query(updateProductQuery, values, (error, result) => {
+                if (error) {
+                  console.error(error);
+                  res.status(500).json({ error: 'Internal server error' });
+                } else {
+                  res.json({ message: 'Product updated successfully' });
+                }
+              });
+            }
+          });
+        }
       }
     }
   });
