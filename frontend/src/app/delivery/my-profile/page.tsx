@@ -30,7 +30,6 @@ function Page () {
           }
         })
         const data = await response.json()
-        console.log(data)
         setProfileInfo(data)
       } catch (error: any) {
         alert(error.message)
