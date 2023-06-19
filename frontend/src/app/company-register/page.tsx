@@ -99,7 +99,7 @@ function Page () {
 
     // send form data
     try {
-      const res = await fetch(`${baseUrl}/deliveryRegister`, {
+      const res = await fetch(`${baseUrl}/companyRegister`, {
         method: 'POST',
         body: formData
       })

@@ -40,11 +40,14 @@ function Page () {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     try {
-      await signIn('credentials', {
+      const res = await signIn('credentials', {
         email,
         password,
         redirect: false
       })
+      if (res?.status === 401) {
+        setError('El usuario aún no está habilitado o no existe!')
+      }
     } catch (error) {
       setError('Correo o contraseña incorrectos')
     }

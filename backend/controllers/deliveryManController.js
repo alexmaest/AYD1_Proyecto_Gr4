@@ -5,8 +5,8 @@ exports.main = (req, res) => {
 };
 
 exports.deliveryManInfoRequest = (req, res) => {
-    const { correo } = req.body;
-  
+    const { correo } = req.params;
+    
     const query = `
     SELECT sr.usuario_id,
       nombres,
@@ -21,7 +21,7 @@ exports.deliveryManInfoRequest = (req, res) => {
       lc.descripcion as 'tipo_licencia',
       fecha_solicitud,
       es.descripcion as 'estado_solicitud',
-      case when tiene_vehiculo=1 then 'si' else 'no' end as 'tiene vehiculo',
+      case when tiene_vehiculo=1 then 'si' else 'no' end as 'tiene_vehiculo',
       documento_url
     FROM tbl_solicitud_repartidor sr 
     inner join tbl_usuario u on sr.usuario_id=u.usuario_id
@@ -37,7 +37,7 @@ exports.deliveryManInfoRequest = (req, res) => {
     if (error) {
       res.status(500).json({ error: 'Error en la consulta MySQL' });
     } else {
-      res.json(results);
+      res.json(results[0]);
     }
   });
   
