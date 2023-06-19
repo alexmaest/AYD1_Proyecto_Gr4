@@ -6,25 +6,25 @@ export default function Delivery () {
       title: 'Solicitudes de entrega',
       description: 'Listado de pedidos que se han solicitado para entrega.',
       image: './deliveries.webp',
-      linkTo: '/delivery-man-dashboard/delivery-requests'
+      linkTo: '/delivery/delivery-requests'
     },
     {
       title: 'Pedidos asignados',
       description: 'Mira los pedidos que tienes asignados para entrega.',
       image: './order.webp',
-      linkTo: '/delivery-man-dashboard/assigned-orders'
+      linkTo: '/delivery/assigned-orders'
     },
     {
       title: 'Mi perfil',
       description: 'Actualiza tus datos personales y de contacto.',
       image: './delivery.webp',
-      linkTo: '/delivery-man-dashboard/my-profile'
+      linkTo: '/delivery/my-profile'
     },
     {
       title: 'HIstorial de pedidos',
       description: 'Mira los pedidos que has entregado.',
       image: './record.webp',
-      linkTo: '/delivery-man-dashboard/order-history'
+      linkTo: '/delivery/order-history'
     }
   ]
 
