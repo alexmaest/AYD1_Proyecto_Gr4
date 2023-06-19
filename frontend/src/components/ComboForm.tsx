@@ -22,27 +22,37 @@ function ComboForm ({
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [price, setPrice] = useState('')
-  const [category, setCategory] = useState('')
+  const [category, setCategory] = useState<Category>(categories[0])
   const [categoryType, setCategoryType] = useState('Producto')
-  const [selectedProduct, setSelectedProduct] = useState<Product>()
+  const [selectedProduct, setSelectedProduct] = useState<Product>(products[0])
   const [selectedProducts, setSelectedProducts] = useState<ComboProduct[]>([])
   const [subCategories, setSubCategories] = useState<Category[]>([])
+
+  const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const _category = subCategories.find((c) => c.id === Number(e.target.value))
+    if (_category != null) {
+      setCategory(_category)
+    }
+  }
 
   useEffect(() => {
     const _subCategories = categories.filter((category) => category.type === 'Producto')
     setSubCategories(_subCategories)
+    setCategory(_subCategories[0])
   }, [categories])
 
-  const handleCategoryTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setCategoryType(e.target.value)
-    if (e.target.value === 'Producto') {
+  useEffect(() => {
+    if (categoryType === 'Producto') {
       const _subCategories = categories.filter((category) => category.type === 'Producto')
       setSubCategories(_subCategories)
+      setCategory(_subCategories[0])
     } else {
       const _subCategories = categories.filter((category) => category.type === 'Combo')
       setSubCategories(_subCategories)
+      setCategory(_subCategories[0])
     }
-  }
+  }, [categoryType, categories])
+
   // Handle image
   const changeHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
     const _file = e.currentTarget.files?.item(0)
@@ -120,7 +130,7 @@ function ComboForm ({
       name,
       description,
       price: Number(price),
-      category: Number(category),
+      category: category.id,
       email,
       products: selectedProducts,
       image: fileDataURL
@@ -141,9 +151,9 @@ function ComboForm ({
         setName('')
         setDescription('')
         setPrice('')
-        setCategory('')
+        setCategory(subCategories[0])
         setCategoryType('Producto')
-        setSelectedProduct(undefined)
+        setSelectedProduct(products[0])
         setSelectedProducts([])
       } else {
         const { error } = await res.json()
@@ -221,7 +231,7 @@ function ComboForm ({
             className='form_select'
             required
             value={categoryType}
-            onChange={(e) => handleCategoryTypeChange(e)}
+            onChange={(e) => setCategoryType(e.target.value)}
           >
             {categoryTypes.map((categoryType) => (
               <option key={categoryType} value={categoryType}>{categoryType}</option>
@@ -235,8 +245,8 @@ function ComboForm ({
             id='category'
             className='form_select'
             required
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
+            value={category?.id}
+            onChange={(e) => handleCategoryChange(e)}
           >
             {subCategories.map((category) => (
               <option key={category.id} value={category.id}>{category.name}</option>
