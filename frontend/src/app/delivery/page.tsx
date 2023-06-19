@@ -1,24 +1,4 @@
 import Card from '@/components/Card'
-import Navbar from '@/components/Navbar'
-
-const liItems = [
-  {
-    linkTo: '/delivery/requests',
-    text: 'Solicitudes de entrega'
-  },
-  {
-    linkTo: '/delivery/assigned-orders',
-    text: 'Pedidos asignados'
-  },
-  {
-    linkTo: '/delivery/my-profile',
-    text: 'Mi perfil'
-  },
-  {
-    linkTo: '/delivery/order-history',
-    text: 'Historial de pedidos'
-  }
-]
 
 export default function Delivery () {
   const cards = [
@@ -50,8 +30,7 @@ export default function Delivery () {
 
   return (
     <>
-      <Navbar dropdown={undefined} liElements={liItems} />
-      <div className='h-screen '>
+      <div className='h-screen'>
         <div className='container mx-auto py-28 px-4'>
           <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4'>
             {cards.map((card, index) => (
