@@ -47,7 +47,10 @@ function Page ({ params: { productId } }: Params) {
         setName(name)
         setDescription(description)
         setPrice(price)
-        setCategory(category)
+        const _category = categories.find((c) => c.name === category)
+        if (_category != null) {
+          setCategory(_category)
+        }
         setCategoryType(categoryType)
         setFileDataURL(image)
       } catch (error: any) {
@@ -55,7 +58,7 @@ function Page ({ params: { productId } }: Params) {
       }
     }
     void getProduct()
-  }, [productId])
+  }, [productId, categories])
 
   useEffect(() => {
     const _subCategories = categories.filter((category) => category.type === 'Producto')
@@ -64,8 +67,10 @@ function Page ({ params: { productId } }: Params) {
   }, [categories])
 
   const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const _category = subCategories.find((category) => category.name === e.target.value)
-    setCategory(_category)
+    const _category = subCategories.find((c) => c.id === Number(e.target.value))
+    if (_category != null) {
+      setCategory(_category)
+    }
   }
 
   const handleCategoryTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -116,16 +121,16 @@ function Page ({ params: { productId } }: Params) {
       alert('El precio debe ser mayor a 0')
       return
     }
+    const _image = fileDataURL.includes('data:image') ? fileDataURL : ''
     const formData = JSON.stringify({
       id: Number(productId),
       name,
       description,
       price: Number(price),
-      category: Number(category),
+      category: category?.id,
       categoryType,
-      image: fileDataURL
+      image: _image
     })
-    console.log(formData)
     try {
       const res = await fetch(`${baseUrl}/company/controlPanel/editProduct`, {
         method: 'PUT',
@@ -160,10 +165,10 @@ function Page ({ params: { productId } }: Params) {
         onSubmit={handleSubmit}
       >
         <div className='flex w-full h-[200px] items-center'>
-          {fileDataURL != null
+          {fileDataURL !== null
             ? (
               <Image
-                src={fileDataURL}
+                src={fileDataURL === '' ? '/sin-fotos.png' : fileDataURL}
                 loader={({ src }) => src}
                 alt='product_image'
                 width={200}
@@ -194,7 +199,6 @@ function Page ({ params: { productId } }: Params) {
               autoComplete='off'
               value={name}
               onChange={(e) => setName(e.target.value)}
-              required
             />
           </div>
           <div className='w-1/2 px-3'>
@@ -207,7 +211,6 @@ function Page ({ params: { productId } }: Params) {
               autoComplete='off'
               value={price}
               onChange={(e) => setPrice(e.target.value)}
-              required
             />
           </div>
         </div>
@@ -218,7 +221,6 @@ function Page ({ params: { productId } }: Params) {
               name='categoryType'
               id='categoryType'
               className='form_select'
-              required
               value={categoryType}
               onChange={(e) => handleCategoryTypeChange(e)}
             >
@@ -233,8 +235,7 @@ function Page ({ params: { productId } }: Params) {
               name='category'
               id='category'
               className='form_select'
-              required
-              value={category?.name}
+              value={category?.id}
               onChange={(e) => handleCategoryChange(e)}
             >
               {subCategories.map((_category) => (
@@ -252,7 +253,6 @@ function Page ({ params: { productId } }: Params) {
             autoComplete='off'
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            required
           />
         </div>
         <div className='w-full flex flex-row justify-between gap-4 px-3 mt-4'>
@@ -267,7 +267,6 @@ function Page ({ params: { productId } }: Params) {
               accept='.png, .jpg, .jpeg'
               multiple={false}
               onChange={changeHandler}
-              required
             />
           </label>
           <button className='black_btn' type='submit'>

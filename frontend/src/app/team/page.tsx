@@ -49,7 +49,7 @@ export default function Team () {
     },
     {
       name: 'Otto Olivarez',
-      role: 'Desarrollador Frontend',
+      role: 'Desarrollador Backend',
       photo: 'https://github.com/ottoolivarez.png',
       bio: 'Otto es un desarrollador backend con experiencia en NodeJS, Express y MongoDB.'
     }

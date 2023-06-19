@@ -21,7 +21,7 @@ function ProductForm ({
   const [description, setDescription] = useState('')
   const [price, setPrice] = useState('')
   const [categoryType, setCategoryType] = useState('Producto')
-  const [category, setCategory] = useState<Category | undefined>(categories[0])
+  const [category, setCategory] = useState<Category>(categories[0])
   const [subCategories, setSubCategories] = useState<Category[]>([])
 
   // Handle image
@@ -56,8 +56,10 @@ function ProductForm ({
   }, [file])
 
   const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const _category = subCategories.find((c) => c.name === e.target.value)
-    setCategory(_category)
+    const _category = subCategories.find((c) => c.id === Number(e.target.value))
+    if (_category != null) {
+      setCategory(_category)
+    }
   }
 
   useEffect(() => {
@@ -66,9 +68,8 @@ function ProductForm ({
     setCategory(_subCategories[0])
   }, [categories])
 
-  const handleCategoryTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setCategoryType(e.target.value)
-    if (e.target.value === 'Producto') {
+  useEffect(() => {
+    if (categoryType === 'Producto') {
       const _subCategories = categories.filter((category) => category.type === 'Producto')
       setSubCategories(_subCategories)
       setCategory(_subCategories[0])
@@ -77,7 +78,7 @@ function ProductForm ({
       setSubCategories(_subCategories)
       setCategory(_subCategories[0])
     }
-  }
+  }, [categoryType, categories])
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -89,7 +90,7 @@ function ProductForm ({
       name,
       description,
       price: Number(price),
-      category: Number(category),
+      category: category?.id,
       categoryType: (categoryType === 'Combo') ? 1 : 0,
       email,
       image: fileDataURL
@@ -188,7 +189,7 @@ function ProductForm ({
             className='form_select'
             required
             value={categoryType}
-            onChange={(e) => handleCategoryTypeChange(e)}
+            onChange={(e) => setCategoryType(e.target.value)}
           >
             {categoryTypes.map((categoryType) => (
               <option key={categoryType} value={categoryType}>{categoryType}</option>
@@ -202,7 +203,7 @@ function ProductForm ({
             id='category'
             className='form_select'
             required
-            value={category?.name}
+            value={category?.id}
             onChange={(e) => handleCategoryChange(e)}
           >
             {subCategories.map((category) => (
