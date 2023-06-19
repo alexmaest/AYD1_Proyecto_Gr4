@@ -1,0 +1,83 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 214, 219, 220;
+  --background-end-rgb: 255, 255, 255;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --foreground-rgb: 255, 255, 255;
+    --background-start-rgb: 0, 0, 0;
+    --background-end-rgb: 0, 0, 0;
+  }
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: linear-gradient(
+      to bottom,
+      transparent,
+      rgb(var(--background-end-rgb))
+    )
+    rgb(var(--background-start-rgb));
+}
+
+.form_label {
+  @apply block uppercase tracking-wide text-al-black text-xs font-bold mb-2;
+}
+
+.form_input {
+  @apply w-full flex rounded-lg mt-2 p-3 text-sm text-al-black outline-0;
+}
+
+.form_checkbox {
+  @apply w-5 h-5 text-al-black bg-gray-100 border-gray-300 rounded focus:ring-al-black my-4;
+}
+
+.form_select {
+  @apply bg-gray-50 border border-gray-300 text-al-black text-sm rounded-lg focus:ring-al-orange focus:border-al-orange block w-full p-3;
+}
+
+.form_file {
+  @apply block w-full text-sm text-al-black border-none rounded-lg cursor-pointer bg-transparent font-medium focus:outline-none p-3;
+}
+
+.form_textarea {
+  @apply w-full flex rounded-lg h-[75px] mt-2 p-3 text-sm text-gray-500 outline-0;
+}
+
+.form_radio {
+  @apply w-5 h-5 text-blue-600 bg-al-gray border-al-black focus:ring-blue-500;
+}
+
+.orange_gradient {
+  @apply bg-gradient-to-r from-al-orange to-al-yellow;
+}
+
+.orange_gradient_text {
+  @apply bg-gradient-to-r from-al-orange to-al-yellow bg-clip-text text-transparent;
+}
+
+.black_btn {
+  @apply rounded-full border-2 border-al-black bg-al-black py-1.5 px-5 text-al-yellow transition-all duration-0 ease-in-out hover:duration-700 hover:scale-90 text-center text-lg font-medium flex items-center justify-center;
+}
+
+.outline_btn {
+  @apply rounded-full border-2 border-al-yellow py-1.5 px-5 text-al-yellow transition-all duration-0 ease-in-out hover:duration-700 hover:scale-90 p-2 text-center text-lg font-medium flex items-center justify-center;
+}
+
+.transparent_btn {
+  @apply rounded-full border-2 border-al-black py-1.5 px-5 text-al-black transition-all duration-0 ease-in-out hover:duration-700 hover:scale-90 text-center text-lg font-medium flex items-center justify-center;
+}
+
+.yellow_btn {
+  @apply rounded-full border-2 border-al-yellow bg-al-yellow py-1.5 px-5 text-al-black transition-all duration-0 ease-in-out hover:duration-700 hover:scale-90 text-center text-lg font-medium flex items-center justify-center;
+}
+
+.navbar_item {
+  @apply text-al-white font-semibold text-center border-2 border-transparent rounded-full transition duration-0 ease-in-out p-2  hover:border-al-yellow  hover:duration-700 hover:scale-110;
+}
