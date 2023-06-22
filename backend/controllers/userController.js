@@ -50,7 +50,7 @@ exports.main = (req, res) => {
   });
 };
 
-exports.categories = (req, res) => {
+exports.dashCategories = (req, res) => {
   const query = `
     SELECT c.categoria_producto_id, c.descripcion AS category_description, c.ilustracion_url, e.solicitud_empresa_id, e.nombre, e.descripcion
     FROM tbl_cat_categoria_producto c
