@@ -2,11 +2,13 @@
 
 import { useEffect, useState } from 'react'
 import { useSession } from 'next-auth/react'
+import ChangeLocation from '@/components/ChangeLocation'
 import baseUrl from '@/constants/baseUrl'
 
 function Page () {
   const { data: session } = useSession()
   const [profileInfo, setProfileInfo] = useState({
+    id: 0,
     nombres: '',
     apellidos: '',
     correo: '',
@@ -16,7 +18,6 @@ function Page () {
     tiene_vehiculo: '',
     tipo_licencia: '',
     documento_url: ''
-
   })
   const email = ((session?.user?.email) != null) ? session.user.email : ''
 
@@ -39,9 +40,9 @@ function Page () {
   }, [email])
 
   return (
-    <section className='max-w-2xl rounded px-10 py-16 orange_gradient text-al-black mx-auto my-24'>
-      <h1 className='text-center font-black text-3xl mb-10'>Mi Información</h1>
-      <div className='flex flex-col gap-4'>
+    <section className='max-w-2xl rounded px-10 py-16 text-al-black mx-auto my-[28px]'>
+      <h1 className='text-center font-black text-4xl mb-10 orange_gradient_text'>Mi Perfil</h1>
+      <section className='flex flex-col gap-4 w-full rounded-lg bg-slate-400 py-4'>
         <div className='flex flex-row w-full'>
           <div className='w-1/2 px-3'>
             <label className='form_label' htmlFor='name'>
@@ -75,24 +76,6 @@ function Page () {
           <p className='text-xl'>
             {profileInfo.no_celular}
           </p>
-        </div>
-        <div className='flex flex-row w-full'>
-          <div className='w-1/2 px-3'>
-            <label className='form_label' htmlFor='department'>
-              Departamento:
-            </label>
-            <p className='text-xl'>
-              {profileInfo.departamento}
-            </p>
-          </div>
-          <div className='w-1/2 px-3'>
-            <label className='form_label' htmlFor='town'>
-              Municipio:
-            </label>
-            <p className='text-xl'>
-              {profileInfo.municipio}
-            </p>
-          </div>
         </div>
         <div className='flex flex-row w-full items-center'>
           <div className='w-1/3 px-3'>
@@ -128,7 +111,12 @@ function Page () {
             Mi Hoja de Vida
           </a>
         </div>
-      </div>
+      </section>
+      <ChangeLocation
+        currentDepartment={profileInfo.departamento}
+        currentMunicipality={profileInfo.municipio}
+        userId={profileInfo.id}
+      />
     </section>
   )
 }

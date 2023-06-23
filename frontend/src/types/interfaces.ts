@@ -37,6 +37,17 @@ export interface ComboProduct {
   quantity: number
 }
 
+export interface Department {
+  departamento_id: number
+  descripcion: string
+  municipios: Town[]
+}
+
+export interface Town {
+  municipio_id: number
+  descripcion: string
+}
+
 export interface CompanyRequest {
   categoria_empresa: string
   correo: string
