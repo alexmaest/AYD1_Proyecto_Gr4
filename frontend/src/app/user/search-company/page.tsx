@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import baseUrl from '@/constants/baseUrl'
+import CompanyCard from '@/components/CompanyCard'
 
 interface Company {
   category: string
@@ -52,17 +53,10 @@ export default function Page () {
             companies.length > 0
               ? (
                 <div className='p-4'>
-                  <div className='flex flex-wrap wrap items-center'>
+                  <div className='flex flex-wrap items-center space-x-4'>
                     {
-                    companies.map((company) => (
-                      <div
-                        key={company.company_id}
-                        className='flex flex-col items-center mx-4 my-4 border border-yellow-400 rounded-lg p-4'
-                      >
-                        <p className='text-lg font-bold'>{company.category}</p>
-                        <h1 className='text-xl font-bold'>{company.name}</h1>
-                        <p className='text-lg font-bold'>{company.description}</p>
-                      </div>
+                    companies?.map((company) => (
+                      <CompanyCard key={company.company_id} id={company.company_id} {...company} />
                     ))
                   }
                   </div>
