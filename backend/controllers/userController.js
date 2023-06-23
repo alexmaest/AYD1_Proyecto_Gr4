@@ -100,27 +100,6 @@ exports.dashCategories = (req, res) => {
   });
 };
 
-exports.search = (req, res) => {
-  const { search } = req.body;
-
-  const regexSearch = new RegExp(search, 'i');
-  const searchQuery = `
-    SELECT se.solicitud_empresa_id AS company_id, se.nombre AS name, se.descripcion AS description, c.descripcion AS category
-    FROM tbl_solicitud_empresa se
-    LEFT JOIN tbl_cat_categoria_empresa c ON se.categoria_empresa_id = c.categoria_empresa_id
-    WHERE se.nombre REGEXP ?;
-  `;
-
-  db.query(searchQuery, [regexSearch.source], (error, result) => {
-    if (error) {
-      console.error('Error: Could not perform the search', error);
-      res.status(500).json({ error: 'Error: Internal server failure' });
-    } else {
-      res.json(result);
-    }
-  });
-};
-
 exports.products = (req, res) => {
   const userId = req.params.id;
 
@@ -310,6 +289,27 @@ exports.categories = (req, res) => {
           });
         }
       });
+    }
+  });
+};
+
+exports.search = (req, res) => {
+  const { search } = req.body;
+
+  const regexSearch = new RegExp(search, 'i');
+  const searchQuery = `
+    SELECT se.solicitud_empresa_id AS company_id, se.nombre AS name, se.descripcion AS description, c.descripcion AS category
+    FROM tbl_solicitud_empresa se
+    LEFT JOIN tbl_cat_categoria_empresa c ON se.categoria_empresa_id = c.categoria_empresa_id
+    WHERE se.nombre REGEXP ?;
+  `;
+
+  db.query(searchQuery, [regexSearch.source], (error, result) => {
+    if (error) {
+      console.error('Error: Could not perform the search', error);
+      res.status(500).json({ error: 'Error: Internal server failure' });
+    } else {
+      res.json(result);
     }
   });
 };
