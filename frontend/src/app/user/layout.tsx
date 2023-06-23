@@ -6,6 +6,10 @@ const liItems = [
     text: 'Categorías'
   },
   {
+    linkTo: '/user/search-company',
+    text: 'Buscar Restaurante'
+  },
+  {
     linkTo: '/user/order',
     text: 'Pedir Producto'
   },
