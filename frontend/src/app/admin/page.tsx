@@ -15,6 +15,12 @@ export default function DeliveryManDashboard () {
       linkTo: '/admin/company-requests'
     },
     {
+      title: 'Solicitudes de cambio de ubicación',
+      description: 'Listado de solicitudes de cambio de ubicación de repartidores.',
+      image: './delivery-requests.webp',
+      linkTo: 'admin/change-location-requests'
+    },
+    {
       title: 'Deshabilitar usuario',
       description: 'Deshabilita un usuario de la plataforma.',
       image: './ban-user.webp',
