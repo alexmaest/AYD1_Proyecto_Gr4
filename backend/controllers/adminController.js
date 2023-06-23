@@ -144,6 +144,102 @@ exports.deliveryRequestApprove = (req, res) => {
   }
 };
 
+exports.deliveryChangeLocationRequest = (req, res) => {
+  const query = `
+  select 
+cur.cambios_ubicacion_id as cambio_ubicacion_id
+,sr.solicitud_repartidor_id as repartidor_id
+,sr.nombres
+,sr.apellidos
+,cur.cambios_ubicacion_id as cambio_ubicacion_id
+-- orgen
+,cd_origen.departamento_id as departamento_origen_id
+,cd_origen.descripcion as departamento_origen
+,cur.origen_municipio_id as municipio_orgen_id
+,cm_origen.descripcion as municipio_origen
+-- destino
+,cd_destino.departamento_id as departamento_destino_id
+,cd_destino.descripcion as departamento_destino
+,cur.destino_municipio_id as municipio_destino_id
+,cm_destino.descripcion as municipio_destino
+,cur.motivo_solicitud
+,cur.fecha_solicitud
+,cur.estado_solicitud_id
+from tbl_cambio_ubicacion_repartidor cur 
+inner join tbl_solicitud_repartidor sr on  cur.repartidor_id=sr.solicitud_repartidor_id
+inner join tbl_cat_municipio cm_origen on cm_origen.municipio_id=cur.origen_municipio_id
+inner join tbl_cat_municipio cm_destino on cm_destino.municipio_id = cur.destino_municipio_id
+inner join tbl_cat_departamento cd_origen on cd_origen.departamento_id= cm_origen.departamento_id
+inner join tbl_cat_departamento cd_destino on cd_destino.departamento_id= cm_destino.departamento_id
+where cur.estado_solicitud_id in (0,1)
+    `;
+
+  db.query(query, (err, result) => {
+    if (err) {
+      console.error(err);
+      res.status(500).send('Error retrieving delivery change location requests');
+    } else {
+      res.json(result);
+    }
+  });
+};
+
+exports.deliveryChangeLocationRequestApprove = (req, res) => {
+  const { request_id, state } = req.body;
+
+  if (state === 'Aprobado') {
+    const approveQuery = `
+       START TRANSACTION;
+
+      UPDATE tbl_cambio_ubicacion_repartidor
+      SET estado_solicitud_id = 2
+      WHERE cambios_ubicacion_id = ${request_id};
+
+      select @dest:= cur.destino_municipio_id, 
+      @repartidor:= cur.repartidor_id
+      from tbl_cambio_ubicacion_repartidor cur 
+      where cur.cambios_ubicacion_id= ${request_id};
+
+      UPDATE tbl_solicitud_repartidor
+      SET municipio_id = @dest
+      WHERE solicitud_repartidor_id = @repartidor;
+
+       COMMIT;
+    `;
+
+    db.query(approveQuery, (err, result) => {
+      if (err) {
+        console.error(err);
+        res.status(500).send('Error: Sending request');
+      } else {
+        
+        res.status(200).send('Information: Request Approved');
+      }
+    });
+  } else if (state === 'Rechazado') {
+    const rejectQuery = `
+    START TRANSACTION;
+
+    UPDATE tbl_cambio_ubicacion_repartidor
+    SET estado_solicitud_id = 3 
+    WHERE cambios_ubicacion_id = ${request_id};
+    COMMIT;
+    `;
+
+    db.query(rejectQuery, (err, result) => {
+      if (err) {
+        console.error(err);
+        res.status(500).send('Error: Sending request');
+      } else {
+        
+        res.status(200).send('Information: Request Approved');
+      }
+    });
+  } else {
+    res.status(400).send('Invalid state value');
+  }
+};
+
 exports.companyRequestApprove = (req, res) => {
   const { id, state, description } = req.body;
 
