@@ -293,6 +293,44 @@ exports.categories = (req, res) => {
   });
 };
 
+exports.company = (req, res) => {
+  const companyId = req.params.id;
+
+  const query = `
+    SELECT
+      se.solicitud_empresa_id AS id,
+      se.nombre AS name,
+      se.descripcion AS description,
+      CASE
+        WHEN se.categoria_empresa_id = 1 THEN 'Restaurante'
+        WHEN se.categoria_empresa_id = 2 THEN 'Tienda'
+        WHEN se.categoria_empresa_id = 3 THEN 'Supermercado'
+      END AS category,
+      u.correo AS email,
+      se.zona AS zone,
+      cd.descripcion AS department,
+      cm.descripcion AS municipality
+    FROM tbl_solicitud_empresa se
+    JOIN tbl_usuario u ON se.usuario_id = u.usuario_id
+    JOIN tbl_cat_municipio cm ON se.municipio_id = cm.municipio_id
+    JOIN tbl_cat_departamento cd ON cm.departamento_id = cd.departamento_id
+    WHERE se.solicitud_empresa_id = ?
+    LIMIT 1;
+  `;
+
+  db.query(query, [companyId], (err, result) => {
+    if (err) {
+      console.error(err);
+      res.status(500).send('Error retrieving company request');
+    } else if (result.length === 0) {
+      res.status(404).send('Company request not found');
+    } else {
+      const request = result[0];
+      res.json(request);
+    }
+  });
+};
+
 exports.search = (req, res) => {
   const { search } = req.body;
 
