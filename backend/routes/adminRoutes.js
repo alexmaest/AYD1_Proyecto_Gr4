@@ -9,6 +9,8 @@ router.get('/companyRequests', adminController.companyRequests);
 router.get('/deliveryRequests', adminController.deliveryRequests);
 router.post('/companyRequests', adminController.companyRequestApprove);
 router.post('/deliveryRequests', adminController.deliveryRequestApprove);
+router.get('/deliveryChangeLocationRequests', adminController.deliveryChangeLocationRequest);
+router.post('/deliveryChangeLocationRequestsApprove', adminController.deliveryChangeLocationRequestApprove);
 router.get('/reports', adminController.reports);
 
 module.exports = router;
