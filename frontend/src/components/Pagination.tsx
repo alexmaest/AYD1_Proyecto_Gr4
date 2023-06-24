@@ -19,7 +19,7 @@ export default function Pagination (
       <ul className='inline-flex -space-x-px'>
         <li>
           <button
-            className='px-3 py-2 ml-0 leading-tight text-gray-800 bg-orange-400 border border-orange-200 rounded-l-lg hover:bg-al-orange hover:text-gray-700'
+            className='px-3 py-2 ml-0 leading-tight border border-yellow-500 rounded-l-lg hover:bg-al-orange'
             onClick={handlePreviusButton}
           >Previous
           </button>
@@ -32,7 +32,7 @@ export default function Pagination (
                       ? (
                         <button
                           onClick={() => setSelectedCard(i)}
-                          className='px-3 py-2 leading-tight text-gray-800 bg-orange-600 border border-orange-200 hover:bg-al-orange hover:text-gray-700'
+                          className='px-3 py-2 leading-tight bg-al-orange border-yellow-500 border hover:bg-al-orange'
                         >
                           {i + 1}
                         </button>
@@ -40,7 +40,7 @@ export default function Pagination (
                       : (
                         <button
                           onClick={() => setSelectedCard(i)}
-                          className='px-3 py-2 leading-tight text-gray-800 bg-orange-400 border border-orange-200 hover:bg-al-orange hover:text-gray-700'
+                          className='px-3 py-2 leading-tight border-yellow-500 border hover:bg-al-orange'
                         >
                           {i + 1}
                         </button>
@@ -51,7 +51,7 @@ export default function Pagination (
         }
         <li>
           <button
-            className='px-3 py-2 leading-tight text-gray-800 bg-orange-400 border border-orange-200 rounded-r-lg hover:bg-al-orange hover:text-gray-700'
+            className='px-3 py-2 leading-tight border border-yellow-500 rounded-r-lg hover:bg-al-orange'
             onClick={handleNextButton}
           >Next
           </button>
