@@ -189,22 +189,18 @@ exports.deliveryChangeLocationRequestApprove = (req, res) => {
 
   if (state === 'Aprobado') {
     const approveQuery = `
-       START TRANSACTION;
+      START TRANSACTION;
 
       UPDATE tbl_cambio_ubicacion_repartidor
-      SET estado_solicitud_id = 2
+      SET estado_solicitud_id = 2 
       WHERE cambios_ubicacion_id = ${request_id};
 
-      select @dest:= cur.destino_municipio_id, 
-      @repartidor:= cur.repartidor_id
-      from tbl_cambio_ubicacion_repartidor cur 
-      where cur.cambios_ubicacion_id= ${request_id};
+      SELECT tbl_usuario.correo, tbl_solicitud_repartidor.nombres, tbl_solicitud_repartidor.apellidos
+      FROM tbl_solicitud_repartidor
+      INNER JOIN tbl_usuario ON tbl_solicitud_repartidor.usuario_id = tbl_usuario.usuario_id
+      WHERE tbl_solicitud_repartidor.solicitud_repartidor_id = (SELECT repartidor_id FROM tbl_cambio_ubicacion_repartidor WHERE cambios_ubicacion_id = ${request_id});
 
-      UPDATE tbl_solicitud_repartidor
-      SET municipio_id = @dest
-      WHERE solicitud_repartidor_id = @repartidor;
-
-       COMMIT;
+      COMMIT;
     `;
 
     db.query(approveQuery, (err, result) => {
@@ -212,18 +208,30 @@ exports.deliveryChangeLocationRequestApprove = (req, res) => {
         console.error(err);
         res.status(500).send('Error: Sending request');
       } else {
-        
-        res.status(200).send('Information: Request Approved');
+        const userData = result[2][0];
+        console.log(userData);
+        console.log(userData.correo);
+        if (userData && userData.correo) {
+          sendEmail2(userData, 'Aprobado', res);
+        } else {
+          res.status(500).send('Error: Recipient email not found');
+        }
       }
     });
   } else if (state === 'Rechazado') {
     const rejectQuery = `
-    START TRANSACTION;
+      START TRANSACTION;
 
-    UPDATE tbl_cambio_ubicacion_repartidor
-    SET estado_solicitud_id = 3 
-    WHERE cambios_ubicacion_id = ${request_id};
-    COMMIT;
+      UPDATE tbl_cambio_ubicacion_repartidor
+      SET estado_solicitud_id = 3 
+      WHERE cambios_ubicacion_id = ${request_id};
+
+      SELECT tbl_usuario.correo, tbl_solicitud_repartidor.nombres, tbl_solicitud_repartidor.apellidos
+      FROM tbl_solicitud_repartidor
+      INNER JOIN tbl_usuario ON tbl_solicitud_repartidor.usuario_id = tbl_usuario.usuario_id
+      WHERE tbl_solicitud_repartidor.solicitud_repartidor_id = (SELECT repartidor_id FROM tbl_cambio_ubicacion_repartidor WHERE cambios_ubicacion_id = ${request_id});
+
+      COMMIT;
     `;
 
     db.query(rejectQuery, (err, result) => {
@@ -231,8 +239,14 @@ exports.deliveryChangeLocationRequestApprove = (req, res) => {
         console.error(err);
         res.status(500).send('Error: Sending request');
       } else {
-        
-        res.status(200).send('Information: Request Approved');
+        const userData = result[2][0];
+        console.log(userData);
+        console.log(userData.correo);
+        if (userData && userData.correo) {
+          sendEmail2(userData, 'Rechazado', res);
+        } else {
+          res.status(500).send('Error: Recipient email not found');
+        }
       }
     });
   } else {
@@ -364,6 +378,40 @@ function sendEmail(id, state, type, description) {
         console.log('Information: Email sent', info.response);
       }
     });
+  });
+}
+
+function sendEmail2(userData, state, res) {
+  const { correo, nombres, apellidos } = userData;
+  const subject = state === 'Aprobado' ? 'Solicitud aprobada' : 'Solicitud rechazada';
+  const message = state === 'Aprobado' ? 'Tu solicitud de cambio de ubicacion ha sido aprobada.' : 'Tu solicitud de cambio de ubicacion ha sido rechazada.';
+  const text = `Estimado(a) ${nombres} ${apellidos},\n\n${message}`;
+
+  const transporter = nodemailer.createTransport({
+    host: process.env.EMAIL_HOST,
+    port: 465,
+    secure: true,
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
+  });
+
+  const mailOptions = {
+    from: process.env.EMAIL_USER,
+    to: correo,
+    subject: subject,
+    text: text,
+  };
+
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      console.error(error);
+      res.status(500).send('Error: Sending email');
+    } else {
+      console.log('Information: Email sent', info.response);
+      res.status(200).send('Information: Request Approved');
+    }
   });
 }
 
