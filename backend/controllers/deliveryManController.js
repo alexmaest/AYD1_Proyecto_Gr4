@@ -83,5 +83,3 @@ exports.changeLocation = (req, res) => {
     });
   });
 };
-
-
