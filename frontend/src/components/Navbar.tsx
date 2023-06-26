@@ -6,7 +6,7 @@ import Link from 'next/link'
 
 export default function Navbar (
   { liElements, dropdown }:
-  { liElements: Array<{ linkTo: string, text: string }>
+  { liElements: Array<{ linkTo: string, text: string | JSX.Element }>
     dropdown?: { title: string, styles: string, items: Array<{ text: string, linkTo: string }> }
   }) {
   const { data: session } = useSession()
