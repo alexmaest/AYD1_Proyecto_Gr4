@@ -363,101 +363,44 @@ exports.shoppingCart = (req, res) => {
         if (error) {
           console.error('Error: Could not perform the card number validation', error);
           res.status(500).json({ error: 'Error: Internal server failure' });
-        } else if (result.length > 0) {
-          res.status(501).json({ error: 'Card number already in use' });
         } else {
-          const metodoPagoData = {
-            no_tarjeta: card_number,
-            usuario_id: user_id,
-            cvv: cvv,
-            fecha_vencimiento: due_date
-          };
-
-          db.query('INSERT INTO tbl_metodo_pago SET ?', metodoPagoData, (error, result) => {
-            if (error) {
-              console.error('Error: Could not insert into tbl_metodo_pago', error);
-              res.status(500).json({ error: 'Error: Internal server failure' });
-            } else {
-              const fecha_pedido = new Date();
-              const estado_id = 1;
-              const pedidoData = {
-                fecha_pedido,
-                usuario_id: user_id,
-                empresa_id: company_id,
-                repartidor_id: null,
-                fecha_empresa: null,
-                fecha_repartidor: null,
-                fecha_usuario: null,
-                estado_id,
-                total_pedido: total,
-                no_tarjeta: card_number,
-                calificacion_repartidor: null,
-                descripcion: description
-              };
-
-              db.query('INSERT INTO tbl_pedido SET ?', pedidoData, (error, result) => {
-                if (error) {
-                  console.error('Error: Could not insert into tbl_pedido', error);
-                  res.status(500).json({ error: 'Error: Internal server failure' });
-                } else {
-                  const pedido_id = result.insertId;
-
-                  if (combos.length > 0) {
-                    const comboData = combos.map(combo => [
-                      pedido_id,
-                      combo.id,
-                      combo.quantity
-                    ]);
-
-                    db.query('INSERT INTO tbl_pedido_combo (pedido_id, combo_id, cantidad) VALUES ?', [comboData], (error, result) => {
-                      if (error) {
-                        console.error('Error: Could not insert into tbl_pedido_combo', error);
-                        res.status(500).json({ error: 'Error: Internal server failure' });
-                      } else {
-                        if (products.length > 0) {
-                          const productData = products.map(product => [
-                            pedido_id,
-                            product.id,
-                            product.quantity
-                          ]);
-
-                          db.query('INSERT INTO tbl_pedido_producto (pedido_id, producto_id, cantidad) VALUES ?', [productData], (error, result) => {
-                            if (error) {
-                              console.error('Error: Could not insert into tbl_pedido_producto', error);
-                              res.status(500).json({ error: 'Error: Internal server failure' });
-                            } else {
-                              res.status(200).json({ message: 'Order sent successfully' });
-                            }
-                          });
-                        } else {
-                          res.status(200).json({ message: 'Order sent successfully' });
-                        }
-                      }
-                    });
+          if (result.length > 0) {
+            db.query('SELECT * FROM tbl_metodo_pago WHERE no_tarjeta = ? AND usuario_id = ?', [card_number, user_id], (error, result) => {
+              if (error) {
+                console.error('Error: Could not perform the card number validation', error);
+                res.status(500).json({ error: 'Error: Internal server failure' });
+              } else if (result.length > 0) {
+                db.query('SELECT * FROM tbl_metodo_pago WHERE no_tarjeta = ? AND usuario_id = ? AND cvv = ? AND fecha_vencimiento = ?', [card_number, user_id, cvv, due_date], (error, result) => {
+                  if (error) {
+                    console.error('Error: Could not perform the card number validation', error);
+                    res.status(500).json({ error: 'Error: Internal server failure' });
+                  } else if (result.length > 0) {
+                    addItems(user_id, company_id, description, card_number, total, products, combos, req, res);
                   } else {
-                    if (products.length > 0) {
-                      const productData = products.map(product => [
-                        pedido_id,
-                        product.id,
-                        product.quantity
-                      ]);
-
-                      db.query('INSERT INTO tbl_pedido_producto (pedido_id, producto_id, cantidad) VALUES ?', [productData], (error, result) => {
-                        if (error) {
-                          console.error('Error: Could not insert into tbl_pedido_producto', error);
-                          res.status(500).json({ error: 'Error: Internal server failure' });
-                        } else {
-                          res.status(200).json({ message: 'Order sent successfully' });
-                        }
-                      });
-                    } else {
-                      res.status(502).json({ error: 'Combos and products array are empty' });
-                    }
+                    res.status(504).json({ error: 'Invalid card values' });
                   }
-                }
-              });
-            }
-          });
+                });
+              } else {
+                res.status(501).json({ error: 'Card number already in use' });
+              }
+            });
+          }else{
+            const metodoPagoData = {
+              no_tarjeta: card_number,
+              usuario_id: user_id,
+              cvv: cvv,
+              fecha_vencimiento: due_date
+            };
+  
+            db.query('INSERT INTO tbl_metodo_pago SET ?', metodoPagoData, (error, result) => {
+              if (error) {
+                console.error('Error: Could not insert into tbl_metodo_pago', error);
+                res.status(500).json({ error: 'Error: Internal server failure' });
+              } else {
+                addItems(user_id, company_id, description, card_number, total, products, combos, req, res);
+              }
+            });
+          }
         }
       });
     }
@@ -480,101 +423,44 @@ exports.shoppingCart = (req, res) => {
               if (error) {
                 console.error('Error: Could not perform the card number validation', error);
                 res.status(500).json({ error: 'Error: Internal server failure' });
-              } else if (result.length > 0) {
-                res.status(501).json({ error: 'Card number already in use' });
               } else {
-                const metodoPagoData = {
-                  no_tarjeta: card_number,
-                  usuario_id: user_id,
-                  cvv: cvv,
-                  fecha_vencimiento: due_date
-                };
-
-                db.query('INSERT INTO tbl_metodo_pago SET ?', metodoPagoData, (error, result) => {
-                  if (error) {
-                    console.error('Error: Could not insert into tbl_metodo_pago', error);
-                    res.status(500).json({ error: 'Error: Internal server failure' });
-                  } else {
-                    const fecha_pedido = new Date();
-                    const estado_id = 1;
-                    const pedidoData = {
-                      fecha_pedido,
-                      usuario_id: user_id,
-                      empresa_id: company_id,
-                      repartidor_id: null,
-                      fecha_empresa: null,
-                      fecha_repartidor: null,
-                      fecha_usuario: null,
-                      estado_id,
-                      total_pedido: total,
-                      no_tarjeta: card_number,
-                      calificacion_repartidor: null,
-                      descripcion: description
-                    };
-
-                    db.query('INSERT INTO tbl_pedido SET ?', pedidoData, (error, result) => {
-                      if (error) {
-                        console.error('Error: Could not insert into tbl_pedido', error);
-                        res.status(500).json({ error: 'Error: Internal server failure' });
-                      } else {
-                        const pedido_id = result.insertId;
-
-                        if (combos.length > 0) {
-                          const comboData = combos.map(combo => [
-                            pedido_id,
-                            combo.id,
-                            combo.quantity
-                          ]);
-
-                          db.query('INSERT INTO tbl_pedido_combo (pedido_id, combo_id, cantidad) VALUES ?', [comboData], (error, result) => {
-                            if (error) {
-                              console.error('Error: Could not insert into tbl_pedido_combo', error);
-                              res.status(500).json({ error: 'Error: Internal server failure' });
-                            } else {
-                              if (products.length > 0) {
-                                const productData = products.map(product => [
-                                  pedido_id,
-                                  product.id,
-                                  product.quantity
-                                ]);
-
-                                db.query('INSERT INTO tbl_pedido_producto (pedido_id, producto_id, cantidad) VALUES ?', [productData], (error, result) => {
-                                  if (error) {
-                                    console.error('Error: Could not insert into tbl_pedido_producto', error);
-                                    res.status(500).json({ error: 'Error: Internal server failure' });
-                                  } else {
-                                    res.status(200).json({ message: 'Order sent successfully' });
-                                  }
-                                });
-                              } else {
-                                res.status(200).json({ message: 'Order sent successfully' });
-                              }
-                            }
-                          });
+                if (result.length > 0) {
+                  db.query('SELECT * FROM tbl_metodo_pago WHERE no_tarjeta = ? AND usuario_id = ?', [card_number, user_id], (error, result) => {
+                    if (error) {
+                      console.error('Error: Could not perform the card number validation', error);
+                      res.status(500).json({ error: 'Error: Internal server failure' });
+                    } else if (result.length > 0) {
+                      db.query('SELECT * FROM tbl_metodo_pago WHERE no_tarjeta = ? AND usuario_id = ? AND cvv = ? AND fecha_vencimiento = ?', [card_number, user_id, cvv, due_date], (error, result) => {
+                        if (error) {
+                          console.error('Error: Could not perform the card number validation', error);
+                          res.status(500).json({ error: 'Error: Internal server failure' });
+                        } else if (result.length > 0) {
+                          addItems(user_id, company_id, description, card_number, total, products, combos, req, res);
                         } else {
-                          if (products.length > 0) {
-                            const productData = products.map(product => [
-                              pedido_id,
-                              product.id,
-                              product.quantity
-                            ]);
-
-                            db.query('INSERT INTO tbl_pedido_producto (pedido_id, producto_id, cantidad) VALUES ?', [productData], (error, result) => {
-                              if (error) {
-                                console.error('Error: Could not insert into tbl_pedido_producto', error);
-                                res.status(500).json({ error: 'Error: Internal server failure' });
-                              } else {
-                                res.status(200).json({ message: 'Order sent successfully' });
-                              }
-                            });
-                          } else {
-                            res.status(502).json({ error: 'Combos and products array are empty' });
-                          }
+                          res.status(504).json({ error: 'Invalid card values' });
                         }
-                      }
-                    });
-                  }
-                });
+                      });
+                    } else {
+                      res.status(501).json({ error: 'Card number already in use' });
+                    }
+                  });
+                }else{
+                  const metodoPagoData = {
+                    no_tarjeta: card_number,
+                    usuario_id: user_id,
+                    cvv: cvv,
+                    fecha_vencimiento: due_date
+                  };
+        
+                  db.query('INSERT INTO tbl_metodo_pago SET ?', metodoPagoData, (error, result) => {
+                    if (error) {
+                      console.error('Error: Could not insert into tbl_metodo_pago', error);
+                      res.status(500).json({ error: 'Error: Internal server failure' });
+                    } else {
+                      addItems(user_id, company_id, description, card_number, total, products, combos, req, res);
+                    }
+                  });
+                }
               }
             });
           }
@@ -583,3 +469,84 @@ exports.shoppingCart = (req, res) => {
     });
   }
 };
+
+function addItems(user_id, company_id, description, card_number, total, products, combos, req, res){
+  const fecha_pedido = new Date();
+  const estado_id = 1;
+  const pedidoData = {
+    fecha_pedido,
+    usuario_id: user_id,
+    empresa_id: company_id,
+    repartidor_id: null,
+    fecha_empresa: null,
+    fecha_repartidor: null,
+    fecha_usuario: null,
+    estado_id,
+    total_pedido: total,
+    no_tarjeta: card_number,
+    calificacion_repartidor: null,
+    descripcion: description
+  };
+
+  db.query('INSERT INTO tbl_pedido SET ?', pedidoData, (error, result) => {
+    if (error) {
+      console.error('Error: Could not insert into tbl_pedido', error);
+      res.status(500).json({ error: 'Error: Internal server failure' });
+    } else {
+      const pedido_id = result.insertId;
+
+      if (combos.length > 0) {
+        const comboData = combos.map(combo => [
+          pedido_id,
+          combo.id,
+          combo.quantity
+        ]);
+
+        db.query('INSERT INTO tbl_pedido_combo (pedido_id, combo_id, cantidad) VALUES ?', [comboData], (error, result) => {
+          if (error) {
+            console.error('Error: Could not insert into tbl_pedido_combo', error);
+            res.status(500).json({ error: 'Error: Internal server failure' });
+          } else {
+            if (products.length > 0) {
+              const productData = products.map(product => [
+                pedido_id,
+                product.id,
+                product.quantity
+              ]);
+
+              db.query('INSERT INTO tbl_pedido_producto (pedido_id, producto_id, cantidad) VALUES ?', [productData], (error, result) => {
+                if (error) {
+                  console.error('Error: Could not insert into tbl_pedido_producto', error);
+                  res.status(500).json({ error: 'Error: Internal server failure' });
+                } else {
+                  res.status(200).json({ message: 'Order sent successfully' });
+                }
+              });
+            } else {
+              res.status(200).json({ message: 'Order sent successfully' });
+            }
+          }
+        });
+      } else {
+        if (products.length > 0) {
+          const productData = products.map(product => [
+            pedido_id,
+            product.id,
+            product.quantity
+          ]);
+
+          db.query('INSERT INTO tbl_pedido_producto (pedido_id, producto_id, cantidad) VALUES ?', [productData], (error, result) => {
+            if (error) {
+              console.error('Error: Could not insert into tbl_pedido_producto', error);
+              res.status(500).json({ error: 'Error: Internal server failure' });
+            } else {
+              res.status(200).json({ message: 'Order sent successfully' });
+            }
+          });
+        } else {
+          res.status(502).json({ error: 'Combos and products array are empty' });
+        }
+      }
+    }
+  });
+}
