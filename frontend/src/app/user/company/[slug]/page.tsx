@@ -133,6 +133,7 @@ export default function Page ({ params }: { params: { slug: string } }) {
                 ? (
                   <ProductMenuCard
                     key={products[selectedProductCard]?.id}
+                    companyId={company?.id}
                     productAdded={productAdded}
                     setProductAdded={setProductAdded}
                     {...products[selectedProductCard]}
@@ -153,6 +154,7 @@ export default function Page ({ params }: { params: { slug: string } }) {
                 ? (
                   <ComboMenuCard
                     key={combos[selectedComboCard]?.id}
+                    companyId={company?.id}
                     comboAdded={comboAdded}
                     setComboAdded={setComboAdded}
                     {...combos[selectedComboCard]}
