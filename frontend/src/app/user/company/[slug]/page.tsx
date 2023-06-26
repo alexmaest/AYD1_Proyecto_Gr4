@@ -46,6 +46,8 @@ export default function Page ({ params }: { params: { slug: string } }) {
   const [comboTab, setComboTab] = useState<boolean>(false)
   const [products, setProducts] = useState<Products[]>([])
   const [combos, setCombos] = useState<Combo[]>([])
+  const [productAdded, setProductAdded] = useState(false)
+  const [comboAdded, setComboAdded] = useState(false)
   const [selectedProductCard, setSelectedProductCard] = useState<number>(0)
   const [selectedComboCard, setSelectedComboCard] = useState<number>(0)
   const [company, setCompany] = useState<Company>({
@@ -91,8 +93,6 @@ export default function Page ({ params }: { params: { slug: string } }) {
     void getCombos()
   }, [comboTab, params.slug])
 
-  console.log({ productTab, comboTab })
-
   return (
     <section className='py-28 px-2 h-screen'>
       <div className=''>
@@ -131,7 +131,12 @@ export default function Page ({ params }: { params: { slug: string } }) {
             <div className='flex flex-col w-2/3 p-2'>
               {products.length > 0
                 ? (
-                  <ProductMenuCard key={products[selectedProductCard]?.id} {...products[selectedProductCard]} />
+                  <ProductMenuCard
+                    key={products[selectedProductCard]?.id}
+                    productAdded={productAdded}
+                    setProductAdded={setProductAdded}
+                    {...products[selectedProductCard]}
+                  />
                   )
                 : (
                   <div className='flex flex-col justify-center items-center'>
@@ -146,7 +151,12 @@ export default function Page ({ params }: { params: { slug: string } }) {
             <div className='flex flex-col w-2/3 p-2'>
               {combos.length > 0
                 ? (
-                  <ComboMenuCard key={combos[selectedComboCard]?.id} {...combos[selectedComboCard]} />
+                  <ComboMenuCard
+                    key={combos[selectedComboCard]?.id}
+                    comboAdded={comboAdded}
+                    setComboAdded={setComboAdded}
+                    {...combos[selectedComboCard]}
+                  />
                   )
                 : (
                   <div className='flex flex-col justify-center items-center'>
