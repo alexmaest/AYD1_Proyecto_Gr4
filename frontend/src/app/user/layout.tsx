@@ -1,3 +1,4 @@
+import CartLogo from '@/components/CartLogo'
 import Navbar from '@/components/Navbar'
 
 const liItems = [
@@ -28,6 +29,10 @@ const liItems = [
   {
     linkTo: '/user/review-deliveries',
     text: 'Calificar entregas'
+  },
+  {
+    linkTo: '/user/cart',
+    text: <CartLogo className='w-8 h-8 stroke-white' />
   }
 ]
 
