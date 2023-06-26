@@ -45,8 +45,6 @@ export default function Page () {
       combos: combos?.map(({ id, quantity }) => ({ id, quantity }))
     }
 
-    console.log({ payObject })
-
     const fetcher = async (url: string) => {
       const res = await fetch(url, {
         method: 'POST',
@@ -77,6 +75,8 @@ export default function Page () {
         alert('Error en la compra')
       }
     }
+
+    await pay()
   }
 
   useEffect(() => {
