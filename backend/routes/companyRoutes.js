@@ -6,7 +6,7 @@ const companyController = require('../controllers/companyController');
 // Admin
 router.get('/', companyController.main);
 router.get('/controlPanel/categories', companyController.categories);
-router.get('/controlPanel/productsCategories ', companyController.productsCategories);
+router.get('/controlPanel/productsCategories', companyController.productsCategories);
 router.get('/controlPanel/combosCategories', companyController.combosCategories);
 router.get('/controlPanel/singleProduct/:id', companyController.singleProduct);
 router.get('/controlPanel/products/:userEmail', companyController.products);
