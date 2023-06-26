@@ -579,7 +579,7 @@ exports.orders = (req, res) => {
   const companyId = req.params.id;
 
   const getOrderQuery = `
-    SELECT p.pedido_id, p.fecha_pedido, e.descripcion AS estado, p.total_pedido, p.no_tarjeta, p.descripcion, c.descuento
+    SELECT p.pedido_id AS order_id, p.fecha_pedido AS order_date, e.descripcion AS state_id, p.total_pedido AS total, p.no_tarjeta AS card_number, p.descripcion AS description, c.descuento
     FROM tbl_pedido p
     INNER JOIN tbl_pedido_estado e ON p.estado_id = e.estado_id
     LEFT JOIN tbl_cupones c ON p.pedido_id = c.pedido_id
@@ -613,24 +613,24 @@ exports.orders = (req, res) => {
       const orders = [];
 
       for (const orderResult of orderResults) {
-        const currentDate = orderResult.fecha_pedido;
+        const currentDate = orderResult.order_date;
         const orderData = {
-          pedido_id: orderResult.pedido_id,
-          fecha_pedido: currentDate,
-          estado_id: orderResult.estado,
-          total_pedido: orderResult.total_pedido,
-          no_tarjeta: orderResult.no_tarjeta.substring(0, 10) + 'X'.repeat(6),
-          descripcion: orderResult.descripcion,
+          order_id: orderResult.order_id,
+          order_date: currentDate,
+          state_id: orderResult.state_id,
+          total: orderResult.total,
+          card_number: orderResult.card_number.substring(0, 10) + 'X'.repeat(6),
+          description: orderResult.description,
           combos: [],
-          productos: []
+          products: []
         };
 
         const couponDiscount = orderResult.descuento;
         if (couponDiscount) {
-          orderData.total_pedido -= orderData.total_pedido * 0.15;
+          orderData.total -= orderData.total * 0.15;
         }
 
-        db.query(getCombosQuery, [orderData.pedido_id], (error, comboResults) => {
+        db.query(getCombosQuery, [orderData.order_id], (error, comboResults) => {
           if (error) {
             console.error('Error: Failed to fetch combo data', error);
             res.status(500).json({ error: 'Error: Internal server failure' });
@@ -639,13 +639,13 @@ exports.orders = (req, res) => {
               orderData.combos.push({ name: combo.name, quantity: combo.quantity });
             }
 
-            db.query(getProductsQuery, [orderData.pedido_id], (error, productResults) => {
+            db.query(getProductsQuery, [orderData.order_id], (error, productResults) => {
               if (error) {
                 console.error('Error: Failed to fetch product data', error);
                 res.status(500).json({ error: 'Error: Internal server failure' });
               } else {
                 for (const product of productResults) {
-                  orderData.productos.push({ name: product.name, quantity: product.quantity });
+                  orderData.products.push({ name: product.name, quantity: product.quantity });
                 }
 
                 orders.push(orderData);

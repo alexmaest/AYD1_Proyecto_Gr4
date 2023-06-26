@@ -16,9 +16,10 @@ router.get('/orders/:id', companyController.orders);
 router.post('/controlPanel/addProduct', companyController.addProduct);
 router.post('/controlPanel/addCategory', companyController.addCategory);
 router.post('/controlPanel/addCombo', companyController.addCombo);
+//router.post('/orderAccept/:id', companyController.orderAccept);
+
 router.put('/controlPanel/editProduct', companyController.editProduct);
 router.delete('/controlPanel/products/:id', companyController.deleteProduct);
-//router.get('/orders', companyController.orders);
 //router.get('/reports', companyController.reports);
 
 module.exports = router;
