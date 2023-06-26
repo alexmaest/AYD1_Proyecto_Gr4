@@ -1,8 +1,9 @@
 export interface User {
-  name?: string | null | undefined
-  role?: string
-  email?: string | null | undefined
-  accessToken?: string
+  id: number
+  name: string
+  role: string
+  email: string
+  accessToken: string
 }
 
 export interface Product {
