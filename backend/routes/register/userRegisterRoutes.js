@@ -20,7 +20,7 @@ app.post('/', (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
       } else {
         if (results.length === 0) {
-          res.status(400).json({ error: 'Municipipality or department not found' });
+          res.status(400).json({ error: 'Municipality or department not found' });
           return;
         }
         const { municipio_id, departamento_id } = results[0];
@@ -44,21 +44,32 @@ app.post('/', (req, res) => {
                       res.status(500).json({ error: 'Internal Server Error' });
                     } else {
                       const usuario_id = result.insertId;
-                      const codigoCupon = generateCouponCode();
                       db.query(
-                        'INSERT INTO tbl_cupones (usuario_id, pedido_id, codigo) VALUES (?, NULL, ?)',
-                        [usuario_id, codigoCupon],
+                        'INSERT INTO tbl_informacion_usuario (usuario_id, nombres, apellidos, no_celular, municipio) VALUES (?, ?, ?, ?, ?)',
+                        [usuario_id, firstName, lastName, phoneNumber, municipio_id],
                         (error, result) => {
                           if (error) {
                             console.error(error);
                             res.status(500).json({ error: 'Internal Server Error' });
                           } else {
-                            const userData = {
-                              correo: email,
-                              nombres: firstName,
-                              apellidos: lastName,
-                            };
-                            sendEmail(userData, codigoCupon, res);
+                            const codigoCupon = generateCouponCode();
+                            db.query(
+                              'INSERT INTO tbl_cupones (usuario_id, pedido_id, codigo) VALUES (?, NULL, ?)',
+                              [usuario_id, codigoCupon],
+                              (error, result) => {
+                                if (error) {
+                                  console.error(error);
+                                  res.status(500).json({ error: 'Internal Server Error' });
+                                } else {
+                                  const userData = {
+                                    correo: email,
+                                    nombres: firstName,
+                                    apellidos: lastName,
+                                  };
+                                  sendEmail(userData, codigoCupon, res);
+                                }
+                              }
+                            );
                           }
                         }
                       );

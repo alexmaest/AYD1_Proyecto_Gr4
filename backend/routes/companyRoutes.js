@@ -17,7 +17,7 @@ router.post('/controlPanel/addCategory', companyController.addCategory);
 router.post('/controlPanel/addCombo', companyController.addCombo);
 router.put('/controlPanel/editProduct', companyController.editProduct);
 router.delete('/controlPanel/products/:id', companyController.deleteProduct);
-//router.get('/orders', adminController.orders);
-//router.get('/reports', adminController.reports);
+//router.get('/orders', companyController.orders);
+//router.get('/reports', companyController.reports);
 
 module.exports = router;

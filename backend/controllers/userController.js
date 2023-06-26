@@ -387,7 +387,7 @@ exports.shoppingCart = (req, res) => {
               fecha_usuario: null,
               estado_id,
               total_pedido: total,
-              no_tarjeta: null,
+              no_tarjeta: card_number,
               calificacion_repartidor: null,
               descripcion: description
             };
@@ -477,7 +477,7 @@ exports.shoppingCart = (req, res) => {
                       fecha_usuario: null,
                       estado_id,
                       total_pedido: total,
-                      no_tarjeta: null,
+                      no_tarjeta: card_number,
                       calificacion_repartidor: null,
                       descripcion: description
                     };
