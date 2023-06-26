@@ -16,6 +16,7 @@ type ComboCart = Combo & ComboCartInfo
 interface CartStore {
   products: ProductCart[]
   combos: ComboCart[]
+  total: number
   addProduct: (product: ProductCart) => void
   addCombo: (combo: ComboCart) => void
   removeProduct: (product: ProductCart) => void
@@ -23,6 +24,7 @@ interface CartStore {
   updateComboQuantity: (id: number, quantity: number) => void
   removeCombo: (combo: ComboCart) => void
   clearCart: () => void
+  totalCart: () => number
 }
 
 const useCartStore = create<CartStore>()(
@@ -30,6 +32,7 @@ const useCartStore = create<CartStore>()(
     (set) => ({
       products: [] as ProductCart[],
       combos: [] as ComboCart[],
+      total: 0,
       addProduct: (product) => {
         set((state) => {
           const productInCart = state.products.find((p) => p.id === product.id)
@@ -98,6 +101,17 @@ const useCartStore = create<CartStore>()(
       },
       clearCart: () => {
         set(() => ({ products: [], combos: [] }))
+      },
+      totalCart: () => {
+        const totalProducts: number = useCartStore.getState().products.reduce(
+          (acc: number, product: ProductCart) => acc + product.price * product.quantity,
+          0
+        )
+        const totalCombos: number = useCartStore.getState().combos.reduce(
+          (acc: number, combo: ComboCart) => acc + combo.price * combo.quantity,
+          0
+        )
+        return totalProducts + totalCombos
       }
     }),
     {

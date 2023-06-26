@@ -3,7 +3,7 @@ import useStore from '@/hooks/useStore'
 import useCartStore from '@/hooks/useCartStore'
 
 export default function Page () {
-  const { updateProductQuantity, updateComboQuantity } = useCartStore()
+  const { updateProductQuantity, updateComboQuantity, totalCart } = useCartStore()
   const products = useStore(useCartStore, (state) => state.products)
   const combos = useStore(useCartStore, (state) => state.combos)
 
@@ -125,6 +125,14 @@ export default function Page () {
               </div>
             ))
         }
+          <footer className='flex justify-between flex-1 w-full px-2 border-t my-2 items-center'>
+            <p>
+              Total
+            </p>
+            <p className='font-bold text-xl text-yellow-400'>
+              Q. {totalCart()}
+            </p>
+          </footer>
         </article>
       </div>
     </section>
