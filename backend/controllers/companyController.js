@@ -574,3 +574,90 @@ exports.deleteProduct = (req, res) => {
     }
   });
 };
+
+exports.orders = (req, res) => {
+  const companyId = req.params.id;
+
+  const getOrderQuery = `
+    SELECT p.pedido_id AS order_id, p.fecha_pedido AS order_date, e.descripcion AS state_id, p.total_pedido AS total, p.no_tarjeta AS card_number, p.descripcion AS description, c.descuento
+    FROM tbl_pedido p
+    INNER JOIN tbl_pedido_estado e ON p.estado_id = e.estado_id
+    LEFT JOIN tbl_cupones c ON p.pedido_id = c.pedido_id
+    WHERE p.empresa_id = ?;
+  `;
+
+  const getCombosQuery = `
+    SELECT cp.nombre AS name, pc.cantidad AS quantity
+    FROM tbl_pedido_combo pc
+    INNER JOIN tbl_combo_producto cp ON pc.combo_id = cp.combo_producto_id
+    WHERE pc.pedido_id = ?;
+  `;
+
+  const getProductsQuery = `
+    SELECT pr.nombre AS name, pp.cantidad AS quantity
+    FROM tbl_pedido_producto pp
+    INNER JOIN tbl_producto pr ON pp.producto_id = pr.producto_id
+    WHERE pp.pedido_id = ?;
+  `;
+
+  db.query(getOrderQuery, [companyId], (error, orderResults) => {
+    if (error) {
+      console.error('Error: Failed to fetch order data', error);
+      res.status(500).json({ error: 'Error: Internal server failure' });
+    } else {
+      if (orderResults.length === 0) {
+        res.status(400).json({ error: 'No orders found for the specified company' });
+        return;
+      }
+
+      const orders = [];
+
+      for (const orderResult of orderResults) {
+        const currentDate = orderResult.order_date;
+        const orderData = {
+          order_id: orderResult.order_id,
+          order_date: currentDate,
+          state_id: orderResult.state_id,
+          total: orderResult.total,
+          card_number: orderResult.card_number.substring(0, 10) + 'X'.repeat(6),
+          description: orderResult.description,
+          combos: [],
+          products: []
+        };
+
+        const couponDiscount = orderResult.descuento;
+        if (couponDiscount) {
+          orderData.total -= orderData.total * 0.15;
+        }
+
+        db.query(getCombosQuery, [orderData.order_id], (error, comboResults) => {
+          if (error) {
+            console.error('Error: Failed to fetch combo data', error);
+            res.status(500).json({ error: 'Error: Internal server failure' });
+          } else {
+            for (const combo of comboResults) {
+              orderData.combos.push({ name: combo.name, quantity: combo.quantity });
+            }
+
+            db.query(getProductsQuery, [orderData.order_id], (error, productResults) => {
+              if (error) {
+                console.error('Error: Failed to fetch product data', error);
+                res.status(500).json({ error: 'Error: Internal server failure' });
+              } else {
+                for (const product of productResults) {
+                  orderData.products.push({ name: product.name, quantity: product.quantity });
+                }
+
+                orders.push(orderData);
+
+                if (orders.length === orderResults.length) {
+                  res.json(orders);
+                }
+              }
+            });
+          }
+        });
+      }
+    }
+  });
+};
