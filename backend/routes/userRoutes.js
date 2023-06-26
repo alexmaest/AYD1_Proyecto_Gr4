@@ -12,5 +12,6 @@ router.get('/dashboard/company/combos/:id', userController.combos);
 router.get('/dashboard/company/categories/:id', userController.categories);
 
 router.post('/dashboard/search', userController.search);
+router.post('/dashboard/shoppingCart', userController.shoppingCart);
 
 module.exports = router;
