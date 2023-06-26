@@ -17,14 +17,18 @@ interface CartStore {
   products: ProductCart[]
   combos: ComboCart[]
   total: number
+  description: string
+  companyId: number
   addProduct: (product: ProductCart) => void
   addCombo: (combo: ComboCart) => void
-  removeProduct: (product: ProductCart) => void
+  deleteProduct: (id: number) => void
   updateProductQuantity: (id: number, quantity: number) => void
   updateComboQuantity: (id: number, quantity: number) => void
-  removeCombo: (combo: ComboCart) => void
+  deleteCombo: (id: number) => void
   clearCart: () => void
   totalCart: () => number
+  setDescription: (description: string) => void
+  setCompanyId: (companyId: number) => void
 }
 
 const useCartStore = create<CartStore>()(
@@ -33,6 +37,8 @@ const useCartStore = create<CartStore>()(
       products: [] as ProductCart[],
       combos: [] as ComboCart[],
       total: 0,
+      description: '',
+      companyId: 0,
       addProduct: (product) => {
         set((state) => {
           const productInCart = state.products.find((p) => p.id === product.id)
@@ -65,8 +71,8 @@ const useCartStore = create<CartStore>()(
           return { combos: [...state.combos, { ...combo }] }
         })
       },
-      removeProduct: (product) => {
-        set((state) => ({ products: state.products.filter((p) => p.id !== product.id) }))
+      deleteProduct: (id) => {
+        set((state) => ({ products: state.products.filter((p) => p.id !== id) }))
       },
       updateProductQuantity: (id, quantity) => {
         set((state) => ({
@@ -96,11 +102,11 @@ const useCartStore = create<CartStore>()(
           })
         }))
       },
-      removeCombo: (combo) => {
-        set((state) => ({ combos: state.combos.filter((c) => c.id !== combo.id) }))
+      deleteCombo: (id) => {
+        set((state) => ({ combos: state.combos.filter((c) => c.id !== id) }))
       },
       clearCart: () => {
-        set(() => ({ products: [], combos: [] }))
+        set(() => ({ products: [], combos: [], total: 0, description: '', companyId: 0 }))
       },
       totalCart: () => {
         const totalProducts: number = useCartStore.getState().products.reduce(
@@ -112,6 +118,12 @@ const useCartStore = create<CartStore>()(
           0
         )
         return totalProducts + totalCombos
+      },
+      setDescription: (description) => {
+        set(() => ({ description }))
+      },
+      setCompanyId: (companyId) => {
+        set(() => ({ companyId }))
       }
     }),
     {
