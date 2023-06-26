@@ -1,43 +1,40 @@
-import CompanyOrderCard from '@/components/CompanyOrderCard'
+'use client'
 
-const mockOrder = {
-  id: 1,
-  products: [
-    {
-      id: 1,
-      name: 'Big Mac',
-      price: 50,
-      quantity: 2
-    },
-    {
-      id: 2,
-      name: 'Coca Cola',
-      price: 20,
-      quantity: 1
-    }
-  ],
-  combos: [
-    {
-      id: 1,
-      name: 'Combo 1',
-      price: 70,
-      quantity: 1
-    }
-  ],
-  total: 140,
-  status: 'pendiente',
-  createdAt: '2021-10-10T00:00:00.000Z',
-  indications: 'Sin cebolla'
-}
+import { useEffect, useState } from 'react'
+import { useSession } from 'next-auth/react'
+import CompanyOrderCard from '@/components/CompanyOrderCard'
+import baseUrl from '@/constants/baseUrl'
+import Spinner from '@/components/Spinner'
+import { CompanyOrder } from '@/types/interfaces'
 
 function Page () {
+  const { data: session, status } = useSession()
+  const [orders, setOrders] = useState<CompanyOrder[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const id = session?.user?.id
+
+  useEffect(() => {
+    if (id === undefined) return
+    const fetchOrders = async () => {
+      const res = await fetch(`${baseUrl}/company/orders/${id}`)
+      const data = await res.json()
+      setOrders(data)
+      setIsLoading(false)
+    }
+    void fetchOrders()
+  }, [id, orders])
+
   return (
     <div className='container w-4/5 my-24 mx-auto'>
       <div className='w-full flex flex-row pb-2 border-b-2 border-al-yellow'>
         <h1 className='grow text-3xl font-semibold'>Ordenes Entrantes</h1>
       </div>
-      <div className='flex flex-col flex-wrap justify-center mt-8'>
-        <CompanyOrderCard {...mockOrder} />
+      <div className='flex flex-col flex-wrap justify-center mt-8 gap-4'>
+        {(status === 'loading' || isLoading) && <Spinner />}
+        {status === 'authenticated' && (
+          orders.map((order: CompanyOrder) =>
+            <CompanyOrderCard key={order.order_id} setOrders={setOrders} order={order} />
+          ))}
       </div>
     </div>
   )
