@@ -5,8 +5,9 @@ import SuccessAlert from './SuccessAlert'
 import React from 'react'
 
 export default function ProductMenuCard (
-  { id, name, description, price, image, category, productAdded, setProductAdded }:
+  { id, companyId, name, description, price, image, category, productAdded, setProductAdded }:
   { id: number
+    companyId: number
     name: string
     description: string
     price: number
@@ -15,10 +16,11 @@ export default function ProductMenuCard (
     productAdded: boolean
     setProductAdded: React.Dispatch<React.SetStateAction<boolean>>
   }) {
-  const { addProduct } = useCartStore()
+  const { addProduct, setCompanyId } = useCartStore()
 
   const handleAddToCart = () => {
     addProduct({ id, name, description, price, image, category, quantity: 1 })
+    setCompanyId(companyId)
     setProductAdded(true)
     setTimeout(() => {
       setProductAdded(false)

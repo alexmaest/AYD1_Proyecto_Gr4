@@ -11,6 +11,7 @@ interface Product {
 
 interface ComboMenuCardProps {
   id: number
+  companyId: number
   name: string
   description: string
   price: number
@@ -22,13 +23,14 @@ interface ComboMenuCardProps {
 }
 
 export default function ComboMenuCard (
-  { id, name, description, price, image, category, products, comboAdded, setComboAdded }:
+  { id, companyId, name, description, price, image, category, products, comboAdded, setComboAdded }:
   ComboMenuCardProps
 ) {
-  const { addCombo } = useCartStore()
+  const { addCombo, setCompanyId } = useCartStore()
 
   const handleAddToCard = () => {
     addCombo({ id, name, description, price, image, category, products, quantity: 1 })
+    setCompanyId(companyId)
     setComboAdded(true)
     setTimeout(() => {
       setComboAdded(false)
