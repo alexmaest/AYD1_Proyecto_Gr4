@@ -550,3 +550,231 @@ function addItems(user_id, company_id, description, card_number, total, products
     }
   });
 }
+
+exports.history = (req, res) => {
+  const deliveryId = req.params.id;
+
+  const getOrderQuery = `
+    SELECT 
+      p.pedido_id,
+      DATE(p.fecha_pedido) AS order_date,
+      TIME(p.fecha_pedido) AS order_hour,
+      se.nombre AS company_name,
+      pe.descripcion AS state,
+      p.total_pedido AS subtotal,
+      p.descripcion AS description,
+      CASE
+        WHEN c.pedido_id IS NOT NULL THEN p.total_pedido - (p.total_pedido * 0.15)
+        ELSE p.total_pedido
+      END AS total,
+      CASE
+        WHEN c.pedido_id IS NOT NULL THEN 'Si'
+        ELSE 'No'
+      END AS coupon_applied
+    FROM
+      tbl_pedido AS p
+      INNER JOIN tbl_solicitud_empresa AS se ON p.empresa_id = se.solicitud_empresa_id
+      INNER JOIN tbl_pedido_estado AS pe ON p.estado_id = pe.estado_id
+      LEFT JOIN tbl_cupones AS c ON p.pedido_id = c.pedido_id
+    WHERE
+      p.usuario_id = ?;
+  `;
+
+  const getOrderComboQuery = `
+    SELECT
+      pc.combo_id AS id,
+      pc.cantidad AS quantity,
+      cp.precio AS unitary_price
+    FROM
+      tbl_pedido_combo AS pc
+      INNER JOIN tbl_combo_producto AS cp ON pc.combo_id = cp.combo_producto_id
+    WHERE
+      pc.pedido_id = ?
+  `;
+
+  const getOrderProductQuery = `
+    SELECT
+      pp.producto_id AS id,
+      pp.cantidad AS quantity,
+      pr.precio_unitario AS unitary_price
+    FROM
+      tbl_pedido_producto AS pp
+      INNER JOIN tbl_producto AS pr ON pp.producto_id = pr.producto_id
+    WHERE
+      pp.pedido_id = ?
+  `;
+
+  db.query(getOrderQuery, [deliveryId], (error, results) => {
+    if (error) {
+      console.error(error);
+      return res.status(500).json({ error: 'Error retrieving orders' });
+    }
+
+    const orders = [];
+
+    let count = 0;
+
+    for (const result of results) {
+      const order = {
+        order_id: result.pedido_id,
+        order_date: result.order_date.toISOString().split('T')[0],
+        order_hour: result.order_hour,
+        company_name: result.company_name,
+        state: result.state,
+        subtotal: result.subtotal,
+        description: result.description,
+        total: result.total,
+        coupon_applied: result.coupon_applied,
+        combos: [],
+        products: []
+      };
+
+      const orderId = result.pedido_id;
+
+      db.query(getOrderComboQuery, [orderId], (error, comboResults) => {
+        if (error) {
+          console.error(error);
+        } else {
+          order.combos = comboResults.map((comboResult) => {
+            return {
+              id: comboResult.id,
+              quantity: comboResult.quantity,
+              unitary_price: comboResult.unitary_price
+            };
+          });
+        }
+
+        db.query(getOrderProductQuery, [orderId], (error, productResults) => {
+          if (error) {
+            console.error(error);
+          } else {
+            order.products = productResults.map((productResult) => {
+              return {
+                id: productResult.id,
+                quantity: productResult.quantity,
+                unitary_price: productResult.unitary_price
+              };
+            });
+          }
+
+          orders.push(order);
+
+          count++;
+
+          if (count === results.length) {
+            res.status(200).json(orders);
+          }
+        });
+      });
+    }
+  });
+};
+
+exports.ordersDelivered = (req, res) => {
+  const userId = req.params.id;
+
+  const getOrderQuery = `
+    SELECT 
+      p.pedido_id AS order_id,
+      DATE(p.fecha_usuario) AS order_date,
+      TIME(p.fecha_usuario) AS order_hour,
+      CONCAT(sr.nombres, ' ', sr.apellidos) AS repartidor_nombre,
+      se.nombre AS company_name,
+      pe.descripcion AS state,
+      p.descripcion AS description
+    FROM
+      tbl_pedido AS p
+      INNER JOIN tbl_solicitud_empresa AS se ON p.empresa_id = se.solicitud_empresa_id
+      INNER JOIN tbl_pedido_estado AS pe ON p.estado_id = pe.estado_id
+      INNER JOIN tbl_solicitud_repartidor AS sr ON p.repartidor_id = sr.solicitud_repartidor_id
+    WHERE
+      p.usuario_id = ? AND p.estado_id = 5;
+  `;
+
+  const getOrderComboQuery = `
+    SELECT
+      pc.combo_id AS id,
+      pc.cantidad AS quantity,
+      cp.nombre AS name
+    FROM
+      tbl_pedido_combo AS pc
+      INNER JOIN tbl_combo_producto AS cp ON pc.combo_id = cp.combo_producto_id
+    WHERE
+      pc.pedido_id = ?
+  `;
+
+  const getOrderProductQuery = `
+    SELECT
+      pp.producto_id AS id,
+      pp.cantidad AS quantity,
+      pr.nombre AS name
+    FROM
+      tbl_pedido_producto AS pp
+      INNER JOIN tbl_producto AS pr ON pp.producto_id = pr.producto_id
+    WHERE
+      pp.pedido_id = ?
+  `;
+
+  db.query(getOrderQuery, [userId], (error, results) => {
+    if (error) {
+      console.error(error);
+      return res.status(500).json({ error: 'Error retrieving orders' });
+    }
+
+    const orders = [];
+
+    let count = 0;
+
+    for (const result of results) {
+      const order = {
+        order_id: result.order_id,
+        deliveryMan_name: result.repartidor_nombre,
+        delivered_date: result.order_date.toISOString().split('T')[0],
+        delivered_hour: result.order_hour,
+        company_name: result.company_name,
+        state: result.state,
+        description: result.description,
+        combos: [],
+        products: []
+      };
+
+      const orderId = result.order_id;
+
+      db.query(getOrderComboQuery, [orderId], (error, comboResults) => {
+        if (error) {
+          console.error(error);
+        } else {
+          order.combos = comboResults.map((comboResult) => {
+            return {
+              id: comboResult.id,
+              quantity: comboResult.quantity,
+              name: comboResult.name
+            };
+          });
+        }
+
+        db.query(getOrderProductQuery, [orderId], (error, productResults) => {
+          if (error) {
+            console.error(error);
+          } else {
+            order.products = productResults.map((productResult) => {
+              return {
+                id: productResult.id,
+                quantity: productResult.quantity,
+                name: productResult.name
+              };
+            });
+          }
+
+          orders.push(order);
+
+          count++;
+
+          if (count === results.length) {
+            res.status(200).json(orders);
+          }
+        });
+      });
+    }
+  });
+};

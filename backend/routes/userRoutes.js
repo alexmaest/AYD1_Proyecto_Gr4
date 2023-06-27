@@ -10,6 +10,8 @@ router.get('/dashboard/company/:id', userController.company);
 router.get('/dashboard/company/products/:id', userController.products);
 router.get('/dashboard/company/combos/:id', userController.combos);
 router.get('/dashboard/company/categories/:id', userController.categories);
+router.get('/dashboard/history/:id', userController.history);
+router.get('/dashboard/ordersDelivered/:id', userController.ordersDelivered);
 
 router.post('/dashboard/search', userController.search);
 router.post('/dashboard/shoppingCart', userController.shoppingCart);
