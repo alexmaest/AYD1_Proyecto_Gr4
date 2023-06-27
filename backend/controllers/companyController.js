@@ -587,7 +587,7 @@ exports.orders = (req, res) => {
     FROM tbl_pedido p
     INNER JOIN tbl_pedido_estado e ON p.estado_id = e.estado_id
     LEFT JOIN tbl_cupones c ON p.pedido_id = c.pedido_id
-    WHERE p.empresa_id = ?;
+    WHERE p.empresa_id = ? AND p.estado_id IN (1, 2);
   `;
 
   const getCombosQuery = `
