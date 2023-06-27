@@ -14,14 +14,15 @@ function Page () {
 
   useEffect(() => {
     if (id === undefined) return
+    console.log(id)
     const fetchOrders = async () => {
-      const res = await fetch(`${baseUrl}/company/orders/${id}`)
+      const res = await fetch(`${baseUrl}/deliveryMan/orders/${id}`)
       const data = await res.json()
       setOrders(data)
       setIsLoading(false)
     }
     void fetchOrders()
-  }, [id, orders])
+  }, [id])
   return (
     <div className='container w-4/5 my-24 mx-auto'>
       <div className='w-full flex flex-row pb-2 border-b-2 border-al-yellow'>
@@ -29,9 +30,10 @@ function Page () {
       </div>
       <div className='grid grid-cols-2 justify-center mt-8 gap-4'>
         {(status === 'loading' || isLoading) && <Spinner />}
+        {status === 'authenticated' && orders.length === 0 && <h2 className='text-2xl font-semibold'>No hay ordenes disponibles</h2>}
         {status === 'authenticated' && (
           orders.map((order: DeliveryOrder) =>
-            <DeliveryOrderCard key={order.order_id} setOrders={setOrders} order={order} userId={id} />
+            <DeliveryOrderCard key={order.order_id} setOrders={setOrders} order={order} userId={id} deliver={false} />
           ))}
       </div>
     </div>

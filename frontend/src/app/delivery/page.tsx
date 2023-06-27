@@ -9,22 +9,22 @@ export default function Delivery () {
       linkTo: '/delivery/available-orders'
     },
     {
-      title: 'Pedidos asignados',
-      description: 'Mira los pedidos que tienes asignados para entrega.',
+      title: 'Pedido asignado',
+      description: 'Mira el pedido que tienes asignado para entrega.',
       image: './order.webp',
-      linkTo: '/delivery/assigned-orders'
-    },
-    {
-      title: 'Mi perfil',
-      description: 'Actualiza tus datos personales y de contacto.',
-      image: './delivery.webp',
-      linkTo: '/delivery/my-profile'
+      linkTo: '/delivery/assigned-order'
     },
     {
       title: 'HIstorial de pedidos',
       description: 'Mira los pedidos que has entregado.',
       image: './record.webp',
       linkTo: '/delivery/order-history'
+    },
+    {
+      title: 'Mi perfil',
+      description: 'Actualiza tus datos personales y de contacto.',
+      image: './delivery.webp',
+      linkTo: '/delivery/my-profile'
     }
   ]
 

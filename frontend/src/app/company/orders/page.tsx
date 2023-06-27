@@ -22,7 +22,7 @@ function Page () {
       setIsLoading(false)
     }
     void fetchOrders()
-  }, [id, orders])
+  }, [id])
 
   return (
     <div className='container w-4/5 my-24 mx-auto'>
@@ -31,6 +31,7 @@ function Page () {
       </div>
       <div className='flex flex-col flex-wrap justify-center mt-8 gap-4'>
         {(status === 'loading' || isLoading) && <Spinner />}
+        {status === 'authenticated' && orders.length === 0 && <h2 className='text-2xl font-semibold'>No hay ordenes disponibles</h2>}
         {status === 'authenticated' && (
           orders.map((order: CompanyOrder) =>
             <CompanyOrderCard key={order.order_id} setOrders={setOrders} order={order} />

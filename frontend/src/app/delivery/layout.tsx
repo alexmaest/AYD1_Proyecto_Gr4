@@ -9,8 +9,8 @@ const dropdown = {
       text: 'Solicitudes de entrega'
     },
     {
-      linkTo: '/delivery/assigned-orders',
-      text: 'Pedidos asignados'
+      linkTo: '/delivery/assigned-order',
+      text: 'Pedido asignado'
     },
     {
       linkTo: '/delivery/order-history',
