@@ -3,13 +3,23 @@ import { signIn, signOut, useSession } from 'next-auth/react'
 import Dropdown from './Dropdown'
 import Logo from './Logo'
 import Link from 'next/link'
+import useCartStore from '@/hooks/useCartStore'
 
 export default function Navbar (
   { liElements, dropdown }:
   { liElements: Array<{ linkTo: string, text: string | JSX.Element }>
     dropdown?: { title: string, styles: string, items: Array<{ text: string, linkTo: string }> }
   }) {
+  const { clearCart } = useCartStore()
   const { data: session } = useSession()
+  const id = session?.user?.id
+  const handleLogout = async () => {
+    if (id === undefined) return
+    if (session?.user?.role === 'Usuario') {
+      clearCart()
+    }
+    await signOut()
+  }
   return (
     <nav className='flex justify-between items-center px-8 fixed top-0 left-0 right-0 backdrop-blur-lg py-2'>
       <div className='flex items-center'>
@@ -36,7 +46,7 @@ export default function Navbar (
         <li className='navbar_item'>
           {session?.user != null
             ? (
-              <button onClick={async () => await signOut()}>Cerrar Sesión</button>
+              <button onClick={handleLogout}>Cerrar Sesión</button>
               )
             : (
               <button onClick={async () => await signIn()}>Iniciar Sesión</button>
