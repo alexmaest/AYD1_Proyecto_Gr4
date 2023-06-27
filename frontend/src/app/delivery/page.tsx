@@ -6,7 +6,7 @@ export default function Delivery () {
       title: 'Solicitudes de entrega',
       description: 'Listado de pedidos que se han solicitado para entrega.',
       image: './deliveries.webp',
-      linkTo: '/delivery/delivery-requests'
+      linkTo: '/delivery/available-orders'
     },
     {
       title: 'Pedidos asignados',

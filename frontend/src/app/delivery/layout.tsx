@@ -5,7 +5,7 @@ const dropdown = {
   styles: 'min-w-[150px]',
   items: [
     {
-      linkTo: '/delivery/requests',
+      linkTo: '/delivery/available-orders',
       text: 'Solicitudes de entrega'
     },
     {
