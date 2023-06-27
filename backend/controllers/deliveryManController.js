@@ -140,3 +140,62 @@ exports.orders = (req, res) => {
     return res.status(200).json(modifiedResults);
   });
 };
+
+exports.orderAccept = (req, res) => {
+  const { deliveryManId, orderId } = req.body;
+
+  const getRepartidorIdQuery = `
+    SELECT solicitud_repartidor_id
+    FROM tbl_solicitud_repartidor
+    WHERE usuario_id = ?;
+  `;
+
+  db.query(getRepartidorIdQuery, [deliveryManId], (error, repartidorIdResults) => {
+    if (error) {
+      console.error('Error: Failed to retrieve repartidor ID', error);
+      return res.status(500).json({ error: 'Error: Internal server failure' });
+    } else {
+      if (repartidorIdResults.length === 0) {
+        return res.status(404).json({ error: 'Delivery man not found' });
+      } else {
+        const repartidorId = repartidorIdResults[0].solicitud_repartidor_id;
+
+        const checkPendingOrdersQuery = `
+          SELECT pedido_id
+          FROM tbl_pedido
+          WHERE repartidor_id = ? AND estado_id = 4;
+        `;
+
+        db.query(checkPendingOrdersQuery, [repartidorId], (error, results) => {
+          if (error) {
+            console.error('Error: Failed to check pending orders', error);
+            return res.status(500).json({ error: 'Error: Internal server failure' });
+          } else {
+            if (results.length > 0) {
+              return res.status(400).json({ error: 'You have pending orders for delivery' });
+            } else {
+              const updateQuery = `
+                UPDATE tbl_pedido
+                SET repartidor_id = ?, fecha_repartidor = NOW(), estado_id = 4
+                WHERE pedido_id = ?;
+              `;
+
+              db.query(updateQuery, [repartidorId, orderId], (error, results) => {
+                if (error) {
+                  console.error('Error: Failed to update order data', error);
+                  return res.status(500).json({ error: 'Error: Internal server failure' });
+                } else {
+                  if (results.affectedRows === 0) {
+                    return res.status(404).json({ error: 'Order not found' });
+                  } else {
+                    return res.json({ message: 'Order on the way' });
+                  }
+                }
+              });
+            }
+          }
+        });
+      }
+    }
+  });
+};
