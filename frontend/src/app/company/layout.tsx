@@ -1,6 +1,29 @@
 import Navbar from '@/components/Navbar'
 
+const dropdown = {
+  title: 'Panel de Control',
+  styles: 'min-w-[150px]',
+  items: [
+    {
+      linkTo: '/company/products',
+      text: 'Productos'
+    },
+    {
+      linkTo: '/company/combos',
+      text: 'Combos'
+    },
+    {
+      linkTo: '/company/categories',
+      text: 'Categorías'
+    }
+  ]
+}
+
 const liItems = [
+  {
+    linkTo: '/company',
+    text: 'Inicio'
+  },
   {
     linkTo: '/company/orders',
     text: 'Pedidos'
@@ -8,18 +31,6 @@ const liItems = [
   {
     linkTo: '/company/reports',
     text: 'Reportes'
-  },
-  {
-    linkTo: '/company/products',
-    text: 'Productos'
-  },
-  {
-    linkTo: '/company/combos',
-    text: 'Combos'
-  },
-  {
-    linkTo: '/company/categories',
-    text: 'Categorías'
   }
 ]
 
@@ -30,7 +41,7 @@ export default function CompanyLayout ({
 }) {
   return (
     <>
-      <Navbar liElements={liItems} />
+      <Navbar liElements={liItems} dropdown={dropdown} />
       <div>{children}</div>
     </>
   )

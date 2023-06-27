@@ -67,3 +67,14 @@ export interface UserReport {
   disabledUsers: number
   enabledUsers: number
 }
+
+export interface CompanyOrder {
+  order_id: number
+  order_date: string
+  state_id: string
+  total: number
+  card_number: string
+  description: string
+  combos: any[]
+  products: any[]
+}
