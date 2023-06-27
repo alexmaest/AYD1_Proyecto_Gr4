@@ -6,10 +6,12 @@ interface DeliveryOrderCardProps {
   order: DeliveryOrder
   setOrders: any
   userId: number | undefined
+  deliver: boolean
 }
 
-function DeliveryOrderCard ({ order, setOrders, userId }: DeliveryOrderCardProps) {
+function DeliveryOrderCard ({ order, setOrders, userId, deliver }: DeliveryOrderCardProps) {
   const handleAccept = async () => {
+    if (userId === undefined) return
     try {
       const res = await fetch(`${baseUrl}/deliveryMan/orderAccept`, {
         method: 'PUT',
@@ -32,6 +34,24 @@ function DeliveryOrderCard ({ order, setOrders, userId }: DeliveryOrderCardProps
       alert('Ha ocurrido un error al intentar aceptar la orden')
     }
   }
+
+  const handleDeliver = async () => {
+    try {
+      const res = await fetch(`${baseUrl}/deliveryMan/orderDelivered/${order.order_id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      if (res.status === 200) {
+        alert('La orden se ha entregado')
+        setOrders(null)
+      }
+    } catch (error) {
+      alert('Ha ocurrido un error al intentar entregar la orden')
+    }
+  }
+
   return (
     <div className='flex flex-col rounded overflow-hidden bg-slate-400'>
       <div className='flex flex-col gap-2 px-6 py-4 grow'>
@@ -75,9 +95,19 @@ function DeliveryOrderCard ({ order, setOrders, userId }: DeliveryOrderCardProps
             {order.phone}
           </span>
         </div>
-        <button className='ml-auto black_btn' onClick={handleAccept}>
-          Aceptar Orden
-        </button>
+        {
+          !deliver
+            ? (
+              <button className='ml-auto black_btn' onClick={handleAccept}>
+                Aceptar Orden
+              </button>
+              )
+            : (
+              <button className='ml-auto black_btn' onClick={handleDeliver}>
+                Entregar
+              </button>
+              )
+        }
       </div>
     </div>
   )
