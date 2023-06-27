@@ -5,6 +5,7 @@ const deliveryManController = require('../controllers/deliveryManController');
 
 router.get('/',deliveryManController.main);
 router.get('/deliveryManInfoRequest/:correo', deliveryManController.deliveryManInfoRequest);
+router.get('/orders/:id', deliveryManController.orders);
 
 router.post('/changeLocation', deliveryManController.changeLocation);
 
