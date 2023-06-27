@@ -78,3 +78,16 @@ export interface CompanyOrder {
   combos: any[]
   products: any[]
 }
+
+export interface DeliveryOrder {
+  order_id: number
+  client_names: string
+  last_names: string
+  phone: string
+  department: string
+  municipality: string
+  company_name: string
+  description: string
+  total: number
+  coupon_applied: string
+}
