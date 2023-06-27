@@ -688,7 +688,7 @@ exports.ordersDelivered = (req, res) => {
       INNER JOIN tbl_pedido_estado AS pe ON p.estado_id = pe.estado_id
       INNER JOIN tbl_solicitud_repartidor AS sr ON p.repartidor_id = sr.solicitud_repartidor_id
     WHERE
-      p.usuario_id = ? AND p.estado_id = 5;
+      p.usuario_id = ? AND p.estado_id = 5 AND (p.calificacion_repartidor IS NULL);
   `;
 
   const getOrderComboQuery = `
@@ -771,10 +771,30 @@ exports.ordersDelivered = (req, res) => {
           count++;
 
           if (count === results.length) {
-            res.status(200).json(orders);
+            return res.status(200).json(orders);
           }
         });
       });
     }
+  });
+};
+
+exports.qualifyDeliveryMan = (req, res) => {
+  const { orderId, calification, description } = req.body;
+
+  const updateOrderQuery = `
+    UPDATE tbl_pedido
+    SET calificacion_repartidor = ?,
+        calificacion_descripcion = ?
+    WHERE pedido_id = ?;
+  `;
+
+  db.query(updateOrderQuery, [calification, description, orderId], (error, results) => {
+    if (error) {
+      console.error(error);
+      return res.status(500).json({ error: 'Error updating order' });
+    }
+    
+    return res.status(200).json({ message: 'Order qualified successfully' });
   });
 };
