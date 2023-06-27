@@ -199,3 +199,26 @@ exports.orderAccept = (req, res) => {
     }
   });
 };
+
+exports.orderDelivered = (req, res) => {
+  const orderId = req.params.id;
+
+  const updateQuery = `
+    UPDATE tbl_pedido
+    SET fecha_usuario = NOW(), estado_id = 5
+    WHERE pedido_id = ?;
+  `;
+
+  db.query(updateQuery, [orderId], (error, results) => {
+    if (error) {
+      console.error('Error: Failed to update order data', error);
+      res.status(500).json({ error: 'Error: Internal server failure' });
+    } else {
+      if (results.affectedRows === 0) {
+        res.status(404).json({ error: 'Order not found' });
+      } else {
+        res.json({ message: 'Order delivered' });
+      }
+    }
+  });
+};

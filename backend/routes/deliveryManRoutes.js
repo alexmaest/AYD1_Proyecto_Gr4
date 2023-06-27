@@ -10,6 +10,6 @@ router.get('/orders/:id', deliveryManController.orders);
 router.post('/changeLocation', deliveryManController.changeLocation);
 
 router.put('/orderAccept', deliveryManController.orderAccept);
-//router.put('/orderDelivered/:id', deliveryManController.orderDelivered);
+router.put('/orderDelivered/:id', deliveryManController.orderDelivered);
 
 module.exports = router;
