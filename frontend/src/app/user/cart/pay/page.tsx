@@ -59,20 +59,12 @@ export default function Page () {
     const pay = async () => {
       setPaying(true)
       const res = await fetcher(`${baseUrl}/user/dashboard/shoppingCart`)
-      if (res.status === 503) {
-        setPaying(false)
-        alert('Cupón ya usado')
-      }
-      if (res.status === 504) {
-        setPaying(false)
-        alert('Cupón inválido')
-      }
-      if (res.status === 200) {
+      if (res?.status === 200) {
         setPaying(false)
         alert('Compra exitosa')
       } else {
         setPaying(false)
-        alert('Error en la compra')
+        alert(res?.error)
       }
     }
 
