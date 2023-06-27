@@ -212,13 +212,70 @@ exports.orderDelivered = (req, res) => {
   db.query(updateQuery, [orderId], (error, results) => {
     if (error) {
       console.error('Error: Failed to update order data', error);
-      res.status(500).json({ error: 'Error: Internal server failure' });
+      return res.status(500).json({ error: 'Error: Internal server failure' });
     } else {
       if (results.affectedRows === 0) {
-        res.status(404).json({ error: 'Order not found' });
+        return res.status(404).json({ error: 'Order not found' });
       } else {
-        res.json({ message: 'Order delivered' });
+        return res.json({ message: 'Order delivered' });
       }
     }
+  });
+};
+
+exports.orderPending = (req, res) => {
+  const deliveryId = req.params.id;
+
+  const getOrderQuery = `
+    SELECT 
+      p.pedido_id AS order_id,
+      i.nombres AS client_names,
+      i.apellidos AS last_names,
+      i.no_celular AS phone,
+      dm.descripcion AS department,
+      cm.descripcion AS municipality,
+      se.nombre AS company_name,
+      p.descripcion AS description,
+      CASE
+        WHEN c.pedido_id IS NOT NULL THEN p.total_pedido - (p.total_pedido * 0.15)
+        ELSE p.total_pedido
+      END AS total,
+      CASE
+        WHEN c.pedido_id IS NOT NULL THEN 'Si'
+        ELSE 'No'
+      END AS coupon_applied
+    FROM
+      tbl_pedido AS p
+      INNER JOIN tbl_informacion_usuario AS i ON p.usuario_id = i.usuario_id
+      INNER JOIN tbl_cat_municipio AS cm ON i.municipio = cm.municipio_id
+      INNER JOIN tbl_solicitud_empresa AS se ON p.empresa_id = se.solicitud_empresa_id
+      INNER JOIN tbl_cat_departamento AS dm ON cm.departamento_id = dm.departamento_id
+      LEFT JOIN tbl_cupones AS c ON p.pedido_id = c.pedido_id
+    WHERE
+      p.estado_id = 4 AND
+      p.usuario_id = i.usuario_id AND
+      i.municipio = (SELECT municipio_id FROM tbl_solicitud_repartidor WHERE usuario_id = ?);
+  `;
+
+  db.query(getOrderQuery, [deliveryId], (error, results) => {
+    if (error) {
+      console.error(error);
+      return res.status(500).json({ error: 'Error retrieving orders' });
+    }
+    const modifiedResults = results.map((result) => {
+      return {
+        order_id: result.order_id,
+        client_names: result.client_names,
+        last_names: result.last_names,
+        phone: result.phone,
+        department: result.department,
+        municipality: result.municipality,
+        company_name: result.company_name,
+        description: result.description,
+        total: result.total,
+        coupon_applied: result.coupon_applied,
+      };
+    });
+    return res.status(200).json(modifiedResults);
   });
 };
