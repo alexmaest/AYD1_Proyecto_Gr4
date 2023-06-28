@@ -300,3 +300,43 @@ exports.qualification = (req, res) => {
     }
   });
 };
+
+exports.commissions = (req, res) => {
+  const deliveryManId = req.params.id;
+
+  const getCommissionQuery = `
+    SELECT p.pedido_id AS order_id, DATE(p.fecha_usuario) AS order_date, p.estado_id,
+      IF(c.pedido_id IS NOT NULL, p.total_pedido * 0.85, p.total_pedido) AS total,
+      p.total_pedido * 0.05 AS commission,
+      pe.descripcion AS state
+    FROM tbl_solicitud_repartidor sr
+    INNER JOIN tbl_pedido p ON sr.solicitud_repartidor_id = p.repartidor_id
+    LEFT JOIN tbl_cupones c ON p.pedido_id = c.pedido_id
+    INNER JOIN tbl_pedido_estado pe ON p.estado_id = pe.estado_id
+    WHERE sr.usuario_id = ? AND p.estado_id = 5;
+  `;
+
+  db.query(getCommissionQuery, [deliveryManId], (error, results) => {
+    if (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Error al obtener las comisiones del repartidor.' });
+    } else {
+      const formattedResults = results.map((result) => {
+        return {
+          order_id: result.order_id,
+          order_date: result.order_date.toISOString().split('T')[0],
+          total: result.total,
+          commission: result.commission,
+          state: result.state
+        };
+      });
+
+      let totalCommissions = 0;
+      for (const commission of results) {
+        totalCommissions += commission.commission;
+      }
+      
+      res.status(200).json({ commissions: formattedResults, total_commissions: totalCommissions });
+    }
+  });
+};
