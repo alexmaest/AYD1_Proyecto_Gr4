@@ -279,3 +279,24 @@ exports.orderPending = (req, res) => {
     return res.status(200).json(modifiedResults);
   });
 };
+
+exports.qualification = (req, res) => {
+  const deliveryManId = req.params.id;
+
+  const getQualificationQuery = `
+    SELECT IFNULL(AVG(p.calificacion_repartidor), 0) AS qualification
+    FROM tbl_solicitud_repartidor sr
+    LEFT JOIN tbl_pedido p ON sr.solicitud_repartidor_id = p.repartidor_id
+    WHERE sr.usuario_id = ?;
+  `;
+
+  db.query(getQualificationQuery, [deliveryManId], (error, results) => {
+    if (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Qualification data get failed' });
+    } else {
+      const qualification = results[0].qualification;
+      res.status(200).json({ qualification: qualification });
+    }
+  });
+};
