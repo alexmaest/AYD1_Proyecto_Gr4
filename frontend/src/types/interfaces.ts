@@ -91,3 +91,11 @@ export interface DeliveryOrder {
   total: number
   coupon_applied: string
 }
+
+export interface Commission {
+  order_id: number
+  order_date: string
+  total: number
+  commission: number
+  state: string
+}

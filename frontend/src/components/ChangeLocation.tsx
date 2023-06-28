@@ -18,6 +18,7 @@ function ChangeLocation ({ currentDepartment, currentMunicipality, userId }: IPr
   const [motive, setMotive] = useState('')
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  const [toggleRequest, setToggleRequest] = useState(false)
 
   const sendRequest = async () => {
     if (motive === '') {
@@ -46,6 +47,8 @@ function ChangeLocation ({ currentDepartment, currentMunicipality, userId }: IPr
       if (res.ok) {
         setSuccess('Solicitud enviada con éxito')
         setError('')
+        setMotive('')
+        setDepartment(departments[0])
       } else {
         setError('Ha ocurrido un error, intenta de nuevo')
         setSuccess('')
@@ -97,9 +100,9 @@ function ChangeLocation ({ currentDepartment, currentMunicipality, userId }: IPr
         <button
           className='outline_btn w-[200px]'
           type='button'
-          onClick={sendRequest}
+          onClick={() => setToggleRequest(!toggleRequest)}
         >
-          Realizar Solicitud
+          {toggleRequest ? 'Cancelar' : 'Realizar Solicitud'}
         </button>
       </div>
       {
@@ -112,81 +115,94 @@ function ChangeLocation ({ currentDepartment, currentMunicipality, userId }: IPr
           <p className='w-full mt-4 p-2 rounded-lg bg-green-500 text-white text-center' ref={successRef}>{success}</p>
         )
       }
-      <div className='flex flex-row w-full mt-4 py-4 rounded-lg bg-slate-400'>
-        <div className='w-1/2 px-3'>
-          <label className='form_label' htmlFor='department'>
-            Departamento Actual:
-          </label>
-          <p className='text-xl'>
-            {currentDepartment}
-          </p>
-        </div>
-        <div className='w-1/2 px-3'>
-          <label className='form_label' htmlFor='town'>
-            Municipio Actual:
-          </label>
-          <p className='text-xl'>
-            {currentMunicipality}
-          </p>
-        </div>
-      </div>
-      <form
-        action='post'
-        className='flex flex-col gap-4 w-full mt-4 py-4 rounded-lg bg-slate-400'
-      >
-        <div className='flex flex-row w-full'>
-          <div className='w-1/2 px-3'>
-            <label className='form_label' htmlFor='department'>
-              Nuevo Departamento:
-            </label>
-            <select
-              className='form_select'
-              name='departments'
-              id='departments'
-              onChange={(e) => {
-                setDepartment(departments.find(d => d.descripcion === e.target.value))
-              }}
-              value={department?.descripcion}
-            >
-              {departments.map((department) => (
-                <option key={department.departamento_id} value={department.descripcion}>{department.descripcion}</option>
-              ))}
-            </select>
+      {toggleRequest && (
+        <>
+          <div className='flex flex-row w-full mt-4 py-4 rounded-lg bg-slate-400'>
+            <div className='w-1/2 px-3'>
+              <label className='form_label' htmlFor='department'>
+                Departamento Actual:
+              </label>
+              <p className='text-xl'>
+                {currentDepartment}
+              </p>
+            </div>
+            <div className='w-1/2 px-3'>
+              <label className='form_label' htmlFor='town'>
+                Municipio Actual:
+              </label>
+              <p className='text-xl'>
+                {currentMunicipality}
+              </p>
+            </div>
           </div>
-          <div className='w-1/2 px-3'>
-            <label className='form_label' htmlFor='town'>
-              Nuevo Municipio:
-            </label>
-            <select
-              className='form_select'
-              name='towns'
-              id='towns'
-              onChange={(e) => {
-                setTown(towns.find(t => t.descripcion === e.target.value))
-              }}
-              value={town?.descripcion}
-            >
-              {towns.map((town) => (
-                <option key={town.municipio_id} value={town.descripcion}>{town.descripcion}</option>
-              ))}
-            </select>
-          </div>
-        </div>
-        <div className='w-full px-3'>
-          <label className='form_label' htmlFor='motive'>
-            Motivo:
-          </label>
-          <textarea
-            className='form_textarea resize-none'
-            name='motive'
-            id='motive'
-            placeholder='Motivo'
-            onChange={e => setMotive(e.target.value)}
-            value={motive}
-            required
-          />
-        </div>
-      </form>
+          <form
+            action='post'
+            className='flex flex-col gap-4 w-full mt-4 py-4 rounded-lg bg-slate-400'
+          >
+            <div className='flex flex-row w-full'>
+              <div className='w-1/2 px-3'>
+                <label className='form_label' htmlFor='department'>
+                  Nuevo Departamento:
+                </label>
+                <select
+                  className='form_select'
+                  name='departments'
+                  id='departments'
+                  onChange={(e) => {
+                    setDepartment(departments.find(d => d.descripcion === e.target.value))
+                  }}
+                  value={department?.descripcion}
+                >
+                  {departments.map((department) => (
+                    <option key={department.departamento_id} value={department.descripcion}>{department.descripcion}</option>
+                  ))}
+                </select>
+              </div>
+              <div className='w-1/2 px-3'>
+                <label className='form_label' htmlFor='town'>
+                  Nuevo Municipio:
+                </label>
+                <select
+                  className='form_select'
+                  name='towns'
+                  id='towns'
+                  onChange={(e) => {
+                    setTown(towns.find(t => t.descripcion === e.target.value))
+                  }}
+                  value={town?.descripcion}
+                >
+                  {towns.map((town) => (
+                    <option key={town.municipio_id} value={town.descripcion}>{town.descripcion}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div className='w-full px-3'>
+              <label className='form_label' htmlFor='motive'>
+                Motivo:
+              </label>
+              <textarea
+                className='form_textarea resize-none'
+                name='motive'
+                id='motive'
+                placeholder='Motivo'
+                onChange={e => setMotive(e.target.value)}
+                value={motive}
+                required
+              />
+            </div>
+            <div className='flex justify-end px-3'>
+              <button
+                className='black_btn w-[200px]'
+                type='button'
+                onClick={sendRequest}
+              >
+                Enviar
+              </button>
+            </div>
+          </form>
+        </>
+      )}
     </section>
   )
 }
