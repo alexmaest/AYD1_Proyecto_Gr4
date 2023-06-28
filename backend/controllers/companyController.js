@@ -725,3 +725,85 @@ exports.orderReady = (req, res) => {
     }
   });
 };
+
+exports.bestSeller = (req, res) => {
+  const companyId = req.params.id;
+
+  const getCompanyIdQuery = `
+    SELECT solicitud_empresa_id FROM tbl_solicitud_empresa WHERE usuario_id = ?;
+  `;
+
+  db.query(getCompanyIdQuery, [companyId], (error, companyIdResults) => {
+    if (error) {
+      console.error('Error: Failed to fetch company ID', error);
+      res.status(500).json({ error: 'Error: Internal server failure' });
+    } else {
+      if (companyIdResults.length > 0) {
+        const solicitudEmpresaId = companyIdResults[0].solicitud_empresa_id;
+
+        const getPedidoIdsQuery = `
+          SELECT pedido_id FROM tbl_pedido WHERE empresa_id = ?;
+        `;
+
+        db.query(getPedidoIdsQuery, [solicitudEmpresaId], (error, pedidoIdsResults) => {
+          if (error) {
+            console.error('Error: Failed to fetch pedido IDs', error);
+            res.status(500).json({ error: 'Error: Internal server failure' });
+          } else {
+            if (pedidoIdsResults.length > 0) {
+              const pedidoIds = pedidoIdsResults.map(result => result.pedido_id);
+
+              const getProductCountsQuery = `
+                SELECT producto_id, SUM(cantidad) AS total_cantidad
+                FROM tbl_pedido_producto
+                WHERE pedido_id IN (?)
+                GROUP BY producto_id
+                ORDER BY total_cantidad DESC
+                LIMIT 1;
+              `;
+
+              db.query(getProductCountsQuery, [pedidoIds], (error, productCountsResults) => {
+                if (error) {
+                  console.error('Error: Failed to fetch product counts', error);
+                  res.status(500).json({ error: 'Error: Internal server failure' });
+                } else {
+                  if (productCountsResults.length > 0) {
+                    const mostSoldProductId = productCountsResults[0].producto_id;
+
+                    const getProductNameQuery = `
+                      SELECT nombre
+                      FROM tbl_producto
+                      WHERE producto_id = ?;
+                    `;
+
+                    db.query(getProductNameQuery, [mostSoldProductId], (error, productNameResults) => {
+                      if (error) {
+                        console.error('Error: Failed to fetch product name', error);
+                        res.status(500).json({ error: 'Error: Internal server failure' });
+                      } else {
+                        if (productNameResults.length > 0) {
+                          const productName = productNameResults[0].nombre;
+                          const count = productCountsResults[0].total_cantidad;
+
+                          res.json({ productName, count });
+                        } else {
+                          res.status(500).json({ error: 'Product name not found' });
+                        }
+                      }
+                    });
+                  } else {
+                    res.status(500).json({ error: 'No products found in the orders' });
+                  }
+                }
+              });
+            } else {
+              res.status(500).json({ error: 'No orders found for the company' });
+            }
+          }
+        });
+      } else {
+        res.status(500).json({ error: 'Company not found' });
+      }
+    }
+  });
+};

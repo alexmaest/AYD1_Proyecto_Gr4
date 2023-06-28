@@ -12,6 +12,7 @@ router.get('/controlPanel/singleProduct/:id', companyController.singleProduct);
 router.get('/controlPanel/products/:userEmail', companyController.products);
 router.get('/controlPanel/combos/:userEmail', companyController.combos);
 router.get('/orders/:id', companyController.orders);
+router.get('/bestSeller/:id', companyController.bestSeller);
 
 router.post('/controlPanel/addProduct', companyController.addProduct);
 router.post('/controlPanel/addCategory', companyController.addCategory);
