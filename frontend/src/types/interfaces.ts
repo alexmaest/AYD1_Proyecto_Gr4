@@ -99,3 +99,18 @@ export interface Commission {
   commission: number
   state: string
 }
+
+export interface DeliveryHistory {
+  order_id: number
+  client_names: string
+  last_names: string
+  phone: string
+  department: string
+  municipality: string
+  company_name: string
+  calification: number
+  calification_description: string
+  order_date: string
+  state: string
+  total: number
+}
