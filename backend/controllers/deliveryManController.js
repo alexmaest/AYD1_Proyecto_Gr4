@@ -344,10 +344,6 @@ exports.commissions = (req, res) => {
 exports.history = (req, res) => {
   const deliveryId = req.params.id;
 
-  const getDeliveryManIdQuery = `
-    SELECT solicitud_repartidor_id FROM tbl_solicitud_repartidor WHERE usuario_id = ?;
-  `;
-
   const getOrderQuery = `
     SELECT 
       p.pedido_id AS order_id,
