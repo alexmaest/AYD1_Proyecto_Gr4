@@ -354,7 +354,7 @@ exports.history = (req, res) => {
       cm.descripcion AS municipality,
       se.nombre AS company_name,
       DATE(p.fecha_pedido) AS order_date,
-      IFNULL(p.calificacion_repartidor, '*Aun no entregado') AS calification,
+      IFNULL(p.calificacion_repartidor, -1) AS calification,
       IFNULL(p.calificacion_descripcion, '*Aun no entregado') AS calification_description,
       pe.descripcion AS state,
       CASE

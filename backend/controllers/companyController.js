@@ -822,7 +822,7 @@ exports.history = (req, res) => {
       IFNULL(se.nombres, '*Aun no asignado') AS deliveryMan_firstNames,
       IFNULL(se.apellidos, '*Aun no asignado') AS deliveryMan_lastNames,
       DATE(p.fecha_pedido) AS order_date,
-      IFNULL(p.calificacion_repartidor, '*Aun no entregado') AS calification,
+      IFNULL(p.calificacion_repartidor, -1) AS calification,
       IFNULL(p.calificacion_descripcion, '*Aun no entregado') AS calification_description,
       pe.descripcion AS state,
       CASE
