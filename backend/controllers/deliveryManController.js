@@ -340,3 +340,66 @@ exports.commissions = (req, res) => {
     }
   });
 };
+
+exports.history = (req, res) => {
+  const deliveryId = req.params.id;
+
+  const getDeliveryManIdQuery = `
+    SELECT solicitud_repartidor_id FROM tbl_solicitud_repartidor WHERE usuario_id = ?;
+  `;
+
+  const getOrderQuery = `
+    SELECT 
+      p.pedido_id AS order_id,
+      i.nombres AS client_names,
+      i.apellidos AS last_names,
+      i.no_celular AS phone,
+      dm.descripcion AS department,
+      cm.descripcion AS municipality,
+      se.nombre AS company_name,
+      DATE(p.fecha_pedido) AS order_date,
+      IFNULL(p.calificacion_repartidor, '*Aun no entregado') AS calification,
+      IFNULL(p.calificacion_descripcion, '*Aun no entregado') AS calification_description,
+      pe.descripcion AS state,
+      CASE
+        WHEN c.pedido_id IS NOT NULL THEN p.total_pedido - (p.total_pedido * 0.15)
+        ELSE p.total_pedido
+      END AS total
+    FROM
+      tbl_pedido AS p
+      INNER JOIN tbl_informacion_usuario AS i ON p.usuario_id = i.usuario_id
+      INNER JOIN tbl_cat_municipio AS cm ON i.municipio = cm.municipio_id
+      INNER JOIN tbl_solicitud_empresa AS se ON p.empresa_id = se.solicitud_empresa_id
+      INNER JOIN tbl_cat_departamento AS dm ON cm.departamento_id = dm.departamento_id
+      INNER JOIN tbl_pedido_estado AS pe ON p.estado_id = pe.estado_id
+      LEFT JOIN tbl_cupones AS c ON p.pedido_id = c.pedido_id
+    WHERE
+      p.estado_id IN (4, 5) AND
+      p.usuario_id = i.usuario_id AND
+      p.repartidor_id = (SELECT solicitud_repartidor_id FROM tbl_solicitud_repartidor WHERE usuario_id = ?);
+  `;
+
+  db.query(getOrderQuery, [deliveryId], (error, results) => {
+    if (error) {
+      console.error(error);
+      return res.status(500).json({ error: 'Error al obtener los pedidos.' });
+    }
+    const modifiedResults = results.map((result) => {
+      return {
+        order_id: result.order_id,
+        client_names: result.client_names,
+        last_names: result.last_names,
+        phone: result.phone,
+        department: result.department,
+        municipality: result.municipality,
+        company_name: result.company_name,
+        calification: result.calification,
+        calification_description: result.calification_description,
+        order_date: result.order_date.toISOString().split('T')[0],
+        state: result.state,
+        total: result.total,
+      };
+    });
+    return res.status(200).json(modifiedResults);
+  });
+};
