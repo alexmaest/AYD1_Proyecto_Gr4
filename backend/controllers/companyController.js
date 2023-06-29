@@ -725,3 +725,145 @@ exports.orderReady = (req, res) => {
     }
   });
 };
+
+exports.bestSeller = (req, res) => {
+  const companyId = req.params.id;
+
+  const getCompanyIdQuery = `
+    SELECT solicitud_empresa_id FROM tbl_solicitud_empresa WHERE usuario_id = ?;
+  `;
+
+  db.query(getCompanyIdQuery, [companyId], (error, companyIdResults) => {
+    if (error) {
+      console.error('Error: Failed to fetch company ID', error);
+      res.status(500).json({ error: 'Error: Internal server failure' });
+    } else {
+      if (companyIdResults.length > 0) {
+        const solicitudEmpresaId = companyIdResults[0].solicitud_empresa_id;
+
+        const getPedidoIdsQuery = `
+          SELECT pedido_id FROM tbl_pedido WHERE empresa_id = ?;
+        `;
+
+        db.query(getPedidoIdsQuery, [solicitudEmpresaId], (error, pedidoIdsResults) => {
+          if (error) {
+            console.error('Error: Failed to fetch pedido IDs', error);
+            res.status(500).json({ error: 'Error: Internal server failure' });
+          } else {
+            if (pedidoIdsResults.length > 0) {
+              const pedidoIds = pedidoIdsResults.map(result => result.pedido_id);
+
+              const getProductCountsQuery = `
+                SELECT producto_id, SUM(cantidad) AS total_cantidad
+                FROM tbl_pedido_producto
+                WHERE pedido_id IN (?)
+                GROUP BY producto_id
+                ORDER BY total_cantidad DESC
+                LIMIT 1;
+              `;
+
+              db.query(getProductCountsQuery, [pedidoIds], (error, productCountsResults) => {
+                if (error) {
+                  console.error('Error: Failed to fetch product counts', error);
+                  res.status(500).json({ error: 'Error: Internal server failure' });
+                } else {
+                  if (productCountsResults.length > 0) {
+                    const mostSoldProductId = productCountsResults[0].producto_id;
+
+                    const getProductNameQuery = `
+                      SELECT nombre
+                      FROM tbl_producto
+                      WHERE producto_id = ?;
+                    `;
+
+                    db.query(getProductNameQuery, [mostSoldProductId], (error, productNameResults) => {
+                      if (error) {
+                        console.error('Error: Failed to fetch product name', error);
+                        res.status(500).json({ error: 'Error: Internal server failure' });
+                      } else {
+                        if (productNameResults.length > 0) {
+                          const productName = productNameResults[0].nombre;
+                          const count = productCountsResults[0].total_cantidad;
+
+                          res.json({ productName, count });
+                        } else {
+                          res.status(500).json({ error: 'Product name not found' });
+                        }
+                      }
+                    });
+                  } else {
+                    res.status(500).json({ error: 'No products found in the orders' });
+                  }
+                }
+              });
+            } else {
+              res.status(500).json({ error: 'No orders found for the company' });
+            }
+          }
+        });
+      } else {
+        res.status(500).json({ error: 'Company not found' });
+      }
+    }
+  });
+};
+
+exports.history = (req, res) => {
+  const companyId = req.params.id;
+
+  const getOrderQuery = `
+    SELECT 
+      p.pedido_id AS order_id,
+      i.nombres AS client_firstNames,
+      i.apellidos AS client_lastNames,
+      i.no_celular AS client_phone,
+      dm.descripcion AS department,
+      cm.descripcion AS municipality,
+      IFNULL(se.nombres, '*Aun no asignado') AS deliveryMan_firstNames,
+      IFNULL(se.apellidos, '*Aun no asignado') AS deliveryMan_lastNames,
+      DATE(p.fecha_pedido) AS order_date,
+      IFNULL(p.calificacion_repartidor, -1) AS calification,
+      IFNULL(p.calificacion_descripcion, '*Aun no entregado') AS calification_description,
+      pe.descripcion AS state,
+      CASE
+        WHEN c.pedido_id IS NOT NULL THEN p.total_pedido - (p.total_pedido * 0.15)
+        ELSE p.total_pedido
+      END AS total
+    FROM
+      tbl_pedido AS p
+      INNER JOIN tbl_informacion_usuario AS i ON p.usuario_id = i.usuario_id
+      INNER JOIN tbl_cat_municipio AS cm ON i.municipio = cm.municipio_id
+      LEFT JOIN tbl_solicitud_repartidor AS se ON p.repartidor_id = se.solicitud_repartidor_id
+      INNER JOIN tbl_cat_departamento AS dm ON cm.departamento_id = dm.departamento_id
+      INNER JOIN tbl_pedido_estado AS pe ON p.estado_id = pe.estado_id
+      LEFT JOIN tbl_cupones AS c ON p.pedido_id = c.pedido_id
+    WHERE
+      p.usuario_id = i.usuario_id AND
+      p.empresa_id = (SELECT solicitud_empresa_id FROM tbl_solicitud_empresa WHERE usuario_id = ?);
+`;
+
+  db.query(getOrderQuery, [companyId], (error, results) => {
+    if (error) {
+      console.error(error);
+      return res.status(500).json({ error: 'Error al obtener los pedidos.' });
+    }
+    const modifiedResults = results.map((result) => {
+      return {
+        order_id: result.order_id,
+        client_firstNames: result.client_firstNames,
+        client_lastNames: result.client_lastNames,
+        client_lastNamesphone: result.client_phone,
+        department: result.department,
+        municipality: result.municipality,
+        deliveryMan_firstNames: result.deliveryMan_firstNames,
+        deliveryMan_lastNames: result.deliveryMan_lastNames,
+        calification: result.calification,
+        calification_description: result.calification_description,
+        order_date: result.order_date.toISOString().split('T')[0],
+        state: result.state,
+        total: result.total,
+      };
+    });
+    return res.status(200).json(modifiedResults);
+  });
+};

@@ -583,6 +583,7 @@ exports.history = (req, res) => {
   const getOrderComboQuery = `
     SELECT
       pc.combo_id AS id,
+      cp.nombre AS name,
       pc.cantidad AS quantity,
       cp.precio AS unitary_price
     FROM
@@ -595,6 +596,7 @@ exports.history = (req, res) => {
   const getOrderProductQuery = `
     SELECT
       pp.producto_id AS id,
+      pr.nombre AS name,
       pp.cantidad AS quantity,
       pr.precio_unitario AS unitary_price
     FROM
@@ -638,6 +640,7 @@ exports.history = (req, res) => {
           order.combos = comboResults.map((comboResult) => {
             return {
               id: comboResult.id,
+              name: comboResult.name,
               quantity: comboResult.quantity,
               unitary_price: comboResult.unitary_price
             };
@@ -651,6 +654,7 @@ exports.history = (req, res) => {
             order.products = productResults.map((productResult) => {
               return {
                 id: productResult.id,
+                name: productResult.name,
                 quantity: productResult.quantity,
                 unitary_price: productResult.unitary_price
               };

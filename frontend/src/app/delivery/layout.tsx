@@ -5,12 +5,12 @@ const dropdown = {
   styles: 'min-w-[150px]',
   items: [
     {
-      linkTo: '/delivery/requests',
+      linkTo: '/delivery/available-orders',
       text: 'Solicitudes de entrega'
     },
     {
-      linkTo: '/delivery/assigned-orders',
-      text: 'Pedidos asignados'
+      linkTo: '/delivery/assigned-order',
+      text: 'Pedido asignado'
     },
     {
       linkTo: '/delivery/order-history',

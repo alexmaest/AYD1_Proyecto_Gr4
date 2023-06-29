@@ -7,6 +7,9 @@ router.get('/',deliveryManController.main);
 router.get('/deliveryManInfoRequest/:correo', deliveryManController.deliveryManInfoRequest);
 router.get('/orders/:id', deliveryManController.orders);
 router.get('/orderPending/:id', deliveryManController.orderPending);
+router.get('/qualification/:id', deliveryManController.qualification);
+router.get('/commissions/:id', deliveryManController.commissions);
+router.get('/history/:id', deliveryManController.history);
 
 router.post('/changeLocation', deliveryManController.changeLocation);
 

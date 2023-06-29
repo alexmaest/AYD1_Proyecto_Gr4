@@ -81,3 +81,7 @@ body {
 .navbar_item {
   @apply text-al-white font-semibold text-center border-2 border-transparent rounded-full transition duration-0 ease-in-out p-2  hover:border-al-yellow  hover:duration-700 hover:scale-110;
 }
+
+.outline_input {
+  @apply rounded-full border-2 border-al-yellow py-1.5 px-5 text-al-yellow p-2 text-center text-lg font-medium flex items-center justify-center bg-transparent;
+}
