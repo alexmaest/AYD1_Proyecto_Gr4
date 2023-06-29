@@ -134,3 +134,19 @@ export interface DeliveryHistory {
   state: string
   total: number
 }
+
+export interface CompanyHistory {
+  order_id: number
+  client_firstNames: string
+  client_lastNames: string
+  client_lastNamesphone: string
+  department: string
+  municipality: string
+  deliveryMan_firstNames: string
+  deliveryMan_lastNames: string
+  calification: number
+  calification_description: string
+  order_date: string
+  state: string
+  total: number
+}

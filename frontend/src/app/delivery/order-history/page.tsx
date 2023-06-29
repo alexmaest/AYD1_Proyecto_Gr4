@@ -95,9 +95,13 @@ function Page () {
                 <p className='text-lg font-semibold'>Empresa: {order.company_name}</p>
                 <p className='text-lg font-semibold'>{order.order_date}</p>
               </div>
+              <div className='flex flex-row justify-between'>
+                <p className='text-lg font-semibold'>Departamento: {order.department}</p>
+                <p className='text-lg font-semibold'>Municipio: {order.municipality}</p>
+              </div>
               {order.calification !== -1 && (
-                <div className='flex flex-row justify-between'>
-                  <p className='text-lg font-semibold'>Calificación:</p>
+                <div className='flex flex-row justify-end'>
+                  <p className='text-lg font-semibold mr-4'>Calificación:</p>
                   <Rating
                     style={{ maxWidth: 150 }}
                     value={order.calification}
