@@ -852,7 +852,7 @@ exports.history = (req, res) => {
         order_id: result.order_id,
         client_firstNames: result.client_firstNames,
         client_lastNames: result.client_lastNames,
-        client_lastNamesphone: result.client_phone,
+        client_phone: result.client_phone,
         department: result.department,
         municipality: result.municipality,
         deliveryMan_firstNames: result.deliveryMan_firstNames,
