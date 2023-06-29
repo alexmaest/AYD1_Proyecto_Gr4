@@ -95,6 +95,7 @@ export interface UserOrderHistory {
 
 export interface ItemsUserOrderHistory {
   id: number
+  name: string
   quantity: number
   unitary_price: number
 }
