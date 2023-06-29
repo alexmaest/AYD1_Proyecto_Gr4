@@ -525,7 +525,7 @@ exports.companyTop5 = (req, res) => {
   db.query(top5Query, (err, result) => {
     if (err) {
       console.error(err);
-      return res.status(500).json({ error: 'Error en el servidor' });
+      return res.status(500).json({ error: 'Internal server error' });
     }
 
     const top5Companies = result.map((row) => {
@@ -537,5 +537,34 @@ exports.companyTop5 = (req, res) => {
     });
 
     return res.status(200).json(top5Companies);
+  });
+};
+
+exports.deliveryTop5 = (req, res) => {
+  const top5Query = `
+    SELECT se.solicitud_repartidor_id, se.nombres, se.apellidos, COUNT(p.repartidor_id) AS cantidad_entregas
+    FROM tbl_solicitud_repartidor se
+    LEFT JOIN tbl_pedido p ON se.solicitud_repartidor_id = p.repartidor_id
+    GROUP BY se.solicitud_repartidor_id, se.nombres, se.apellidos
+    ORDER BY cantidad_entregas DESC
+    LIMIT 5;
+  `;
+
+  db.query(top5Query, (err, result) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ error: 'Internal server error' });
+    }
+
+    const top5DeliveryMan = result.map((row) => {
+      return {
+        deliveryMan_id: row.solicitud_repartidor_id,
+        first_name: row.nombres,
+        last_name: row.apellidos,
+        deliveries_number: row.cantidad_entregas,
+      };
+    });
+
+    return res.status(200).json(top5DeliveryMan);
   });
 };
