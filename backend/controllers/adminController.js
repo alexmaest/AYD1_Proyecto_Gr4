@@ -444,3 +444,53 @@ exports.reports = (req, res) => {
     });
   });
 };
+
+exports.usersToDisable = (req, res) => {
+  const selectQuery = `
+    SELECT u.usuario_id AS user_id, i.nombres AS first_names, i.apellidos AS last_names, DATE(i.fecha_registro)  AS register_date, u.correo AS email
+    FROM tbl_usuario u
+    JOIN tbl_informacion_usuario i ON u.usuario_id = i.usuario_id
+    WHERE u.habilitado = 1 AND u.rol_usuario_id = 2;
+  `;
+
+  db.query(selectQuery, (err, result) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ error: 'Error en el servidor' });
+    }
+
+    const users = result.map((row) => {
+      return {
+        user_id: row.user_id,
+        first_names: row.first_names,
+        last_names: row.last_names,
+        register_date: row.register_date.toISOString().split('T')[0],
+        email: row.email,
+      };
+    });
+    return res.status(200).json(users);
+  });
+};
+
+exports.userDisabled = (req, res) => {
+  const userId = req.params.id;
+
+  const updateQuery = `
+    UPDATE tbl_usuario
+    SET habilitado = 0
+    WHERE usuario_id = ${userId};
+  `;
+
+  db.query(updateQuery, (err, result) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ error: 'Internal server error' });
+    }
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'User not founded' });
+    }
+
+    return res.status(200).json({ message: 'User successfully disabled' });
+  });
+};
