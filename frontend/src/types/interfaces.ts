@@ -78,3 +78,23 @@ export interface CompanyOrder {
   combos: any[]
   products: any[]
 }
+
+export interface UserOrderHistory {
+  combos: ItemsUserOrderHistory[]
+  company_name: string
+  coupon_applied: string
+  description: string
+  order_date: Date
+  order_hour: string
+  order_id: number
+  products: ItemsUserOrderHistory[]
+  state: string
+  subtotal: number
+  total: number
+}
+
+export interface ItemsUserOrderHistory {
+  id: number
+  quantity: number
+  unitary_price: number
+}
