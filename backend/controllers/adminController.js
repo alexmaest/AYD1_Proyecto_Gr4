@@ -542,11 +542,11 @@ exports.companyTop5 = (req, res) => {
 
 exports.deliveryTop5 = (req, res) => {
   const top5Query = `
-    SELECT se.solicitud_repartidor_id, se.nombres, se.apellidos, COUNT(p.repartidor_id) AS cantidad_entregas
-    FROM tbl_solicitud_repartidor se
-    LEFT JOIN tbl_pedido p ON se.solicitud_repartidor_id = p.repartidor_id
-    GROUP BY se.solicitud_repartidor_id, se.nombres, se.apellidos
-    ORDER BY cantidad_entregas DESC
+    SELECT sr.solicitud_repartidor_id, sr.nombres, sr.apellidos, IFNULL(AVG(p.calificacion_repartidor), 0) AS promedio_calificacion
+    FROM tbl_solicitud_repartidor sr
+    LEFT JOIN tbl_pedido p ON sr.solicitud_repartidor_id = p.repartidor_id
+    GROUP BY sr.solicitud_repartidor_id, sr.nombres, sr.apellidos
+    ORDER BY promedio_calificacion DESC
     LIMIT 5;
   `;
 
@@ -561,7 +561,7 @@ exports.deliveryTop5 = (req, res) => {
         deliveryMan_id: row.solicitud_repartidor_id,
         first_name: row.nombres,
         last_name: row.apellidos,
-        deliveries_number: row.cantidad_entregas,
+        average_rating: row.promedio_calificacion,
       };
     });
 
