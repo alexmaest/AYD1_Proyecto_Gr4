@@ -135,6 +135,24 @@ export interface DeliveryHistory {
   total: number
 }
 
+export interface OrdersDelivered {
+  combos: ItemsOrdersDelivered[]
+  company_name: string
+  delivered_date: Date
+  delivered_hour: string
+  deliveryMan_name: string
+  description: string
+  order_id: number
+  products: ItemsOrdersDelivered[]
+  state: string
+}
+
+export interface ItemsOrdersDelivered {
+  id: number
+  name: string
+  quantity: number
+}
+
 export interface CompanyHistory {
   order_id: number
   client_firstNames: string

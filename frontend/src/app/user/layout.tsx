@@ -11,18 +11,6 @@ const liItems = [
     text: 'Buscar Restaurante'
   },
   {
-    linkTo: '/user/order',
-    text: 'Pedir Producto'
-  },
-  {
-    linkTo: '/user/cart',
-    text: 'Carrito'
-  },
-  {
-    linkTo: '/user/coupons',
-    text: 'Cupones'
-  },
-  {
     linkTo: '/user/order-history',
     text: 'Historial de pedidos'
   },
