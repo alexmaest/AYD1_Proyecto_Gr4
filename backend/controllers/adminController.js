@@ -444,3 +444,157 @@ exports.reports = (req, res) => {
     });
   });
 };
+
+exports.usersToDisable = (req, res) => {
+  const selectQuery = `
+    SELECT u.usuario_id AS user_id, i.nombres AS first_names, i.apellidos AS last_names, DATE(i.fecha_registro)  AS register_date, u.correo AS email
+    FROM tbl_usuario u
+    JOIN tbl_informacion_usuario i ON u.usuario_id = i.usuario_id
+    WHERE u.habilitado = 1 AND u.rol_usuario_id = 2;
+  `;
+
+  db.query(selectQuery, (err, result) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ error: 'Error en el servidor' });
+    }
+
+    const users = result.map((row) => {
+      return {
+        user_id: row.user_id,
+        first_names: row.first_names,
+        last_names: row.last_names,
+        register_date: row.register_date.toISOString().split('T')[0],
+        email: row.email,
+      };
+    });
+    return res.status(200).json(users);
+  });
+};
+
+exports.userDisabled = (req, res) => {
+  const userId = req.params.id;
+
+  const checkQuery = `
+    SELECT COUNT(*) AS count
+    FROM tbl_pedido
+    WHERE usuario_id = ${userId} AND estado_id <> 5;
+  `;
+
+  db.query(checkQuery, (err, result) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ error: 'Internal server error' });
+    }
+
+    const count = result[0].count;
+    if (count > 0) {
+      return res.status(403).json({ error: 'Cannot disable user because they have pending orders' });
+    }
+
+    const updateQuery = `
+      UPDATE tbl_usuario
+      SET habilitado = 0
+      WHERE usuario_id = ${userId};
+    `;
+
+    db.query(updateQuery, (err, result) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).json({ error: 'Internal server error' });
+      }
+
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ error: 'Usuario not founded' });
+      }
+      return res.status(200).json({ message: 'User successfully disabled' });
+    });
+  });
+};
+
+exports.companyTop5 = (req, res) => {
+  const top5Query = `
+    SELECT se.solicitud_empresa_id, se.nombre, COUNT(p.empresa_id) AS cantidad_pedidos
+    FROM tbl_solicitud_empresa se
+    LEFT JOIN tbl_pedido p ON se.solicitud_empresa_id = p.empresa_id
+    GROUP BY se.solicitud_empresa_id, se.nombre
+    ORDER BY cantidad_pedidos DESC
+    LIMIT 5;
+  `;
+
+  db.query(top5Query, (err, result) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ error: 'Internal server error' });
+    }
+
+    const top5Companies = result.map((row) => {
+      return {
+        company_id: row.solicitud_empresa_id,
+        name: row.nombre,
+        orders_number: row.cantidad_pedidos,
+      };
+    });
+
+    return res.status(200).json(top5Companies);
+  });
+};
+
+exports.deliveryTop5 = (req, res) => {
+  const top5Query = `
+    SELECT sr.solicitud_repartidor_id, sr.nombres, sr.apellidos, IFNULL(AVG(p.calificacion_repartidor), 0) AS promedio_calificacion
+    FROM tbl_solicitud_repartidor sr
+    LEFT JOIN tbl_pedido p ON sr.solicitud_repartidor_id = p.repartidor_id
+    GROUP BY sr.solicitud_repartidor_id, sr.nombres, sr.apellidos
+    ORDER BY promedio_calificacion DESC
+    LIMIT 5;
+  `;
+
+  db.query(top5Query, (err, result) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ error: 'Internal server error' });
+    }
+
+    const top5DeliveryMan = result.map((row) => {
+      return {
+        deliveryMan_id: row.solicitud_repartidor_id,
+        first_name: row.nombres,
+        last_name: row.apellidos,
+        average_rating: row.promedio_calificacion,
+      };
+    });
+
+    return res.status(200).json(top5DeliveryMan);
+  });
+};
+
+exports.productsTopGlobal = (req, res) => {
+  const topQuery = `
+    SELECT pp.producto_id AS product_id, p.nombre AS nombre_producto, SUM(pp.cantidad) AS cantidad, se.nombre AS empresa
+    FROM tbl_pedido_producto pp
+    JOIN tbl_producto p ON pp.producto_id = p.producto_id
+    JOIN tbl_pedido pd ON pp.pedido_id = pd.pedido_id
+    JOIN tbl_solicitud_empresa se ON pd.empresa_id = se.solicitud_empresa_id
+    GROUP BY pp.producto_id, p.nombre, se.nombre
+    ORDER BY cantidad DESC;
+  `;
+
+  db.query(topQuery, (err, result) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ error: 'Internal server error' });
+    }
+
+    const topGlobal = result.map((row) => {
+      return {
+        product_id: row.product_id,
+        product_name: row.nombre_producto,
+        quantity: row.cantidad,
+        company: row.empresa,
+      };
+    });
+
+    return res.status(200).json(topGlobal);
+  });
+};

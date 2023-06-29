@@ -614,6 +614,10 @@ exports.history = (req, res) => {
 
     const orders = [];
 
+    if (results.length === 0) {
+      return res.status(404).json({ error: 'No orders found' });
+    }
+
     let count = 0;
 
     for (const result of results) {
@@ -636,37 +640,39 @@ exports.history = (req, res) => {
       db.query(getOrderComboQuery, [orderId], (error, comboResults) => {
         if (error) {
           console.error(error);
-        } else {
-          order.combos = comboResults.map((comboResult) => {
-            return {
-              id: comboResult.id,
-              name: comboResult.name,
-              quantity: comboResult.quantity,
-              unitary_price: comboResult.unitary_price
-            };
-          });
+          return res.status(500).json({ error: 'Error retrieving orders' });
         }
+
+        order.combos = comboResults.map((comboResult) => {
+          return {
+            id: comboResult.id,
+            name: comboResult.name,
+            quantity: comboResult.quantity,
+            unitary_price: comboResult.unitary_price
+          };
+        });
 
         db.query(getOrderProductQuery, [orderId], (error, productResults) => {
           if (error) {
             console.error(error);
-          } else {
-            order.products = productResults.map((productResult) => {
-              return {
-                id: productResult.id,
-                name: productResult.name,
-                quantity: productResult.quantity,
-                unitary_price: productResult.unitary_price
-              };
-            });
+            return res.status(500).json({ error: 'Error retrieving orders' });
           }
+
+          order.products = productResults.map((productResult) => {
+            return {
+              id: productResult.id,
+              name: productResult.name,
+              quantity: productResult.quantity,
+              unitary_price: productResult.unitary_price
+            };
+          });
 
           orders.push(order);
 
           count++;
 
           if (count === results.length) {
-            res.status(200).json(orders);
+            return res.status(200).json(orders);
           }
         });
       });
@@ -727,6 +733,10 @@ exports.ordersDelivered = (req, res) => {
 
     const orders = [];
 
+    if (results.length === 0) {
+      return res.status(404).json({ error: 'No orders found' });
+    }
+
     let count = 0;
 
     for (const result of results) {
@@ -747,35 +757,37 @@ exports.ordersDelivered = (req, res) => {
       db.query(getOrderComboQuery, [orderId], (error, comboResults) => {
         if (error) {
           console.error(error);
-        } else {
-          order.combos = comboResults.map((comboResult) => {
-            return {
-              id: comboResult.id,
-              quantity: comboResult.quantity,
-              name: comboResult.name
-            };
-          });
+          return res.status(500).json({ error: 'Error getting orders' });
         }
+
+        order.combos = comboResults.map((comboResult) => {
+          return {
+            id: comboResult.id,
+            quantity: comboResult.quantity,
+            name: comboResult.name
+          };
+        });
 
         db.query(getOrderProductQuery, [orderId], (error, productResults) => {
           if (error) {
             console.error(error);
-          } else {
-            order.products = productResults.map((productResult) => {
-              return {
-                id: productResult.id,
-                quantity: productResult.quantity,
-                name: productResult.name
-              };
-            });
+            return res.status(500).json({ error: 'Error getting orders' });
           }
+
+          order.products = productResults.map((productResult) => {
+            return {
+              id: productResult.id,
+              quantity: productResult.quantity,
+              name: productResult.name
+            };
+          });
 
           orders.push(order);
 
           count++;
 
           if (count === results.length) {
-            return res.status(200).json(orders);
+            res.status(200).json(orders);
           }
         });
       });

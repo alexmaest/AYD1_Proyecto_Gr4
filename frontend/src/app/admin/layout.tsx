@@ -4,6 +4,10 @@ const liItems = [
   {
     linkTo: '/admin',
     text: 'Inicio'
+  },
+  {
+    linkTo: '/admin/reports',
+    text: 'Reportes'
   }
 ]
 

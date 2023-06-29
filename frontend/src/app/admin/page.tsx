@@ -24,7 +24,7 @@ export default function DeliveryManDashboard () {
       title: 'Deshabilitar usuario',
       description: 'Deshabilita un usuario de la plataforma.',
       image: './ban-user.webp',
-      linkTo: '/admin/my-profile'
+      linkTo: '/admin/disable-user'
     },
     {
       title: 'Mantenimiento',
