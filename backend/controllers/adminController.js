@@ -475,22 +475,67 @@ exports.usersToDisable = (req, res) => {
 exports.userDisabled = (req, res) => {
   const userId = req.params.id;
 
-  const updateQuery = `
-    UPDATE tbl_usuario
-    SET habilitado = 0
-    WHERE usuario_id = ${userId};
+  const checkQuery = `
+    SELECT COUNT(*) AS count
+    FROM tbl_pedido
+    WHERE usuario_id = ${userId} AND estado_id <> 5;
   `;
 
-  db.query(updateQuery, (err, result) => {
+  db.query(checkQuery, (err, result) => {
     if (err) {
       console.error(err);
       return res.status(500).json({ error: 'Internal server error' });
     }
 
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ error: 'User not founded' });
+    const count = result[0].count;
+    if (count > 0) {
+      return res.status(403).json({ error: 'Cannot disable user because they have pending orders' });
     }
 
-    return res.status(200).json({ message: 'User successfully disabled' });
+    const updateQuery = `
+      UPDATE tbl_usuario
+      SET habilitado = 0
+      WHERE usuario_id = ${userId};
+    `;
+
+    db.query(updateQuery, (err, result) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).json({ error: 'Internal server error' });
+      }
+
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ error: 'Usuario not founded' });
+      }
+      return res.status(200).json({ message: 'User successfully disabled' });
+    });
+  });
+};
+
+exports.companyTop5 = (req, res) => {
+  const top5Query = `
+    SELECT se.solicitud_empresa_id, se.nombre, COUNT(p.empresa_id) AS cantidad_pedidos
+    FROM tbl_solicitud_empresa se
+    LEFT JOIN tbl_pedido p ON se.solicitud_empresa_id = p.empresa_id
+    GROUP BY se.solicitud_empresa_id, se.nombre
+    ORDER BY cantidad_pedidos DESC
+    LIMIT 5;
+  `;
+
+  db.query(top5Query, (err, result) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ error: 'Error en el servidor' });
+    }
+
+    const top5Companies = result.map((row) => {
+      return {
+        company_id: row.solicitud_empresa_id,
+        name: row.nombre,
+        orders_number: row.cantidad_pedidos,
+      };
+    });
+
+    return res.status(200).json(top5Companies);
   });
 };

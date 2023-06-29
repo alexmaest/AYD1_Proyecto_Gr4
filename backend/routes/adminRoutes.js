@@ -10,6 +10,7 @@ router.get('/deliveryRequests', adminController.deliveryRequests);
 router.get('/deliveryChangeLocationRequests', adminController.deliveryChangeLocationRequest);
 router.get('/reports', adminController.reports);
 router.get('/usersToDisable', adminController.usersToDisable);
+router.get('/companyTop5', adminController.companyTop5);
 
 router.put('/userDisabled/:id', adminController.userDisabled);
 
