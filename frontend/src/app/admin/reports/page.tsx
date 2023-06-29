@@ -32,6 +32,15 @@ export default function Page () {
           </div>
           <h1 className='font-semibold'>Top 5 Repartidores</h1>
         </Link>
+        <Link
+          href='/admin/reports/products'
+          className='flex justify-between items-center rounded-lg p-4 cursor-pointer border hover:border-yellow-300 duration-1000 transition-all'
+        >
+          <div className='flex justify-center items-center'>
+            <UserLogo className='fill-sky-500' />
+          </div>
+          <h1 className='font-semibold'>Productos mas vendidos</h1>
+        </Link>
       </div>
     </div>
   )
