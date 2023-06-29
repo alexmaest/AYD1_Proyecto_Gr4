@@ -568,3 +568,33 @@ exports.deliveryTop5 = (req, res) => {
     return res.status(200).json(top5DeliveryMan);
   });
 };
+
+exports.productsTopGlobal = (req, res) => {
+  const topQuery = `
+    SELECT pp.producto_id AS product_id, p.nombre AS nombre_producto, SUM(pp.cantidad) AS cantidad, se.nombre AS empresa
+    FROM tbl_pedido_producto pp
+    JOIN tbl_producto p ON pp.producto_id = p.producto_id
+    JOIN tbl_pedido pd ON pp.pedido_id = pd.pedido_id
+    JOIN tbl_solicitud_empresa se ON pd.empresa_id = se.solicitud_empresa_id
+    GROUP BY pp.producto_id, p.nombre, se.nombre
+    ORDER BY cantidad DESC;
+  `;
+
+  db.query(topQuery, (err, result) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ error: 'Internal server error' });
+    }
+
+    const topGlobal = result.map((row) => {
+      return {
+        product_id: row.product_id,
+        product_name: row.nombre_producto,
+        quantity: row.cantidad,
+        company: row.empresa,
+      };
+    });
+
+    return res.status(200).json(topGlobal);
+  });
+};

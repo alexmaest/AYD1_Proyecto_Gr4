@@ -12,6 +12,7 @@ router.get('/reports', adminController.reports);
 router.get('/usersToDisable', adminController.usersToDisable);
 router.get('/companyTop5', adminController.companyTop5);
 router.get('/deliveryTop5', adminController.deliveryTop5);
+router.get('/productsTopGlobal', adminController.productsTopGlobal);
 
 router.put('/userDisabled/:id', adminController.userDisabled);
 
