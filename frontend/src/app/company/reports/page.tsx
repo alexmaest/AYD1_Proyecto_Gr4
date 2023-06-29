@@ -155,7 +155,7 @@ function Page () {
                       <p className='text-lg font-semibold'>Q{order.total}</p>
                     </div>
                     <div className='flex flex-row justify-between'>
-                      <p className='text-lg font-semibold'>Teléfono: {order.client_lastNamesphone}</p>
+                      <p className='text-lg font-semibold'>Teléfono: {order.client_phone}</p>
                       <p className='text-lg font-semibold'>{order.calification_description}</p>
                     </div>
                     <div className='flex flex-row justify-between'>

@@ -139,7 +139,7 @@ export interface CompanyHistory {
   order_id: number
   client_firstNames: string
   client_lastNames: string
-  client_lastNamesphone: string
+  client_phone: string
   department: string
   municipality: string
   deliveryMan_firstNames: string
