@@ -14,7 +14,7 @@ interface User {
 
 function Page () {
   const [users, setUsers] = useState<User[]>([])
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
 
   const handleDisable = async (id: number) => {
     try {

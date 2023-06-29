@@ -14,6 +14,15 @@ export default function Page () {
           </div>
           <h1 className='font-semibold'>Reporte de Usuarios</h1>
         </Link>
+        <Link
+          href='/admin/reports/companies'
+          className='flex justify-center items-center rounded-lg p-4 cursor-pointer border hover:border-yellow-300 duration-1000 transition-all'
+        >
+          <div className='flex justify-center items-center'>
+            <UserLogo className='fill-al-orange' />
+          </div>
+          <h1 className='font-semibold'>Top 5 Empresas</h1>
+        </Link>
       </div>
     </div>
   )
