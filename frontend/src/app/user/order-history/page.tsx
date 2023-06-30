@@ -35,11 +35,12 @@ export default function Page () {
         {
           orders.map((order) => (
             <section key={order.order_id}>
-              <h2 className='text-yellow-500'>Order ID: {order.order_id}</h2>
+              <h2 className='text-yellow-500 font-bold'>Order ID: {order.order_id}</h2>
+              <p>Company: {order.company_name}</p>
               <p>Order Date: {order.order_date.toString()}</p>
+              <p>Order Hour: {order.order_hour}</p>
               <p>Order Status: {order.state}</p>
               <p>Order Total: Q. {order.total}</p>
-              <p>Order Items:</p>
               <ul className='flex flex-col'>
                 {
                   order.products.map((product) => (
