@@ -47,11 +47,12 @@ function base64_encode(file) {
     REGISTER USER
 ---------------------------------*/ 
 describe('Testing register user(client) correctly : POST /register', function() {
+    const ahora = Date.now();
     const userData =
             {
-                firstName:"usr2", 
-                lastName:"lstnm2", 
-                email:"notexist3@alchilazo.com", 
+                firstName:"usr"+ahora, 
+                lastName:"lstnm", 
+                email:Date.now()+"@alchilazo.com", 
                 password:"123", 
                 phoneNumber:"11115555",
                 municipality:"Santa Cruz Verapaz",
@@ -103,7 +104,7 @@ describe('Testing register user(client) correctly : POST /register', function() 
         .field('licenseType', deliveryData.licenseType)
         .field('hasVehicle', deliveryData.hasVehicle)
         .field('password', deliveryData.password)
-        .attach('file', path.resolve(__dirname,'./helpers/filetest.pdf') ,{filename:'filetest.pdf'})
+        .attach('cv', path.resolve(__dirname,'./helpers/testFile.pdf') ,'testFile.pdf')
         .then((err,res) => {
             if (err) console.error(err);
             expect(res.statusCode).toBe(200); // Asegúrate de que el servidor responda con el código de estado correcto
@@ -173,7 +174,7 @@ describe('Testing endpoint root admin: GET /admin/deliveryRequests', function() 
             {
                 id:"3", 
                 state:"Rechazado", 
-                description:"repartidor rechazado"
+                description:"Delivery Rejected"
             };
     it('Get response from /admin/deliveryRequests', async function() {
         const response = await request(app)
@@ -190,7 +191,7 @@ describe('Testing get company request: POST /admin/companyRequests', function() 
     {
         id:"1", 
         state:"Aprobado", 
-        description:"repartidor aprobado"
+        description:"Company Approved"
     };
     it('GET /admin/companyRequests', async function() {
         const response = await request(app)
@@ -207,7 +208,7 @@ describe('Testing reject company: POST /admin/companyRequests', function() {
     {
         id:"2", 
         state:"Rechazado", 
-        description:"repartidor rechazado"
+        description:"Company rejected"
     };
     it('POST response from /admin/companyRequests', async function() {
         const response = await request(app)
@@ -217,6 +218,15 @@ describe('Testing reject company: POST /admin/companyRequests', function() {
         expect(response.statusCode).toBe(200);
     });
 }); 
+
+describe('Testing /admin/deliveryChangeLocationRequests', function() {
+    it('Get response from /admin/deliveryChangeLocationRequests', async function() {
+        const response = await request(app)
+        .get('/admin/deliveryChangeLocationRequests')
+        .set('Accept', 'application/json');
+        expect(response.statusCode).toBe(200);
+    });
+});
 
 //post delivery change location aprove
 describe('Testing aprove chande location request: POST /admin/deliveryChangeLocationApprove', function() {
@@ -250,6 +260,50 @@ describe('Testing aprove chande location request: POST /admin/deliveryChangeLoca
     });
 });
 
+describe('Testing /admin/usersToDisable', function() {
+    it('Get response from /admin/usersToDisable', async function() {
+        const response = await request(app)
+        .get('/admin/usersToDisable')
+        .set('Accept', 'application/json');
+        expect(response.statusCode).toBe(200);
+    });
+
+    it('put response from /admin/userDisabled', async function() {
+        const response = await request(app)
+        .put('/admin/userDisabled/3')
+        .set('Accept', 'application/json');
+        expect(response.statusCode).toBe(200);
+    });
+});
+
+//companyTop5
+describe('Testing /admin/companyTop5', function() {
+    it('Get response from /admin/companyTop5', async function() {
+        const response = await request(app)
+        .get('/admin/companyTop5')
+        .set('Accept', 'application/json');
+        expect(response.statusCode).toBe(200);
+    });
+});
+
+//deliveryTop5
+describe('Testing /admin/deliveryTop5', function() {
+    it('Get response from /admin/deliveryTop5', async function() {
+        const response = await request(app)
+        .get('/admin/deliveryTop5')
+        .set('Accept', 'application/json');
+        expect(response.statusCode).toBe(200);
+    });
+});
+//productsTopGlobal
+describe('Testing /admin/productsTopGlobal', function() {
+    it('Get response from /admin/productsTopGlobal', async function() {
+        const response = await request(app)
+        .get('/admin/productsTopGlobal')
+        .set('Accept', 'application/json');
+        expect(response.statusCode).toBe(200);
+    });
+});
 
 /*-----------------------------
     LOGIN CONTROLLER
@@ -274,7 +328,7 @@ describe('Testing login POST /login', function() {
     it('POST admin /login', async function() {
         const response = await request(app)
         .post('/login')
-        .send({correo: 'test@alchilazo.com', clave: 'admin'})
+        .send({correo: 'admin@alchilazo.com', clave: 'admin'})
         .set('Accept', 'application/json');
         expect(response.statusCode).toBe(200);
     });
@@ -290,7 +344,7 @@ describe('Testing login POST /login', function() {
     it('POST admin /login', async function() {
         const response = await request(app)
         .post('/login')
-        .send({correo: 'test@alchilazo.com', clave: '#BadPassword'})
+        .send({correo: 'admin@alchilazo.com', clave: '#BadPassword'})
         .set('Accept', 'application/json');
         expect(response.statusCode).toBe(401);
     });
@@ -311,7 +365,7 @@ describe('Testing login POST /login', function() {
         });
     });
 
-    describe('GET /company/controlPanel/categories', function() {
+    describe('Testing /company/controlPanel/categories', function() {
         
         it('Get response from /company/controlPanel/categories', async function() {
             const result = await request(app)
@@ -382,7 +436,6 @@ describe('Testing login POST /login', function() {
     describe('Testing ADD endpoints from /company/controlPanel', function() {
         it('POST request to /company/controlPanel/addProduct', async function() {
             var imageBase64= base64_encode(path.resolve(__dirname,'./helpers/testImage.png'));
-            //console.log(imageBase64);
             const result = await request(app)
             .post('/company/controlPanel/addProduct')
             .set('Accept', 'application/json')
@@ -394,7 +447,6 @@ describe('Testing login POST /login', function() {
                 email:"empresa1@alchilazo.com", 
                 image:'data:image/png;base64,'+imageBase64
             });
-            //console.log(result);
             expect(result.statusCode).toEqual(200);
         });
     });
@@ -413,3 +465,138 @@ describe('Testing endpoing departments: GET /departments', function() {
         expect(response.statusCode).toBe(200);
     });
 });
+
+/*-----------------------------
+    USER CONTROLLER
+---------------------------------*/
+
+describe('Testing endpoint root user: GET /user', function() {
+    it('Get response from /user/id', async function() {
+        const response = await request(app)
+        .get('/user/2')
+        .set('Accept', 'application/json');
+        expect(response.statusCode).toBe(200);
+    });
+});
+
+// dashboard/categories
+describe('Testing endpoint dashboard/categories: GET /dashboard/categories', function() {
+    it('Get response from /dashboard/categories', async function() {
+        const response = await request(app)
+        .get('/user/dashboard/categories')
+        .set('Accept', 'application/json');
+        expect(response.statusCode).toBe(200);
+    });
+});
+
+// dashboard/company/:id
+describe('Testing endpoint dashboard/company/:id: GET /dashboard/company/:id', function() {
+    it('Get response from /dashboard/company/:id', async function() {
+        const response = await request(app)
+        .get('/user/dashboard/company/1')
+        .set('Accept', 'application/json');
+        expect(response.statusCode).toBe(200);
+    });
+});
+
+// dashboard/company/products/:id
+describe('Testing endpoint dashboard/company/products/:id: GET /dashboard/company/products/:id', function() {
+    it('Get response from /dashboard/company/products/:id', async function() {
+        const response = await request(app)
+        .get('/user/dashboard/company/products/1')
+        .set('Accept', 'application/json');
+        expect(response.statusCode).toBe(200);
+    });
+});
+
+// dashboard/company/combos/:id
+describe('Testing endpoint dashboard/company/combos/:id: GET /dashboard/company/combos/:id', function() {
+    it('Get response from /dashboard/company/combos/:id', async function() {
+        const response = await request(app)
+        .get('/user/dashboard/company/combos/1')
+        .set('Accept', 'application/json');
+        expect(response.statusCode).toBe(200);
+    });
+});
+
+// dashboard/company/categories/:id
+describe('Testing endpoint dashboard/company/categories/:id: GET /dashboard/company/categories/:id', function() {
+    it('Get response from /dashboard/company/categories/:id', async function() {
+        const response = await request(app)
+        .get('/user/dashboard/company/categories/1')
+        .set('Accept', 'application/json');
+        expect(response.statusCode).toBe(200);
+    });
+});
+
+// dashboard/history/:id
+// Historial de pedidos(debe haber al menos un pedido)
+/*describe('Testing endpoint dashboard/history/:id: GET /dashboard/history/:id', function() { 
+    it('Get response from /dashboard/history/:id', async function() {
+        const response = await request(app)
+        .get('/user/dashboard/history/1')
+        .set('Accept', 'application/json');
+        expect(response.statusCode).toBe(200);
+    });
+});*/
+
+// dashboard/ordersDelivered/:id
+// Calificar repartidor(debe haber al menos un pedido entregado)
+/*describe('Testing endpoint dashboard/ordersDelivered/:id: GET /dashboard/ordersDelivered/:id', function() {
+    it('Get response from /dashboard/ordersDelivered/:id', async function() {
+        const response = await request(app)
+        .get('/user/dashboard/ordersDelivered/2')
+        .set('Accept', 'application/json');
+        expect(response.statusCode).toBe(200);
+    });
+});*/
+
+// PUT dashboard/qualifyDeliveryMan
+
+
+// POST dashboard/search
+describe('Testing endpoint dashboard/search: POST /dashboard/search', function() {
+    it('Get response from /dashboard/search', async function() {
+        const response = await request(app)
+        .post('/user/dashboard/search')
+        .set('Accept', 'application/json')
+        .send({search:'pizza'});
+        expect(response.statusCode).toBe(200);
+    });
+});
+
+
+// POST dashboard/shoppingCart
+// - Prueba correcta
+/*describe('Testing endpoint dashboard/shoppingCart: POST /dashboard/shoppingCart', function() {
+    it('Get response from /dashboard/shoppingCart', async function() {
+        const response = await request(app)
+        .post('/user/dashboard/shoppingCart')
+        .set('Accept', 'application/json')
+        .send({
+                user_id:2,
+                company_id:1,
+                description:"shoping description",
+                card_number:"123456789",
+                cvv:"111",
+                due_date:"2023-06-30",
+                coupon:"ABCD1234",
+                total:13.56,
+                products:[
+                    {id:1,quantity:1}
+                ],
+                combos:[
+                    {id:1,quantity:2}
+                ]
+            });
+            expect(response.statusCode).toBe(200);
+        });
+    }); */
+
+
+// - Prueba tarjeta no valida
+// - No ha productos en el carrito
+
+/*-----------------------------
+    DELIVERY CONTROLLER
+---------------------------------*/
