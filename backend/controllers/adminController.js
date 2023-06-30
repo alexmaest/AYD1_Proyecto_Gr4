@@ -195,6 +195,18 @@ exports.deliveryChangeLocationRequestApprove = (req, res) => {
       SET estado_solicitud_id = 2 
       WHERE cambios_ubicacion_id = ${request_id};
 
+      UPDATE tbl_solicitud_repartidor
+      SET municipio_id = (
+        SELECT destino_municipio_id
+        FROM tbl_cambio_ubicacion_repartidor
+        WHERE cambios_ubicacion_id = ${request_id}
+      )
+      WHERE solicitud_repartidor_id = (
+        SELECT repartidor_id
+        FROM tbl_cambio_ubicacion_repartidor
+        WHERE cambios_ubicacion_id = ${request_id}
+      );
+
       SELECT tbl_usuario.correo, tbl_solicitud_repartidor.nombres, tbl_solicitud_repartidor.apellidos
       FROM tbl_solicitud_repartidor
       INNER JOIN tbl_usuario ON tbl_solicitud_repartidor.usuario_id = tbl_usuario.usuario_id
@@ -208,9 +220,7 @@ exports.deliveryChangeLocationRequestApprove = (req, res) => {
         console.error(err);
         res.status(500).send('Error: Sending request');
       } else {
-        const userData = result[2][0];
-        console.log(userData);
-        console.log(userData.correo);
+        const userData = result[3][0];
         if (userData && userData.correo) {
           sendEmail2(userData, 'Aprobado', res);
         } else {
@@ -240,8 +250,6 @@ exports.deliveryChangeLocationRequestApprove = (req, res) => {
         res.status(500).send('Error: Sending request');
       } else {
         const userData = result[2][0];
-        console.log(userData);
-        console.log(userData.correo);
         if (userData && userData.correo) {
           sendEmail2(userData, 'Rechazado', res);
         } else {
