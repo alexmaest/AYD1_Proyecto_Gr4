@@ -16,13 +16,13 @@ exports.deliveryManInfoRequest = (req, res) => {
       d.descripcion as 'departamento',
       m.descripcion as 'municipio',
       case when tiene_vehiculo=1 then 'si' else 'no' end as 'tiene_vehiculo',
-      lc.descripcion as 'tipo_licencia',
+      CASE WHEN sr.tipo_licencia_id IS NULL THEN 'No tiene' ELSE lc.descripcion END as 'tipo_licencia',
       documento_url
     FROM tbl_solicitud_repartidor sr
     INNER JOIN tbl_usuario u ON sr.usuario_id = u.usuario_id
     INNER JOIN tbl_cat_municipio m ON sr.municipio_id = m.municipio_id
     INNER JOIN tbl_cat_departamento d ON m.departamento_id = d.departamento_id
-    INNER JOIN tbl_cat_tipo_licencia_conducir lc ON sr.tipo_licencia_id = lc.tipo_licencia_conducir_id
+    LEFT JOIN tbl_cat_tipo_licencia_conducir lc ON sr.tipo_licencia_id = lc.tipo_licencia_conducir_id
     WHERE u.rol_usuario_id = 3 AND u.habilitado = 1 AND u.correo = ?;
   `;
 
