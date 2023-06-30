@@ -4,6 +4,8 @@ const app = require('../app');
 const db = require('../database.js');
 const path = require('path');
 
+
+
 // function to encode file data to base64 encoded string
 function base64_encode(file) {
     // read binary data
@@ -12,18 +14,19 @@ function base64_encode(file) {
     return new Buffer.from(bitmap).toString('base64');
 }
 
-   /*beforeAll(async () => {
+   beforeAll(async () => {
        
         if (process.env.NODE_ENV === "test") {
             console.log('Clean data tests');
             db.query('CALL test.sp_cleanDataAndReset();', function (err, result) {
-                if (err) throw err;
+                if (err) console.error( err);
                 console.log("Database cleaned");
             });
         }else{
-            console.log('Not in test enviroment');
+            console.log('Test can run only in NODE_ENV=`test` enviroment');
+            process.exit(0);
         }
-    });*/
+    });
 
     console.log('Enviroment:'+ process.env.NODE_ENV);
 
@@ -72,26 +75,23 @@ describe('Testing register user(client) correctly : POST /register', function() 
 /*-----------------------------
     REGISTER DELIVERY
 ---------------------------------*/ 
-/*describe('Testing endpoint to register an Delivery : POST /deliveryRegister', function() {
+describe('Testing endpoint to register an Delivery : POST /deliveryRegister', function() {
     const deliveryData =
     { 
     name:"rep1", 
     lastName:"lstrep1", 
-    email:"rep1@test.com", 
+    email:Date.now()+"rep1@test.com", 
     phone:"99998888", 
-    town:"gt", 
+    town:"Guatemala", 
     department:"Guatemala", 
-    hasLicense:1, 
+    hasLicense:"true", 
     licenseType:"C", 
-    hasVehicle:1, 
+    hasVehicle:"true", 
     password:"123"  
     }; 
 
     it('POST data to endpoint: /deliveryRegister/', async function() {
-        
-       // let buff = fs.readFileSync(path.resolve(__dirname,'./helpers/filetest.pdf'))
-       // let base64data = buffer.from.toString('base64');
-        // const response = 
+        const response = 
         await request(app)
         .post('/deliveryRegister')
         .field('name', deliveryData.name)
@@ -104,20 +104,80 @@ describe('Testing register user(client) correctly : POST /register', function() 
         .field('licenseType', deliveryData.licenseType)
         .field('hasVehicle', deliveryData.hasVehicle)
         .field('password', deliveryData.password)
-        .attach('cv', path.resolve(__dirname,'./helpers/testFile.pdf') ,'testFile.pdf')
-        .then((err,res) => {
-            if (err) console.error(err);
-            expect(res.statusCode).toBe(200); // Asegúrate de que el servidor responda con el código de estado correcto
-           // Verifica que el nombre del archivo sea correcto en la respuesta
-          done();
-        });
+        .attach('cv', path.resolve(__dirname,'./helpers/testFile.pdf'));
+        expect(response.statusCode).toBe(200); 
     }); 
-});*/
+
+    it('POST email alredy exist /deliveryRegister/', async function() {
+        const response = 
+        await request(app)
+        .post('/deliveryRegister')
+        .field('name', deliveryData.name)
+        .field('lastName', deliveryData.lastName)
+        .field('email', deliveryData.email)
+        .field('phone', deliveryData.phone)
+        .field('town', deliveryData.town)
+        .field('department', deliveryData.department)
+        .field('hasLicense', deliveryData.hasLicense)
+        .field('licenseType', deliveryData.licenseType)
+        .field('hasVehicle', deliveryData.hasVehicle)
+        .field('password', deliveryData.password)
+        .attach('cv', path.resolve(__dirname,'./helpers/testFile.pdf'));
+        expect(response.statusCode).toBe(400); 
+    }); 
+
+    it('POST delivery without license /deliveryRegister/', async function() {
+        const response = 
+        await request(app)
+        .post('/deliveryRegister')
+        .field('name', deliveryData.name)
+        .field('lastName', deliveryData.lastName)
+        .field('email', Date.now()+"rep1@test.com")
+        .field('phone', deliveryData.phone)
+        .field('town', deliveryData.town)
+        .field('department', deliveryData.department)
+        .field('hasLicense', 'false')
+        .field('licenseType', deliveryData.licenseType)
+        .field('hasVehicle', 'false')
+        .field('password', deliveryData.password)
+        .attach('cv', path.resolve(__dirname,'./helpers/testFile.pdf'));
+        expect(response.statusCode).toBe(200); 
+    }); 
+});
+
+
 
 /*-----------------------------
     REGISTER COMPANY
 ---------------------------------*/ 
-
+describe('Testing resgiser company', function() {
+    const companyData={
+        name:"comptest1", 
+        email:Date.now()+"@alchilazo.com", 
+        description:"empresa test 1", 
+        type:'Restaurante', 
+        town:"Guatemala", 
+        department:"Guatemala", 
+        zone:"zona 1", 
+        password:"123"
+    };
+    it('POST /companyRegister', async function() {
+        const response = await request(app)
+        .post('/companyRegister')
+        .set('Accept', 'application/json')
+        .field('name', companyData.name)
+        .field('email', companyData.email)
+        .field('description', companyData.description)
+        .field('type', companyData.type)
+        .field('town', companyData.town)
+        .field('department', companyData.department)
+        .field('zone', companyData.zone)
+        .field('password', companyData.password)
+        .attach('pdfFiles', path.resolve(__dirname,'./helpers/testFile.pdf'))
+        ;
+        expect(response.statusCode).toBe(200);     
+    });
+    });
 
 
 /*-----------------------------
@@ -529,34 +589,12 @@ describe('Testing endpoint dashboard/company/categories/:id: GET /dashboard/comp
     });
 });
 
-// dashboard/history/:id
-// Historial de pedidos(debe haber al menos un pedido)
-/*describe('Testing endpoint dashboard/history/:id: GET /dashboard/history/:id', function() { 
-    it('Get response from /dashboard/history/:id', async function() {
-        const response = await request(app)
-        .get('/user/dashboard/history/1')
-        .set('Accept', 'application/json');
-        expect(response.statusCode).toBe(200);
-    });
-});*/
-
-// dashboard/ordersDelivered/:id
-// Calificar repartidor(debe haber al menos un pedido entregado)
-/*describe('Testing endpoint dashboard/ordersDelivered/:id: GET /dashboard/ordersDelivered/:id', function() {
-    it('Get response from /dashboard/ordersDelivered/:id', async function() {
-        const response = await request(app)
-        .get('/user/dashboard/ordersDelivered/2')
-        .set('Accept', 'application/json');
-        expect(response.statusCode).toBe(200);
-    });
-});*/
-
 // PUT dashboard/qualifyDeliveryMan
 
 
 // POST dashboard/search
-describe('Testing endpoint dashboard/search: POST /dashboard/search', function() {
-    it('Get response from /dashboard/search', async function() {
+describe('Testing endpoint /user/dashboard', function() {
+    it('POST response from /search', async function() {
         const response = await request(app)
         .post('/user/dashboard/search')
         .set('Accept', 'application/json')
@@ -568,35 +606,129 @@ describe('Testing endpoint dashboard/search: POST /dashboard/search', function()
 
 // POST dashboard/shoppingCart
 // - Prueba correcta
-/*describe('Testing endpoint dashboard/shoppingCart: POST /dashboard/shoppingCart', function() {
-    it('Get response from /dashboard/shoppingCart', async function() {
+describe('Testing endpoint dashboard/shoppingCart: POST /dashboard/shoppingCart', function() {
+    it('POST shopping without cuppon /dashboard/shoppingCart', async function() {
         const response = await request(app)
         .post('/user/dashboard/shoppingCart')
         .set('Accept', 'application/json')
         .send({
-                user_id:2,
-                company_id:1,
-                description:"shoping description",
-                card_number:"123456789",
-                cvv:"111",
-                due_date:"2023-06-30",
-                coupon:"ABCD1234",
-                total:13.56,
-                products:[
-                    {id:1,quantity:1}
-                ],
-                combos:[
-                    {id:1,quantity:2}
-                ]
+            "user_id":2,
+            "company_id":1,
+            "description":"shoping description",
+            "card_number":"123456789",
+            "cvv":"111",
+            "due_date":"2023-06-30",
+            "coupon":"",
+            "total":13.56,
+            "products":[
+                {"id":1,"quantity":1}
+            ],
+            "combos":[
+            {   "id":1,"quantity":2}
+            ]
             });
             expect(response.statusCode).toBe(200);
         });
-    }); */
 
+        it('POST shopping with cupon /dashboard/shoppingCart', async function() {
+            const response = await request(app)
+            .post('/user/dashboard/shoppingCart')
+            .set('Accept', 'application/json')
+            .send({
+                "user_id":2,
+                "company_id":1,
+                "description":"shoping description",
+                "card_number":"123456789",
+                "cvv":"111",
+                "due_date":"2023-06-30",
+                "coupon":"ABCD1234",
+                "total":13.56,
+                "products":[
+                    {"id":1,"quantity":1}
+                ],
+                "combos":[
+                {   "id":1,"quantity":2}
+                ]
+                });
+                expect(response.statusCode).toBe(200);
+            });
+            // - mismo cupo deberia dar error
+            it('POST second shopping with same cupon /dashboard/shoppingCart', async function() {
+                const response = await request(app)
+                .post('/user/dashboard/shoppingCart')
+                .set('Accept', 'application/json')
+                .send({
+                    "user_id":2,
+                    "company_id":1,
+                    "description":"shoping description",
+                    "card_number":"123456789",
+                    "cvv":"111",
+                    "due_date":"2023-06-30",
+                    "coupon":"ABCD1234",
+                    "total":13.56,
+                    "products":[
+                        {"id":1,"quantity":1}
+                    ],
+                    "combos":[
+                    {   "id":1,"quantity":2}
+                    ]
+                    });
+                    expect(response.statusCode).toBe(503);
+                }); 
 
-// - Prueba tarjeta no valida
-// - No ha productos en el carrito
+                it('POST shopping without products or combos /dashboard/shoppingCart', async function() {
+                    const response = await request(app)
+                    .post('/user/dashboard/shoppingCart')
+                    .set('Accept', 'application/json')
+                    .send({
+                        "user_id":2,
+                        "company_id":1,
+                        "description":"shoping description",
+                        "card_number":"123456789",
+                        "cvv":"111",
+                        "due_date":"2023-06-30",
+                        "coupon":"ABCD1234",
+                        "total":13.56,
+                        "products":[],
+                        "combos":[]
+                        });
+                        expect(response.statusCode).toBe(503);
+                    }); 
+    }); 
+
+// dashboard/history/:id
+// Historial de pedidos(debe haber al menos un pedido)
+describe('Testing endpoint dashboard/history/:id: GET /dashboard/history/:id', function() { 
+    it('Get history 200 from /dashboard/history/:id', async function() {
+        const response = await request(app)
+        .get('/user/dashboard/history/2')
+        .set('Accept', 'application/json');
+        expect(response.statusCode).toBe(200);
+    });
+
+    it('Get error 404 from /dashboard/history/:id', async function() {
+        const response = await request(app)
+        .get('/user/dashboard/history/1')
+        .set('Accept', 'application/json');
+        expect(response.statusCode).toBe(404);
+    });
+});
+
+// dashboard/ordersDelivered/:id
+// Calificar repartidor(debe haber al menos un pedido entregado)
+describe('Testing endpoint dashboard/ordersDelivered/:id: GET /dashboard/ordersDelivered/:id', function() {
+    it('Get error 404 orders not found from /dashboard/ordersDelivered/:id', async function() {
+        const response = await request(app)
+        .get('/user/dashboard/ordersDelivered/2')
+        .set('Accept', 'application/json');
+        expect(response.statusCode).toBe(404);
+    });
+});
 
 /*-----------------------------
     DELIVERY CONTROLLER
 ---------------------------------*/
+
+//AL FINAL DEBE SE DEBE PROBAR 
+// user/dashboard/qualifyDeliveryMan
+// /user/dashboard/ordersDelivered/2  statusCode 200
