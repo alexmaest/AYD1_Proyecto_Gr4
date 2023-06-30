@@ -375,7 +375,7 @@ exports.shoppingCart = (req, res) => {
                     console.error('Error: Could not perform the card number validation', error);
                     res.status(500).json({ error: 'Error: Internal server failure' });
                   } else if (result.length > 0) {
-                    addItems(user_id, company_id, description, card_number, total, products, combos, req, res);
+                    addItems(user_id, company_id, description, card_number, total, products, combos, req, res, false);
                   } else {
                     res.status(504).json({ error: 'Invalid card values' });
                   }
@@ -397,7 +397,7 @@ exports.shoppingCart = (req, res) => {
                 console.error('Error: Could not insert into tbl_metodo_pago', error);
                 res.status(500).json({ error: 'Error: Internal server failure' });
               } else {
-                addItems(user_id, company_id, description, card_number, total, products, combos, req, res);
+                addItems(user_id, company_id, description, card_number, total, products, combos, req, res, false);
               }
             });
           }
@@ -435,7 +435,7 @@ exports.shoppingCart = (req, res) => {
                           console.error('Error: Could not perform the card number validation', error);
                           res.status(500).json({ error: 'Error: Internal server failure' });
                         } else if (result.length > 0) {
-                          addItems(user_id, company_id, description, card_number, total, products, combos, req, res);
+                          addItems(user_id, company_id, description, card_number, total, products, combos, req, res, true);
                         } else {
                           res.status(504).json({ error: 'Invalid card values' });
                         }
@@ -457,7 +457,7 @@ exports.shoppingCart = (req, res) => {
                       console.error('Error: Could not insert into tbl_metodo_pago', error);
                       res.status(500).json({ error: 'Error: Internal server failure' });
                     } else {
-                      addItems(user_id, company_id, description, card_number, total, products, combos, req, res);
+                      addItems(user_id, company_id, description, card_number, total, products, combos, req, res, true);
                     }
                   });
                 }
@@ -470,7 +470,7 @@ exports.shoppingCart = (req, res) => {
   }
 };
 
-function addItems(user_id, company_id, description, card_number, total, products, combos, req, res){
+function addItems(user_id, company_id, description, card_number, total, products, combos, req, res, redeem){
   const fecha_pedido = new Date();
   const estado_id = 1;
   const pedidoData = {
@@ -494,7 +494,7 @@ function addItems(user_id, company_id, description, card_number, total, products
       res.status(500).json({ error: 'Error: Internal server failure' });
     } else {
       const pedido_id = result.insertId;
-
+      
       if (combos.length > 0) {
         const comboData = combos.map(combo => [
           pedido_id,
@@ -519,11 +519,43 @@ function addItems(user_id, company_id, description, card_number, total, products
                   console.error('Error: Could not insert into tbl_pedido_producto', error);
                   res.status(500).json({ error: 'Error: Internal server failure' });
                 } else {
-                  res.status(200).json({ message: 'Order sent successfully' });
+                  if (redeem){
+                    const updateQuery = `
+                      UPDATE tbl_cupones
+                      SET pedido_id = ?
+                      WHERE usuario_id = ?;
+                    `;
+            
+                    db.query(updateQuery, [pedido_id, user_id], (err, result) => {
+                      if (err) {
+                        console.error(err);
+                        res.status(500).json({ error: 'Internal server error' });
+                      }
+                      res.status(200).json({ message: 'Order sent successfully' });
+                    });
+                  }else{
+                    res.status(200).json({ message: 'Order sent successfully' });
+                  }
                 }
               });
             } else {
-              res.status(200).json({ message: 'Order sent successfully' });
+              if (redeem){
+                const updateQuery = `
+                  UPDATE tbl_cupones
+                  SET pedido_id = ?
+                  WHERE usuario_id = ?;
+                `;
+        
+                db.query(updateQuery, [pedido_id, user_id], (err, result) => {
+                  if (err) {
+                    console.error(err);
+                    res.status(500).json({ error: 'Internal server error' });
+                  }
+                  res.status(200).json({ message: 'Order sent successfully' });
+                });
+              }else{
+                res.status(200).json({ message: 'Order sent successfully' });
+              }
             }
           }
         });
@@ -540,7 +572,23 @@ function addItems(user_id, company_id, description, card_number, total, products
               console.error('Error: Could not insert into tbl_pedido_producto', error);
               res.status(500).json({ error: 'Error: Internal server failure' });
             } else {
-              res.status(200).json({ message: 'Order sent successfully' });
+              if (redeem){
+                const updateQuery = `
+                  UPDATE tbl_cupones
+                  SET pedido_id = ?
+                  WHERE usuario_id = ?;
+                `;
+        
+                db.query(updateQuery, [pedido_id, user_id], (err, result) => {
+                  if (err) {
+                    console.error(err);
+                    res.status(500).json({ error: 'Internal server error' });
+                  }
+                  res.status(200).json({ message: 'Order sent successfully' });
+                });
+              }else{
+                res.status(200).json({ message: 'Order sent successfully' });
+              }
             }
           });
         } else {
