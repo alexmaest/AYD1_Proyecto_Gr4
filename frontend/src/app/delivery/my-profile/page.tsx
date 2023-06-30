@@ -82,9 +82,10 @@ function Page () {
           }
         })
         const data = await response.json()
-        const { commissions, total_commissions } = data
+        const commissions = data.commissions as Commission[]
+        const totalCommissions = data.total_commissions as number
         setUserCommissions(commissions)
-        setTotal(total_commissions)
+        setTotal(totalCommissions)
       } catch (error: any) {
         alert(error.message)
       }
