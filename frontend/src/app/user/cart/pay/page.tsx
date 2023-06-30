@@ -20,7 +20,7 @@ export default function Page () {
   const companyId = useStore(useCartStore, (state) => state.companyId)
   const description = useStore(useCartStore, (state) => state.description)
   const { data: session, status } = useSession()
-  const { totalCart } = useCartStore()
+  const { totalCart, clearCart } = useCartStore()
 
   const userId = session?.user?.id ?? null
 
@@ -53,18 +53,26 @@ export default function Page () {
         },
         body: JSON.stringify(payObject)
       })
+
+      if (!res.ok) throw new Error(await res.text())
+
       return await res.json()
     }
 
     const pay = async () => {
       setPaying(true)
-      const res = await fetcher(`${baseUrl}/user/dashboard/shoppingCart`)
-      if (res?.status === 200) {
+
+      try {
+        const res = await fetcher(`${baseUrl}/user/dashboard/shoppingCart`)
+        if (res?.message !== '') {
+          alert(res?.message)
+          setPaying(false)
+          clearCart()
+          window.location.href = '/user'
+        }
+      } catch (err) {
         setPaying(false)
-        alert('Compra exitosa')
-      } else {
-        setPaying(false)
-        alert(res?.error)
+        alert(err)
       }
     }
 
