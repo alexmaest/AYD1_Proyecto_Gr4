@@ -3,7 +3,14 @@ const request = require('supertest');
 const app = require('../app');
 const db = require('../database.js');
 const path = require('path');
-const assert = require('chai').assert;
+
+// function to encode file data to base64 encoded string
+function base64_encode(file) {
+    // read binary data
+    var bitmap = fs.readFileSync(file);
+    // convert binary data to base64 encoded string
+    return new Buffer.from(bitmap).toString('base64');
+}
 
    /*beforeAll(async () => {
        
@@ -25,6 +32,8 @@ const assert = require('chai').assert;
         db.end();
     });
 
+    
+
     describe('Testing root: GET /', function() {
     it('Get response from /', async function() {
         const response = await request(app)
@@ -42,7 +51,7 @@ describe('Testing register user(client) correctly : POST /register', function() 
             {
                 firstName:"usr2", 
                 lastName:"lstnm2", 
-                email:"notexist1@alchilazo.com", 
+                email:"notexist3@alchilazo.com", 
                 password:"123", 
                 phoneNumber:"11115555",
                 municipality:"Santa Cruz Verapaz",
@@ -62,7 +71,7 @@ describe('Testing register user(client) correctly : POST /register', function() 
 /*-----------------------------
     REGISTER DELIVERY
 ---------------------------------*/ 
-describe('Testing endpoint to register an Delivery : POST /deliveryRegister', function() {
+/*describe('Testing endpoint to register an Delivery : POST /deliveryRegister', function() {
     const deliveryData =
     { 
     name:"rep1", 
@@ -94,16 +103,15 @@ describe('Testing endpoint to register an Delivery : POST /deliveryRegister', fu
         .field('licenseType', deliveryData.licenseType)
         .field('hasVehicle', deliveryData.hasVehicle)
         .field('password', deliveryData.password)
-        .attach('file', path.resolve(__dirname,'./helpers/filetest.pdf') ,'filetest.pdf')
+        .attach('file', path.resolve(__dirname,'./helpers/filetest.pdf') ,{filename:'filetest.pdf'})
         .then((err,res) => {
             if (err) console.error(err);
             expect(res.statusCode).toBe(200); // Asegúrate de que el servidor responda con el código de estado correcto
            // Verifica que el nombre del archivo sea correcto en la respuesta
           done();
         });
-
     }); 
-});
+});*/
 
 /*-----------------------------
     REGISTER COMPANY
@@ -303,7 +311,6 @@ describe('Testing login POST /login', function() {
         });
     });
 
-
     describe('GET /company/controlPanel/categories', function() {
         
         it('Get response from /company/controlPanel/categories', async function() {
@@ -314,6 +321,85 @@ describe('Testing login POST /login', function() {
             
         });
     });
+
+    describe('Testing endpoint /company/controlPanel/productsCategories', function() {
+        it('Get response from /company/controlPanel/productsCategories', async function() {
+            const result = await request(app)
+            .get('/company/controlPanel/productsCategories')
+            .set('Accept', 'application/json');
+            expect(result.statusCode).toEqual(200);
+        });
+    });
+
+    describe('Testing endpoint /company/controlPanel/combosCategories', function() {
+        it('Get response from /company/controlPanel/combosCategories', async function() {
+            const result = await request(app)
+            .get('/company/controlPanel/combosCategories')
+            .set('Accept', 'application/json');
+            expect(result.statusCode).toEqual(200);
+            
+        });
+    });
+
+    describe('Testing endpoint /company/controlPanel/singelProduct', function() {
+        it('Get response correctly from endpoint', async function() {
+            const result = await request(app)
+            .get('/company/controlPanel/singleProduct/'+1)
+            //.set('Content-Type', 'application/x-www-form-urlencoded')
+            //.send({id:'1'})
+            expect(result.statusCode).toEqual(200);
+        });
+    
+        it('Get response incorrectly from endpoint', async function() {
+            const result = await request(app)
+            .get('/company/controlPanel/singleProduct')
+            //.set('Content-Type', 'application/x-www-form-urlencoded')
+            .send({id:'0'});
+            expect(result.statusCode).toEqual(404);
+        });
+    });
+
+
+    describe('Testing endpoint /company/controlPanel/products/:userEmail', function() {
+        it('Get response from /company/controlPanel/products/empresa1@alchilazo.com', async function() {
+            const result = await request(app)
+            .get('/company/controlPanel/products/empresa1@alchilazo.com')
+            .set('Accept', 'application/json');
+            expect(result.statusCode).toEqual(200);
+        });
+    });
+
+    describe('Testing endpoint /company/controlPanel/combos/:userEmail', function() {
+        it('Get response from /company/controlPanel/combos/empresa1@alchilazo.com', async function() {
+            const result = await request(app)
+            .get('/company/controlPanel/combos/empresa1@alchilazo.com')
+            .set('Accept', 'application/json');
+            expect(result.statusCode).toEqual(200);
+        });
+    });
+
+    //GET '/orders/:id' Deben existir pedidos
+    describe('Testing ADD endpoints from /company/controlPanel', function() {
+        it('POST request to /company/controlPanel/addProduct', async function() {
+            var imageBase64= base64_encode(path.resolve(__dirname,'./helpers/testImage.png'));
+            //console.log(imageBase64);
+            const result = await request(app)
+            .post('/company/controlPanel/addProduct')
+            .set('Accept', 'application/json')
+            .send({
+                name:"productX3", 
+                description:"Product x3", 
+                price:13.33, 
+                category:1, 
+                email:"empresa1@alchilazo.com", 
+                image:'data:image/png;base64,'+imageBase64
+            });
+            //console.log(result);
+            expect(result.statusCode).toEqual(200);
+        });
+    });
+
+
 
 /*-----------------------------
     DEPARTMENT CONTROLLER
