@@ -15,6 +15,19 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 18.16.0
+      - name: Set up environment variables
+        run: |
+          echo "AWS_BUCKET_NAME=$AWS_BUCKET_NAME" >> $GITHUB_ENV
+          echo "AWS_BUCKET_REGION=$AWS_BUCKET_REGION" >> $GITHUB_ENV
+          echo "AWS_PUBLIC_KEY=$AWS_PUBLIC_KEY" >> $GITHUB_ENV
+          echo "AWS_SECRET_KEY=$AWS_SECRET_KEY" >> $GITHUB_ENV
+          echo "DB_HOST=$DB_HOST" >> $GITHUB_ENV
+          echo "DB_USER=$DB_USER" >> $GITHUB_ENV
+          echo "DB_PASSWORD=$DB_PASSWORD" >> $GITHUB_ENV
+          echo "DB_NAME=$DB_NAME" >> $GITHUB_ENV
+          echo "EMAIL_HOST=$EMAIL_HOST" >> $GITHUB_ENV
+          echo "EMAIL_USER=$EMAIL_USER" >> $GITHUB_ENV
+          echo "EMAIL_PASS=$EMAIL_PASS" >> $GITHUB_ENV
       - name: Install dependencies
         working-directory: ./backend
         run: npm install
