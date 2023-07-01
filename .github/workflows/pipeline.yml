@@ -8,6 +8,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment: DEV
     steps:
       - uses: actions/checkout@v3
         with:
@@ -15,22 +16,34 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 18.16.0
-      - name: Set up environment variables
-        run: |
-          echo "AWS_BUCKET_NAME=$AWS_BUCKET_NAME" >> $GITHUB_ENV
-          echo "AWS_BUCKET_REGION=$AWS_BUCKET_REGION" >> $GITHUB_ENV
-          echo "AWS_PUBLIC_KEY=$AWS_PUBLIC_KEY" >> $GITHUB_ENV
-          echo "AWS_SECRET_KEY=$AWS_SECRET_KEY" >> $GITHUB_ENV
-          echo "DB_HOST=$DB_HOST" >> $GITHUB_ENV
-          echo "DB_USER=$DB_USER" >> $GITHUB_ENV
-          echo "DB_PASSWORD=$DB_PASSWORD" >> $GITHUB_ENV
-          echo "DB_NAME=$DB_NAME" >> $GITHUB_ENV
-          echo "EMAIL_HOST=$EMAIL_HOST" >> $GITHUB_ENV
-          echo "EMAIL_USER=$EMAIL_USER" >> $GITHUB_ENV
-          echo "EMAIL_PASS=$EMAIL_PASS" >> $GITHUB_ENV
       - name: Install dependencies
         working-directory: ./backend
         run: npm install
+      - name: Use variables
+        run: |
+          echo "AWS_BUCKET_NAME: ${{ secrets.AWS_BUCKET_NAME }}"
+          echo "AWS_BUCKET_REGION: ${{ secrets.AWS_BUCKET_REGION }}"
+          echo "AWS_PUBLIC_KEY: ${{ secrets.AWS_PUBLIC_KEY }}"
+          echo "AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}"
+          echo "DB_HOST: ${{ secrets.DB_HOST }}"
+          echo "DB_USER: ${{ secrets.DB_USER }}"
+          echo "DB_PASSWORD: ${{ secrets.DB_PASSWORD }}"
+          echo "DB_NAME: ${{ secrets.DB_NAME }}"
+          echo "EMAIL_HOST: ${{ secrets.EMAIL_HOST }}"
+          echo "EMAIL_USER: ${{ secrets.EMAIL_USER }}"
+          echo "EMAIL_PASS: ${{ secrets.EMAIL_PASS }}"
+        env:
+          AWS_BUCKET_NAME: ${{ secrets.AWS_BUCKET_NAME }}
+          AWS_BUCKET_REGION: ${{ secrets.AWS_BUCKET_REGION }}
+          AWS_PUBLIC_KEY: ${{ secrets.AWS_PUBLIC_KEY }}
+          AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+          EMAIL_HOST: ${{ secrets.EMAIL_HOST }}
+          EMAIL_USER: ${{ secrets.EMAIL_USER }}
+          EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
       - name: Run tests
         working-directory: ./backend
         run: npm run test
