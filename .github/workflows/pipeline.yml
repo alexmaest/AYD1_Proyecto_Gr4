@@ -15,11 +15,8 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 18.16.0
-      - name: Show current folder
-        run: pwd
-      - name: Move to backend folder
-        run: cd backend
       - name: Install dependencies
+        working-directory: ./backend
         run: npm install
       - name: Run tests
         run: npm test
