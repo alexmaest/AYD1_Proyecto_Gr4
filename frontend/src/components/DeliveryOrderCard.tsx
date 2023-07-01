@@ -29,6 +29,8 @@ function DeliveryOrderCard ({ order, setOrders, userId, deliver }: DeliveryOrder
           return [...prev]
         }
         )
+      } else if (res.status === 400) {
+        alert('Aun tienes una orden pendiente de entregar!')
       }
     } catch (error) {
       alert('Ha ocurrido un error al intentar aceptar la orden')

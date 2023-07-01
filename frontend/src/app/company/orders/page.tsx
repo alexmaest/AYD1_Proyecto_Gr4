@@ -17,8 +17,10 @@ function Page () {
     if (id === undefined) return
     const fetchOrders = async () => {
       const res = await fetch(`${baseUrl}/company/orders/${id}`)
-      const data = await res.json()
-      setOrders(data)
+      if (res.status === 200) {
+        const data = await res.json()
+        setOrders(data)
+      }
       setIsLoading(false)
     }
     void fetchOrders()
@@ -31,7 +33,7 @@ function Page () {
       </div>
       <div className='flex flex-col flex-wrap justify-center mt-8 gap-4'>
         {(status === 'loading' || isLoading) && <Spinner />}
-        {status === 'authenticated' && orders.length === 0 && <h2 className='text-2xl font-semibold'>No hay ordenes disponibles</h2>}
+        {status === 'authenticated' && orders.length === 0 && <h2 className='text-2xl font-semibold'>No se han realizado ordenes!</h2>}
         {status === 'authenticated' && (
           orders.map((order: CompanyOrder) =>
             <CompanyOrderCard key={order.order_id} setOrders={setOrders} order={order} />
