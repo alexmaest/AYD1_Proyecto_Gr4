@@ -12,6 +12,7 @@ interface Company {
 
 function Page () {
   const [companies, setCompanies] = useState<Company[]>([])
+  const [maxValue, setMaxValue] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
@@ -26,6 +27,7 @@ function Page () {
         const data = await response.json()
         setCompanies(data)
         setIsLoading(false)
+        setMaxValue(data[0].orders_number)
       } catch (error) {
         alert(error)
       }
@@ -44,19 +46,29 @@ function Page () {
             <Spinner />
           </div>
         )}
-        <div className='flex flex-col w-full gap-4'>
+        <div className='flex flex-col w-full border-t-2 border-al-orange'>
           {!isLoading && (
             <>
               {companies.map((company, index) => (
                 <div
                   key={company.company_id}
-                  className='flex flex-col justify-center items-center border-2 border-al-orange rounded-lg shadow-lg p-4'
                 >
-                  <h2 className='font-bold text-xl'>{index + 1}. {company.name} - {company.orders_number} ordenes</h2>
+                  <div
+                    className='flex justify-start items-center border-2 border-t-0 border-al-orange p-4 overflow-visible'
+                    style={{ width: (company.orders_number * 100 / maxValue).toString() + '%' }}
+                  >
+                    <h2 className='font-bold text-xl text-al-white'>{company.name}</h2>
+                  </div>
                 </div>
               ))}
+              <div className='flex flex-row justify-between pt-4 mt-1 border-t-2 border-al-orange'>
+                {companies.map((company, index) => (
+                  <h2 key={company.company_id} className='font-bold text-xl'>{index}</h2>
+                ))}
+              </div>
             </>
           )}
+          <p>Cantidad de Pedidos</p>
         </div>
       </section>
     </div>
