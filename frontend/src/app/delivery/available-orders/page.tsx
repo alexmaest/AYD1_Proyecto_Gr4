@@ -1,4 +1,5 @@
 'use client'
+
 import { useEffect, useState } from 'react'
 import DeliveryOrderCard from '@/components/DeliveryOrderCard'
 import { DeliveryOrder } from '@/types/interfaces'
@@ -14,15 +15,17 @@ function Page () {
 
   useEffect(() => {
     if (id === undefined) return
-    console.log(id)
     const fetchOrders = async () => {
       const res = await fetch(`${baseUrl}/deliveryMan/orders/${id}`)
-      const data = await res.json()
-      setOrders(data)
+      if (res.status === 200) {
+        const data = await res.json()
+        setOrders(data)
+      }
       setIsLoading(false)
     }
     void fetchOrders()
   }, [id])
+
   return (
     <div className='container w-4/5 my-24 mx-auto'>
       <div className='w-full flex flex-row pb-2 border-b-2 border-al-yellow'>
