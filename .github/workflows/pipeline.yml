@@ -19,31 +19,22 @@ jobs:
       - name: Install dependencies
         working-directory: ./backend
         run: npm install
-      - name: Use variables
+      - name: create env file
+        working-directory: ./backend
         run: |
-          echo "AWS_BUCKET_NAME: ${{ vars.AWS_BUCKET_NAME }}"
-          echo "AWS_BUCKET_REGION: ${{ vars.AWS_BUCKET_REGION }}"
-          echo "AWS_PUBLIC_KEY: ${{ vars.AWS_PUBLIC_KEY }}"
-          echo "AWS_SECRET_KEY: ${{ vars.AWS_SECRET_KEY }}"
-          echo "DB_HOST: ${{ vars.DB_HOST }}"
-          echo "DB_USER: ${{ vars.DB_USER }}"
-          echo "DB_PASSWORD: ${{ vars.DB_PASSWORD }}"
-          echo "DB_NAME: ${{ vars.DB_NAME }}"
-          echo "EMAIL_HOST: ${{ vars.EMAIL_HOST }}"
-          echo "EMAIL_USER: ${{ vars.EMAIL_USER }}"
-          echo "EMAIL_PASS: ${{ vars.EMAIL_PASS }}"
-        env:
-          AWS_BUCKET_NAME: ${{ vars.AWS_BUCKET_NAME }}
-          AWS_BUCKET_REGION: ${{ vars.AWS_BUCKET_REGION }}
-          AWS_PUBLIC_KEY: ${{ vars.AWS_PUBLIC_KEY }}
-          AWS_SECRET_KEY: ${{ vars.AWS_SECRET_KEY }}
-          DB_HOST: ${{ vars.DB_HOST }}
-          DB_USER: ${{ vars.DB_USER }}
-          DB_PASSWORD: ${{ vars.DB_PASSWORD }}
-          DB_NAME: ${{ vars.DB_NAME }}
-          EMAIL_HOST: ${{ vars.EMAIL_HOST }}
-          EMAIL_USER: ${{ vars.EMAIL_USER }}
-          EMAIL_PASS: ${{ vars.EMAIL_PASS }}
+          touch .env
+          echo AWS_BUCKET_NAME=${{ vars.AWS_BUCKET_NAME }} >> .env
+          echo AWS_BUCKET_REGION=${{ vars.AWS_BUCKET_REGION }} >> .env
+          echo AWS_PUBLIC_KEY=${{ vars.AWS_PUBLIC_KEY }} >> .env
+          echo AWS_SECRET_KEY=${{ vars.AWS_SECRET_KEY }} >> .env
+          echo DB_HOST=${{ vars.DB_HOST }} >> .env
+          echo DB_USER=${{ vars.DB_USER }} >> .env
+          echo DB_PASSWORD=${{ vars.DB_PASSWORD }} >> .env
+          echo DB_NAME=${{ vars.DB_NAME }} >> .env
+          echo DB_NAME_TEST=${{ vars.DB_NAME_TEST }} >> .env
+          echo EMAIL_HOST=${{ vars.EMAIL_HOST }} >> .env
+          echo EMAIL_USER=${{ vars.EMAIL_USER }} >> .env
+          echo EMAIL_PASS=${{ vars.EMAIL_PASS }} >> .env
       - name: Run tests
         working-directory: ./backend
         run: npm run test
