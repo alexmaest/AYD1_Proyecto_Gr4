@@ -15,12 +15,12 @@ function base64_encode(file) {
 }
 
    beforeAll(async () => {
-       
         if (process.env.NODE_ENV === "test") {
             console.log('Clean data tests');
-            db.query('CALL test.sp_cleanDataAndReset();', function (err, result) {
+            
+            db.query('CALL sp_cleanDataAndReset();', function (err, result) {
                 if (err) console.error( err);
-                console.log("Database cleaned");
+                console.log("Database cleaned"+result);
             });
         }else{
             console.log('Test can run only in NODE_ENV=`test` enviroment');
@@ -28,11 +28,11 @@ function base64_encode(file) {
         }
     });
 
-    console.log('Enviroment:'+ process.env.NODE_ENV);
+    
 
     afterAll(async () => {
         console.log('Closing DB connection');
-        db.end();
+        db.destroy();
     });
 
     
@@ -49,11 +49,11 @@ function base64_encode(file) {
 /*-----------------------------
     REGISTER USER
 ---------------------------------*/ 
-describe('Testing register user(client) correctly : POST /register', function() {
-    const ahora = Date.now();
+describe('Testing register user(client) correctly', function() {
+    //const ahora = Date.now();
     const userData =
             {
-                firstName:"usr"+ahora, 
+                firstName:"usr"+Date.now(), 
                 lastName:"lstnm", 
                 email:Date.now()+"@alchilazo.com", 
                 password:"123", 
@@ -61,13 +61,41 @@ describe('Testing register user(client) correctly : POST /register', function() 
                 municipality:"Santa Cruz Verapaz",
                 department:"Alta Verapaz"
             };
+
+    it('Get main rout /userRegister/', async function() {
+        const response = await request(app)
+        .get('/userRegister')
+        expect(response.statusCode).toBe(200);
+    });        
         
     it('POST data to endpoint: /userRegister/', async function() {
         const response = await request(app)
         .post('/userRegister')
-        .send(userData) // send empty object
-        .set('Accept', 'application/json');
+        .send(userData); // send empty object
+        //.set('Accept', 'application/json');
         expect(response.statusCode).toBe(200);
+    });
+
+    it('Post Register user with existing email error 400', async function() {
+        const response = await request(app)
+        .post('/userRegister')
+        .send(userData);
+        expect(response.statusCode).toBe(400);
+    });
+
+    it('Post Register user with invalid municipality', async function() {
+        const response = await request(app)
+        .post('/userRegister')
+        .send({
+            firstName:"usr"+Date.now(), 
+            lastName:"lstnm", 
+            email:Date.now()+"@alchilazo.com", 
+            password:"123", 
+            phoneNumber:"11115555",
+            municipality:"Santa lucia ayampuc",
+            department:"Alta Verapaz"
+        });
+        expect(response.statusCode).toBe(400);
     });
 });
 
@@ -153,7 +181,7 @@ describe('Testing endpoint to register an Delivery : POST /deliveryRegister', fu
 describe('Testing resgiser company', function() {
     const companyData={
         name:"comptest1", 
-        email:Date.now()+"@alchilazo.com", 
+        email:"empresa_"+Date.now()+"@alchilazo.com", 
         description:"empresa test 1", 
         type:'Restaurante', 
         town:"Guatemala", 
@@ -177,7 +205,24 @@ describe('Testing resgiser company', function() {
         ;
         expect(response.statusCode).toBe(200);     
     });
+
+    it('POST company register municipality invalid' , async function() {
+        const response = await request(app)
+        .post('/companyRegister')
+        .set('Accept', 'application/json')
+        .field('name', companyData.name)
+        .field('email', companyData.email)
+        .field('description', companyData.description)
+        .field('type', companyData.type)
+        .field('town', 'Santa lucia ayampuc')
+        .field('department', companyData.department)
+        .field('zone', companyData.zone)
+        .field('password', companyData.password)
+        .attach('pdfFiles', path.resolve(__dirname,'./helpers/testFile.pdf'))
+        ;
+        expect(response.statusCode).toBe(400);     
     });
+});
 
 
 /*-----------------------------
@@ -494,6 +539,7 @@ describe('Testing login POST /login', function() {
 
     //GET '/orders/:id' Deben existir pedidos
     describe('Testing ADD endpoints from /company/controlPanel', function() {
+        var imageBase64= base64_encode(path.resolve(__dirname,'./helpers/testImage.png'));
         it('POST request to /company/controlPanel/addProduct', async function() {
             var imageBase64= base64_encode(path.resolve(__dirname,'./helpers/testImage.png'));
             const result = await request(app)
@@ -509,9 +555,100 @@ describe('Testing login POST /login', function() {
             });
             expect(result.statusCode).toEqual(200);
         });
+        // /controlPanel/addCombo
+        it('POST add combo correctly', async function() {
+            //var imageBase64= base64_encode(path.resolve(__dirname,'./helpers/testImage.png'));
+            const result = await request(app)
+            .post('/company/controlPanel/addCombo')
+            .set('Accept', 'application/json')
+            .send({
+                name:"combo_"+Date.now(), 
+                description:"Combo autogenerado", 
+                price:13.33, 
+                category:1, 
+                email:"empresa1@alchilazo.com",
+                products:[{id:1,quantity:2}],
+                image:'data:image/png;base64,'+imageBase64
+            });
+            expect(result.statusCode).toEqual(200);
+        });
+
+        it('POST add combo company not found', async function() {
+            //var imageBase64= base64_encode(path.resolve(__dirname,'./helpers/testImage.png'));
+            const result = await request(app)
+            .post('/company/controlPanel/addCombo')
+            .set('Accept', 'application/json')
+            .send({
+                name:"combo_"+Date.now(), 
+                description:"Combo autogenerado", 
+                price:13.33, 
+                category:1, 
+                email:"notexist_empresa@alchilazo.com",
+                products:[{id:1,quantity:2}],
+                image:'data:image/png;base64,'+imageBase64
+            });
+            expect(result.statusCode).toEqual(400);
+        });
+
+        it('POST add combo company not have products', async function() {
+            //var imageBase64= base64_encode(path.resolve(__dirname,'./helpers/testImage.png'));
+            const result = await request(app)
+            .post('/company/controlPanel/addCombo')
+            .set('Accept', 'application/json')
+            .send({
+                name:"combo_"+Date.now(), 
+                description:"Combo autogenerado", 
+                price:13.33, 
+                category:1, 
+                email:"empresa2@alchilazo.com",
+                products:[{id:100,quantity:2}],
+                image:'data:image/png;base64,'+imageBase64
+            });
+            expect(result.statusCode).toEqual(500);
+        });
+
+        it('POST add combo category not found', async function() {
+            //var imageBase64= base64_encode(path.resolve(__dirname,'./helpers/testImage.png'));
+            const result = await request(app)
+            .post('/company/controlPanel/addCombo')
+            .set('Accept', 'application/json')
+            .send({
+                name:"combo_"+Date.now(), 
+                description:"Combo autogenerado", 
+                price:13.33, 
+                category:9, 
+                email:"empresa1@alchilazo.com",
+                products:[{id:1,quantity:2}],
+                image:'data:image/png;base64,'+imageBase64
+            });
+            expect(result.statusCode).toEqual(400);
+        });
+
+        // /controlPanel/addCategory
+        it('POST add category correctly', async function() {
+            const result = await request(app)
+            .post('/company/controlPanel/addCategory')
+            .set('Accept', 'application/json')
+            .send({
+                name:"category_test", 
+                categoryType:"Producto", 
+                email:"empresa1@alchilazo.com",
+                image:'data:image/png;base64,'+imageBase64});
+            expect(result.statusCode).toEqual(200);
+        });
+
+        it('POST add category exist error 400', async function() {
+            const result = await request(app)
+            .post('/company/controlPanel/addCategory')
+            .set('Accept', 'application/json')
+            .send({
+                name:"category_test",
+                categoryType:"Producto", 
+                email:"empresa1@alchilazo.com",
+                image:'data:image/png;base64,'+imageBase64});
+            expect(result.statusCode).toEqual(400);
+        });
     });
-
-
 
 /*-----------------------------
     DEPARTMENT CONTROLLER
@@ -614,7 +751,7 @@ describe('Testing endpoint dashboard/shoppingCart: POST /dashboard/shoppingCart'
         .send({
             "user_id":2,
             "company_id":1,
-            "description":"shoping description",
+            "description":"shoping description1",
             "card_number":"123456789",
             "cvv":"111",
             "due_date":"2023-06-30",
@@ -630,14 +767,14 @@ describe('Testing endpoint dashboard/shoppingCart: POST /dashboard/shoppingCart'
             expect(response.statusCode).toBe(200);
         });
 
-        it('POST shopping with cupon /dashboard/shoppingCart', async function() {
+        it('POST shopping with cupon and existing card', async function() {
             const response = await request(app)
             .post('/user/dashboard/shoppingCart')
             .set('Accept', 'application/json')
             .send({
                 "user_id":2,
                 "company_id":1,
-                "description":"shoping description",
+                "description":"shoping description4",
                 "card_number":"123456789",
                 "cvv":"111",
                 "due_date":"2023-06-30",
@@ -660,7 +797,7 @@ describe('Testing endpoint dashboard/shoppingCart: POST /dashboard/shoppingCart'
                 .send({
                     "user_id":2,
                     "company_id":1,
-                    "description":"shoping description",
+                    "description":"shoping description5",
                     "card_number":"123456789",
                     "cvv":"111",
                     "due_date":"2023-06-30",
@@ -683,7 +820,7 @@ describe('Testing endpoint dashboard/shoppingCart: POST /dashboard/shoppingCart'
                     .send({
                         "user_id":2,
                         "company_id":1,
-                        "description":"shoping description",
+                        "description":"shoping description6",
                         "card_number":"123456789",
                         "cvv":"111",
                         "due_date":"2023-06-30",
@@ -726,9 +863,203 @@ describe('Testing endpoint dashboard/ordersDelivered/:id: GET /dashboard/ordersD
 });
 
 /*-----------------------------
-    DELIVERY CONTROLLER
+    COMPANY CONTROLLER
+        - ORDER Accept 
+        - ORDER READY
+---------------------------------*/
+describe('Testing company order manage',function(){
+    it('PUT Accept order', async function(){
+        const response = await request(app)
+        .put('/company/orderAccept/1')
+        .set('Accept', 'application/json')
+        ;
+        expect(response.statusCode).toBe(200);
+    });
+
+    it('PUT order ready', async function(){
+        const response = await request(app)
+        .put('/company/orderReady/1')
+        .set('Accept', 'application/json')
+        ;
+        expect(response.statusCode).toBe(200);
+    });
+});
+
+/*-----------------------------
+    DELIVERYMAN CONTROLLER
+    - /deliveryMan/
+    - /deliveryMan/deliveryManInfoRequest/:correo
 ---------------------------------*/
 
-//AL FINAL DEBE SE DEBE PROBAR 
-// user/dashboard/qualifyDeliveryMan
-// /user/dashboard/ordersDelivered/2  statusCode 200
+// deliveryMan change status to entregdo
+describe('Testing deliveryMan route',function(){
+    it('PUT order ready', async function(){
+        const response = await request(app)
+        .get('/deliveryMan')
+        ;
+        expect(response.statusCode).toBe(200);
+    });
+
+    it('Get deliveryManInfoRequest', async function(){
+        const email = 'repartidor1@alchilazo.com';
+        const response = await request(app)
+        .get(`/deliveryMan/deliveryManInfoRequest/${email}`)
+        expect(response.statusCode).toBe(200);
+        expect(response.body).toHaveProperty('correo');
+    });
+
+    it('GET orders', async function(){
+        const response = await request(app)
+        .get('/deliveryMan/orders/4')
+        .set('Accept', 'application/json'); // el primer repartidor registrado es el 4
+        expect(response.statusCode).toBe(200);
+    });
+// /orderPending/:id
+    it('GET orderPending', async function(){
+        const response = await request(app)
+        .get('/deliveryMan/orderPending/4')
+        .set('Accept', 'application/json'); // el primer repartidor registrado es el 4
+        expect(response.statusCode).toBe(200);
+    });
+
+// /qualification/:id
+    it('GET qualification', async function(){
+        const response = await request(app)
+        .get('/deliveryMan/qualification/2')
+        .set('Accept', 'application/json'); // el primer repartidor registrado es el 4
+        expect(response.statusCode).toBe(200);
+    });
+// /commissions/:id
+    it('GET commissions', async function(){
+        const response = await request(app)
+        .get('/deliveryMan/commissions/2')
+        .set('Accept', 'application/json'); // el primer repartidor registrado es el 4
+        expect(response.statusCode).toBe(200);
+    });
+// /history/:id
+    it('GET history', async function(){
+        const response = await request(app)
+        .get('/deliveryMan/history/2')
+        .set('Accept', 'application/json'); // el primer repartidor registrado es el 4
+        expect(response.statusCode).toBe(200);
+    });
+// /changeLocation
+    it('POST changeLocation', async function(){
+        const response = await request(app)
+        .post('/deliveryMan/changeLocation')
+        .set('Accept', 'application/json')
+        .send({
+            id:2, description:'sin rumbo', department:3, municipality:6
+        });
+        expect(response.statusCode).toBe(200);
+    });
+// /orderAccept
+    it('PUT orderAccept', async function(){
+        const response = await request(app)
+        .put('/deliveryMan/orderAccept')
+        .set('Accept', 'application/json')
+        .send({deliveryManId:4, orderId:1});
+        expect(response.statusCode).toBe(200);
+    });
+// /orderDelivered/:id
+    it('PUT orderDelivered', async function(){
+        const response = await request(app)
+        .put('/deliveryMan/orderDelivered/1')
+        .set('Accept', 'application/json');
+        expect(response.statusCode).toBe(200);
+    });
+});
+
+/*-----------------------------
+    DELIVERYMAN CONTROLLER
+    - /user/dashboard/qualifyDeliveryMan
+    - //user/dashboard/ordersDelivered/2
+---------------------------------*/
+describe('Testing user dashboard',function(){
+    it('PUT qualifyDeliveryMan', async function(){
+        const response = await request(app)
+        .put('/user/dashboard/qualifyDeliveryMan')
+        .set('Accept', 'application/json')
+        .send({deliveryManId:4, orderId:1, qualification:5});
+        expect(response.statusCode).toBe(200);
+    });
+
+    it('GET ordersDelivered', async function(){
+        const response = await request(app)
+        .get('/user/dashboard/ordersDelivered/2')
+        .set('Accept', 'application/json');
+        expect(response.statusCode).toBe(200);
+    });
+});
+
+/*-----------------------------
+    COMPANY CONTROLLER
+    - /company/orders/:id
+    - /company/bestsellers/:id
+    - /company/history/:id
+    - /company/controlPanel/edtiProduct
+    - /company/controlPanel/products/:id
+---------------------------------*/
+describe('Testing company dashboard',function(){
+    it('GET orders', async function(){
+        const response = await request(app)
+        .get('/company/orders/7')
+        .set('Accept', 'application/json');
+        expect(response.statusCode).toBe(200);
+    });
+
+    it('GET bestsellers', async function(){
+        const response = await request(app)
+        .get('/company/bestSeller/7')
+        .set('Accept', 'application/json');
+        expect(response.statusCode).toBe(200);
+    });
+
+    it('GET ERROR ON bestsellers', async function(){
+        const response = await request(app)
+        .get('/company/bestSeller/1')
+        expect(response.statusCode).toBe(500);
+    });
+
+    it('GET history', async function(){
+        const response = await request(app)
+        .get('/company/history/1')
+        .set('Accept', 'application/json');
+        expect(response.statusCode).toBe(200);
+    });
+
+    it('PUT editProduct', async function(){
+        var imageBase64= base64_encode(path.resolve(__dirname,'./helpers/testImage.png'));
+        const response = await request(app)
+        .put('/company/controlPanel/editProduct')
+        .set('Accept', 'application/json')
+        .send({id:1, 
+            name:'pizza', 
+            description:'pizza', 
+            price:19.55, 
+            category:1,
+            image:'data:image/png;base64,'+imageBase64});
+        expect(response.statusCode).toBe(200);
+    });
+
+    it('PUT editProduct with no image', async function(){
+        var imageBase64= base64_encode(path.resolve(__dirname,'./helpers/testImage.png'));
+        const response = await request(app)
+        .put('/company/controlPanel/editProduct')
+        .set('Accept', 'application/json')
+        .send({id:1, 
+            name:'pizza', 
+            description:'pizza', 
+            price:19.55, 
+            category:1,
+            image:''});
+        expect(response.statusCode).toBe(200);
+    });
+
+    it('DELETE products', async function(){
+        const response = await request(app)
+        .delete('/company/controlPanel/products/2')
+        .set('Accept', 'application/json');
+        expect(response.statusCode).toBe(200);
+    });
+});
