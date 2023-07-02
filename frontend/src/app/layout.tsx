@@ -5,7 +5,6 @@ import { Montserrat } from 'next/font/google'
 
 const inter = Montserrat({ subsets: ['latin'] })
 
-
 export default function RootLayout ({
   children,
   session
@@ -16,7 +15,7 @@ export default function RootLayout ({
   return (
     <html lang='es'>
       <head>
-        <title>AlChilazo</title>
+        <title>AlChilazo - G4</title>
         <meta name='description' content='AlChilazo es una plataforma de servicio de comida a domicilio' />
       </head>
       <SessionProvider session={session}>
