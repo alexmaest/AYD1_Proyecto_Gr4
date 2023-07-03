@@ -1,21 +1,33 @@
 import Navbar from '@/components/Navbar'
 
+const dropdown = {
+  title: 'Pedidos',
+  styles: 'min-w-[150px]',
+  items: [
+    {
+      linkTo: '/delivery/available-orders',
+      text: 'Solicitudes de entrega'
+    },
+    {
+      linkTo: '/delivery/assigned-order',
+      text: 'Pedido asignado'
+    },
+    {
+      linkTo: '/delivery/order-history',
+      text: 'Historial de pedidos'
+    }
+  ]
+}
+
 const liItems = [
   {
-    linkTo: '/delivery/requests',
-    text: 'Solicitudes de entrega'
+    linkTo: '/delivery',
+    text: 'Inicio'
   },
-  {
-    linkTo: '/delivery/assigned-orders',
-    text: 'Pedidos asignados'
-  },
+
   {
     linkTo: '/delivery/my-profile',
     text: 'Mi perfil'
-  },
-  {
-    linkTo: '/delivery/order-history',
-    text: 'Historial de pedidos'
   }
 ]
 
@@ -26,7 +38,7 @@ export default function DeliveryProfile ({
 }) {
   return (
     <>
-      <Navbar liElements={liItems} />
+      <Navbar liElements={liItems} dropdown={dropdown} />
       <div>{children}</div>
     </>
   )

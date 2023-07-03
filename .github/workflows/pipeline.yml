@@ -1,0 +1,75 @@
+name: Deployment Pipeline
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+  NEXTAUTH_URL: ${{ secrets.NEXTAUTH_URL }}
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: DEV
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18.16.0
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Install dependencies
+        working-directory: ./backend
+        run: npm install
+      - name: create env file
+        working-directory: ./backend
+        run: |
+          touch .env
+          echo AWS_BUCKET_NAME=${{ vars.AWS_BUCKET_NAME }} >> .env
+          echo AWS_BUCKET_REGION=${{ vars.AWS_BUCKET_REGION }} >> .env
+          echo AWS_PUBLIC_KEY=${{ vars.AWS_PUBLIC_KEY }} >> .env
+          echo AWS_SECRET_KEY=${{ vars.AWS_SECRET_KEY }} >> .env
+          echo DB_HOST=${{ vars.DB_HOST }} >> .env
+          echo DB_USER=${{ vars.DB_USER }} >> .env
+          echo DB_PASSWORD=${{ vars.DB_PASSWORD }} >> .env
+          echo DB_NAME=${{ vars.DB_NAME }} >> .env
+          echo DB_NAME_TEST=${{ vars.DB_NAME_TEST }} >> .env
+          echo EMAIL_HOST=${{ vars.EMAIL_HOST }} >> .env
+          echo EMAIL_USER=${{ vars.EMAIL_USER }} >> .env
+          echo EMAIL_PASS=${{ vars.EMAIL_PASS }} >> .env
+      - name: Run tests
+        working-directory: ./backend
+        run: npm run test
+      - name: Build and push
+        uses: docker/build-push-action@v4
+        with:
+          context: ./backend
+          push: true
+          tags: alexmaest/ayd1-alchilazo:latest
+
+  Deploy-Frontend:
+    runs-on: ubuntu-latest
+    environment: DEV
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+      - name: Pull Vercel Environment Information
+        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Build Project Artifacts
+        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Deploy Project Artifacts to Vercel
+        run: vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Deploy to Production
+        run: vercel --prod --token=${{ secrets.VERCEL_TOKEN }}

@@ -1,3 +1,4 @@
+import baseUrl from '@/constants/baseUrl'
 import NextAuth, { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 
@@ -11,7 +12,7 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize (credentials: any, req: any) {
         const { email, password } = credentials
-        const res = await fetch('http://localhost:5000/login', {
+        const res = await fetch(`${baseUrl}/login`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -33,7 +34,7 @@ export const authOptions: NextAuthOptions = {
     async jwt ({ token, user }) {
       return ({ ...token, ...user })
     },
-    async session ({ session, token, user }) {
+    async session ({ session, token, user }: any) {
       session.user = token
       return session
     },
